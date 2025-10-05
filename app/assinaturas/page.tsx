@@ -21,7 +21,7 @@ export default function AssinaturasPage() {
     return todasAssinaturas
     // if (!familiaAtiva?.id) return todasAssinaturas
     // return todasAssinaturas.filter(a => a.familia_id === familiaAtiva.id)
-  }, [todasAssinaturas, familiaAtiva?.id])
+  }, [todasAssinaturas])
 
   return (
     <div className="space-y-4 md:space-y-6">

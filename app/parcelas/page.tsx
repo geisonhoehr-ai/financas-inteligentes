@@ -21,7 +21,7 @@ export default function ParcelasPage() {
     return todasParcelas
     // if (!familiaAtiva?.id) return todasParcelas
     // return todasParcelas.filter(p => p.familia_id === familiaAtiva.id)
-  }, [todasParcelas, familiaAtiva?.id])
+  }, [todasParcelas])
 
   return (
     <div className="space-y-4 md:space-y-6">

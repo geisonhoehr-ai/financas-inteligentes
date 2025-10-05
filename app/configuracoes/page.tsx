@@ -15,7 +15,7 @@ export default function ConfiguracoesPage() {
     familias[0]?.id || null
   )
   const { data: membros = [] } = useMembros(familiaAtualId)
-  const { convites, createConvite, isCreating, gerarLinkConvite } = useConvites(familiaAtualId)
+  const { convites, createConvite, isCreating, gerarLinkConvite } = useConvites(familiaAtualId || undefined)
   const [showNewFamilia, setShowNewFamilia] = useState(false)
   const [showConvites, setShowConvites] = useState(false)
   const [novaFamilia, setNovaFamilia] = useState({
