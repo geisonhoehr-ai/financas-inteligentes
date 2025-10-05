@@ -80,6 +80,11 @@ const navigation = [
     href: '/lixeira',
     icon: Trash2,
   },
+  {
+    name: 'Configurações',
+    href: '/configuracoes',
+    icon: Settings,
+  },
 ]
 
 interface SidebarProps {
