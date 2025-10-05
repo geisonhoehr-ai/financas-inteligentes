@@ -1,6 +1,3 @@
 {
-  "buildCommand": "cd financeiro-nextjs && npm install && npm run build",
-  "outputDirectory": "financeiro-nextjs/.next",
-  "installCommand": "cd financeiro-nextjs && npm install",
-  "framework": null
+  "framework": "nextjs"
 }
