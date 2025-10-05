@@ -4,6 +4,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { QueryProvider } from "@/components/query-provider"
 import { AuthProvider } from "@/components/auth-provider"
+import { ToastProvider } from "@/components/toast-provider"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { LayoutWrapper } from "@/components/layout-wrapper"
@@ -31,6 +32,7 @@ export default function RootLayout({
               enableSystem={false}
               disableTransitionOnChange
             >
+              <ToastProvider />
               <LayoutWrapper>{children}</LayoutWrapper>
             </ThemeProvider>
           </QueryProvider>

@@ -26,11 +26,7 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!form.descricao || !form.valor) {
-      alert('Preencha todos os campos obrigatórios')
-      return
-    }
-
+    // Form validation is handled by HTML5 required attributes
     createGasto(form as InsertGasto)
     setForm({
       descricao: '',

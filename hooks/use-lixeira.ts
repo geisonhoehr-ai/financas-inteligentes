@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { DeletedItem } from '@/types'
+import { showToast } from '@/lib/toast'
 
 const TABELAS = [
   { nome: 'gastos', label: 'Gasto' },
@@ -76,6 +77,10 @@ export function useLixeira() {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       refreshDashboard()
+      showToast.success('Item restaurado com sucesso!')
+    },
+    onError: (error) => {
+      showToast.error('Erro ao restaurar item: ' + error.message)
     },
   })
 

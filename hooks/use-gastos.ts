@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Gasto, InsertGasto } from '@/types'
+import { showToast } from '@/lib/toast'
 
 export function useGastos() {
   const queryClient = useQueryClient()
@@ -39,6 +40,10 @@ export function useGastos() {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       refreshDashboard()
+      showToast.success('Gasto adicionado com sucesso!')
+    },
+    onError: (error) => {
+      showToast.error('Erro ao adicionar gasto: ' + error.message)
     },
   })
 
@@ -60,6 +65,10 @@ export function useGastos() {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       refreshDashboard()
+      showToast.success('Gasto atualizado com sucesso!')
+    },
+    onError: (error) => {
+      showToast.error('Erro ao atualizar gasto: ' + error.message)
     },
   })
 
@@ -79,6 +88,10 @@ export function useGastos() {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
       refreshDashboard()
+      showToast.success('Gasto movido para lixeira')
+    },
+    onError: (error) => {
+      showToast.error('Erro ao deletar gasto: ' + error.message)
     },
   })
 
