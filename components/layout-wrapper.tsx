@@ -4,8 +4,8 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { Sidebar } from '@/components/sidebar'
 import { Header } from '@/components/header'
-import { PerfilSelector } from '@/components/perfil-selector'
-import { DashboardToggle } from '@/components/dashboard-toggle'
+// import { PerfilSelector } from '@/components/perfil-selector'
+// import { DashboardToggle } from '@/components/dashboard-toggle'
 import { useAuth } from '@/components/auth-provider'
 import { useFamilias } from '@/hooks/use-familias'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
@@ -17,13 +17,25 @@ interface LayoutWrapperProps {
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user } = useAuth()
-  const { familias, isLoading } = useFamilias()
+  const { user, isLoading: authLoading } = useAuth()
+  const { familias, isLoading: familiasLoading } = useFamilias()
   const { familiaAtiva } = useFamiliaAtiva()
   
   // Se for página de autenticação, renderizar apenas o conteúdo
   if (pathname.startsWith('/login') || pathname.startsWith('/convite')) {
     return <>{children}</>
+  }
+
+  // Mostrar loading enquanto carrega autenticação
+  if (authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!user) {
@@ -38,16 +50,16 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
         <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {/* Seletor de Perfil - apenas se o usuário tiver famílias */}
-          {!isLoading && familiaAtiva && (
+          {!familiasLoading && familiaAtiva && (
             <div className="mb-6">
-              <PerfilSelector />
+              {/* PerfilSelector temporariamente removido - precisa ser implementado */}
             </div>
           )}
 
           {/* Toggle do Dashboard - apenas na página principal */}
           {pathname === '/' && (
             <div className="mb-6">
-              <DashboardToggle />
+              {/* DashboardToggle temporariamente removido - precisa ser implementado */}
             </div>
           )}
 
