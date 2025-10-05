@@ -2,6 +2,7 @@
 
 import { useDashboard } from '@/hooks/use-dashboard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { DashboardChart } from '@/components/dashboard-chart'
 import { formatCurrency, formatDateTime } from '@/lib/utils'
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 
@@ -155,6 +156,9 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+
+      {/* Chart */}
+      <DashboardChart />
     </div>
   )
 }
