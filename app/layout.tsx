@@ -6,6 +6,7 @@ import { QueryProvider } from "@/components/query-provider"
 import { AuthProvider } from "@/components/auth-provider"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
+import { LayoutWrapper } from "@/components/layout-wrapper"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,16 +22,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={inter.className} suppressHydrationWarning>
         <AuthProvider>
           <QueryProvider>
             <ThemeProvider
               attribute="class"
               defaultTheme="dark"
-              enableSystem
+              enableSystem={false}
               disableTransitionOnChange
             >
-              {children}
+              <LayoutWrapper>{children}</LayoutWrapper>
             </ThemeProvider>
           </QueryProvider>
         </AuthProvider>
@@ -38,3 +39,4 @@ export default function RootLayout({
     </html>
   )
 }
+

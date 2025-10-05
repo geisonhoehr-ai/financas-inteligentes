@@ -30,9 +30,11 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
       } else if (user) {
-        router.push('/')
+        // O AuthProvider vai gerenciar o redirecionamento automaticamente
+        console.log('Login successful, waiting for redirect...')
       }
     } catch (err: any) {
+      console.error('❌ Erro geral:', err)
       setError(err.message || 'Ocorreu um erro')
     } finally {
       setLoading(false)
@@ -40,8 +42,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-background p-4">
-      <div className="w-full max-w-md">
+    <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 mb-4">
@@ -174,6 +175,5 @@ export default function LoginPage() {
           Feito com 🍎 seguindo Apple HIG
         </p>
       </div>
-    </div>
   )
 }

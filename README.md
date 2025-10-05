@@ -1,361 +1,245 @@
-# 💰 Financeiro v3.0 - Next.js
+# 💰 Sistema de Controle Financeiro Familiar
 
-Sistema completo de controle financeiro familiar com Next.js 14, TypeScript, Supabase e muito mais!
+![Next.js](https://img.shields.io/badge/Next.js-15.2.4-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue?style=for-the-badge&logo=typescript)
+![Supabase](https://img.shields.io/badge/Supabase-Latest-green?style=for-the-badge&logo=supabase)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.0-38bdf8?style=for-the-badge&logo=tailwind-css)
 
-## ✨ Features
+Sistema completo e moderno para controle financeiro familiar, desenvolvido com Next.js 15, TypeScript, Supabase e design inspirado nas Apple Human Interface Guidelines.
 
-- ✅ **Next.js 14** com App Router
-- ✅ **TypeScript** completo com types gerados do Supabase
-- ✅ **Tailwind CSS** para estilização moderna
-- ✅ **Supabase** para banco de dados cloud
-- ✅ **React Query** para cache e gerenciamento de estado
-- ✅ **Soft Delete** - exclusão segura com possibilidade de restauração
-- ✅ **Lixeira** com retenção de 30 dias
-- ✅ **Materialized Views** para dashboard ultra-rápido (30-40x)
-- ✅ **Dark/Light Mode** com persistência
-- ✅ **UI Components** modernos inspirados no Shadcn/ui
-- ✅ **Totalmente Responsivo**
+## ✨ Funcionalidades
 
-## 🚀 Setup Rápido
+### 📊 Dashboard Completo
+- Visão geral de receitas e despesas
+- Cards informativos com métricas em tempo real
+- Detalhamento por categoria
+- Atualização automática dos dados
 
-### 1. Pré-requisitos
+### 💳 Gestão Financeira
+- **Gastos Variáveis**: Controle de gastos do dia a dia
+- **Parcelas**: Acompanhamento de compras parceladas
+- **Gasolina**: Registro de abastecimentos e consumo
+- **Assinaturas**: Gestão de serviços recorrentes (Netflix, Spotify, etc.)
+- **Contas Fixas**: Luz, água, internet, telefone
+- **Ferramentas**: Controle de softwares e ferramentas profissionais
+- **Cartões**: Gerenciamento de cartões de crédito e débito
+- **Metas**: Definição e acompanhamento de objetivos financeiros
+- **Investimentos**: Acompanhamento de aplicações e rentabilidade
+- **Relatórios**: Geração de relatórios detalhados em PDF/CSV
+
+### 🎨 Design Moderno
+- Interface inspirada no design da Apple
+- Modo escuro/claro automático
+- Animações suaves e responsivas
+- Componentes reutilizáveis e elegantes
+- Mobile-first e totalmente responsivo
+
+### 🔒 Recursos Técnicos
+- ✅ TypeScript para type safety completo
+- ✅ React Query para gerenciamento de estado
+- ✅ Supabase como backend (PostgreSQL)
+- ✅ Soft delete com lixeira (restauração em 30 dias)
+- ✅ Materialized views para performance
+- ✅ Row Level Security (RLS)
+- ✅ Hot reload em desenvolvimento
+
+## 🚀 Começando
+
+### Pré-requisitos
 
 - Node.js 18+ instalado
-- Conta no Supabase (gratuita)
+- Conta no [Supabase](https://supabase.com)
+- Git instalado
 
-### 2. Configurar Supabase
+### Instalação
 
-1. Acesse https://supabase.com e crie um novo projeto
-2. Vá em **SQL Editor** e execute o arquivo `../EXECUTAR_AGORA.sql` (na raiz do projeto principal)
-3. Copie suas credenciais:
-   - Project URL: `Settings → API → Project URL`
-   - Anon Key: `Settings → API → Project API keys → anon/public`
-
-### 3. Configurar Variáveis de Ambiente
-
+1. **Clone o repositório**
 ```bash
-# Copie o arquivo de exemplo
-cp .env.local.example .env.local
-
-# Edite .env.local e adicione suas credenciais do Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima-aqui
+git clone https://github.com/seu-usuario/controle-financeiro-familiar.git
+cd controle-financeiro-familiar
 ```
 
-### 4. Instalar Dependências
-
+2. **Instale as dependências**
 ```bash
 npm install
 ```
 
-### 5. Rodar o Projeto
+3. **Configure o Supabase**
 
+   a. Crie um projeto em [supabase.com](https://supabase.com)
+   
+   b. No SQL Editor, execute o script de configuração:
+   ```bash
+   # Execute o arquivo EXECUTAR_AGORA.sql ou database_setup.sql
+   ```
+   
+   c. Copie as credenciais em Settings → API
+
+4. **Configure as variáveis de ambiente**
 ```bash
-# Modo desenvolvimento
-npm run dev
-
-# Acesse http://localhost:3000
+cp .env.local.example .env.local
 ```
 
-### 6. Build para Produção
+Edite `.env.local` com suas credenciais:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-aqui
+```
 
+5. **Inicie o servidor de desenvolvimento**
 ```bash
-# Criar build otimizado
-npm run build
+npm run dev
+```
 
-# Rodar em produção
-npm start
+6. **Acesse o sistema**
+```
+http://localhost:3000
 ```
 
 ## 📁 Estrutura do Projeto
 
 ```
-financeiro-nextjs/
-├── app/
-│   ├── layout.tsx           # Layout raiz com providers
-│   ├── page.tsx             # Dashboard (/)
-│   ├── gastos/
-│   │   └── page.tsx         # Página de gastos
-│   ├── lixeira/
-│   │   └── page.tsx         # Página da lixeira
+controle-financeiro-familiar/
+├── app/                      # Páginas Next.js (App Router)
+│   ├── page.tsx             # Dashboard principal
+│   ├── gastos/              # Gestão de gastos
+│   ├── parcelas/            # Compras parceladas
+│   ├── gasolina/            # Controle de combustível
+│   ├── assinaturas/         # Serviços recorrentes
+│   ├── contas-fixas/        # Contas mensais
+│   ├── ferramentas/         # Softwares profissionais
+│   ├── cartoes/             # Cartões de crédito
+│   ├── metas/               # Objetivos financeiros
+│   ├── investimentos/       # Aplicações
+│   ├── relatorios/          # Relatórios
+│   ├── lixeira/             # Itens excluídos
 │   └── globals.css          # Estilos globais
-├── components/
-│   ├── ui/                  # Componentes UI reutilizáveis
+├── components/              # Componentes React
+│   ├── ui/                  # Componentes base
 │   │   ├── button.tsx
 │   │   ├── card.tsx
-│   │   └── input.tsx
-│   ├── gasto-dialog.tsx     # Modal para criar gastos
-│   ├── header.tsx           # Header com tema toggle
+│   │   ├── input.tsx
+│   │   ├── sheet.tsx
+│   │   └── drawer.tsx
 │   ├── sidebar.tsx          # Navegação lateral
-│   ├── theme-provider.tsx   # Provider de tema
-│   └── query-provider.tsx   # React Query provider
-├── hooks/
-│   ├── use-gastos.ts        # Hook para gastos (CRUD)
+│   ├── header.tsx           # Cabeçalho
+│   ├── gasto-sheet.tsx      # Modal de gastos
+│   └── theme-provider.tsx   # Tema dark/light
+├── hooks/                   # React Hooks customizados
+│   ├── use-gastos.ts        # Hook para gastos
 │   ├── use-dashboard.ts     # Hook para dashboard
 │   └── use-lixeira.ts       # Hook para lixeira
-├── lib/
-│   ├── supabase.ts          # Cliente Supabase configurado
-│   └── utils.ts             # Funções utilitárias
-├── types/
-│   ├── database.types.ts    # Types gerados do Supabase
+├── lib/                     # Utilitários
+│   ├── supabase.ts          # Cliente Supabase
+│   └── utils.ts             # Funções auxiliares
+├── types/                   # Definições TypeScript
+│   ├── database.types.ts    # Types do Supabase
 │   └── index.ts             # Types customizados
-├── package.json
-├── tsconfig.json
-├── tailwind.config.ts
-├── next.config.js
-└── .env.local.example
+└── public/                  # Arquivos estáticos
 ```
 
-## 🔧 Tecnologias Utilizadas
+## 🛠️ Stack Tecnológica
 
-### Core
-- **Next.js 14.1.0** - Framework React com Server Components
-- **React 18.2** - Biblioteca UI
-- **TypeScript 5.3** - Type safety
+### Frontend
+- **Next.js 15.2.4**: Framework React com App Router
+- **React 18**: Biblioteca UI
+- **TypeScript 5.3**: Type safety
+- **Tailwind CSS 3.4**: Estilização utility-first
+- **Lucide React**: Ícones modernos
 
-### Styling
-- **Tailwind CSS 3.4** - Utility-first CSS
-- **tailwindcss-animate** - Animações prontas
-- **class-variance-authority** - Variantes de componentes
-- **clsx + tailwind-merge** - Merge de classes
+### Backend & Database
+- **Supabase**: Backend as a Service
+- **PostgreSQL**: Banco de dados relacional
+- **Row Level Security**: Segurança de dados
 
-### Backend & State
-- **@supabase/supabase-js 2.39** - Cliente Supabase
-- **@tanstack/react-query 5.17** - Cache e state management
-- **zustand 4.4** - State management leve
+### Gerenciamento de Estado
+- **TanStack React Query 5**: Cache e sincronização
+- **Next Themes**: Gerenciamento de tema
 
-### UI & UX
-- **lucide-react** - Ícones modernos
-- **next-themes** - Sistema de temas
-- **date-fns** - Manipulação de datas
-- **zod** - Validação de schemas
+## 📊 Scripts Disponíveis
 
-## 📖 Como Usar
+```bash
+# Desenvolvimento
+npm run dev          # Inicia servidor de desenvolvimento
 
-### Dashboard
+# Produção
+npm run build        # Build para produção
+npm run start        # Inicia servidor de produção
 
-O dashboard exibe:
-- **Receitas totais** (verde)
-- **Despesas totais** (vermelho)
-- **Saldo final** (verde/vermelho)
-- **Detalhamento** de todas as categorias de despesas
-
-Os dados são carregados da **materialized view** `mv_dashboard_mensal`, garantindo performance ultra-rápida mesmo com milhares de registros.
-
-### Gastos
-
-1. Clique em **"Gastos"** no menu lateral
-2. Clique em **"+ Novo Gasto"**
-3. Preencha:
-   - Descrição
-   - Valor
-   - Categoria
-   - Tipo de pagamento
-   - Data
-4. Clique em **"Salvar"**
-
-Para deletar:
-- Clique no ícone de lixeira (🗑️)
-- Confirme a exclusão
-- O item vai para a **Lixeira**
-
-### Lixeira
-
-A lixeira mostra todos os itens deletados nos **últimos 30 dias**.
-
-**Restaurar item:**
-1. Clique em **"↺ Restaurar"**
-2. Confirme
-3. Item volta para a lista original
-
-**Deletar permanentemente:**
-1. Clique em **"🗑️ Deletar"**
-2. Confirme (ação irreversível!)
-3. Item é removido do banco de dados
-
-## 🎨 Customização
-
-### Adicionar Nova Página
-
-```typescript
-// app/nova-pagina/page.tsx
-export default function NovaPaginaPage() {
-  return (
-    <div>
-      <h1>Nova Página</h1>
-    </div>
-  )
-}
+# Qualidade de Código
+npm run lint         # Executa ESLint
 ```
 
-### Adicionar Item no Menu
+## 🎨 Design System
 
-```typescript
-// components/sidebar.tsx
-const navigation = [
-  // ... existentes
-  {
-    name: 'Nova Página',
-    href: '/nova-pagina',
-    icon: IconeDoLucide,
-  },
-]
-```
+O projeto segue os princípios do **Apple Human Interface Guidelines**:
 
-### Criar Novo Hook
+- **Cores**: Apple Blue (#007AFF) como cor primária
+- **Tipografia**: SF Pro Display/Text (fallback para system fonts)
+- **Border Radius**: 12px padrão (Apple-style)
+- **Animações**: Cubic-bezier ease-out
+- **Espaçamento**: Sistema baseado em 4px
 
-```typescript
-// hooks/use-nova-feature.ts
-'use client'
+## 📱 Responsividade
 
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase'
-
-export function useNovaFeature() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['nova-feature'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('sua_tabela')
-        .select('*')
-      return data
-    },
-  })
-
-  return { data, isLoading }
-}
-```
-
-## 🔐 Segurança
-
-- ✅ Variáveis de ambiente não commitadas (`.env.local` no `.gitignore`)
-- ✅ Types seguros com TypeScript
-- ✅ Row Level Security (RLS) configurado no Supabase
-- ✅ Validação de inputs
-- ✅ Soft delete (dados nunca perdidos acidentalmente)
+- ✅ Desktop (1920x1080+)
+- ✅ Laptop (1366x768+)
+- ✅ Tablet (768x1024)
+- ✅ Mobile (375x667+)
 
 ## 🚀 Deploy
 
 ### Vercel (Recomendado)
 
-1. Push o código para GitHub
-2. Acesse https://vercel.com
-3. Clique em **"New Project"**
-4. Importe o repositório
-5. Configure as variáveis de ambiente:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-6. Clique em **"Deploy"**
+1. Faça push do código para o GitHub
+2. Importe o projeto no [Vercel](https://vercel.com)
+3. Configure as variáveis de ambiente
+4. Deploy automático! 🎉
 
-Pronto! Seu app estará online em segundos.
+[![Deploy com Vercel](https://vercel.com/button)](https://vercel.com/new/clone)
 
-### Netlify
+### Outros Provedores
+- Netlify
+- AWS Amplify
+- Railway
+- Render
 
-```bash
-npm run build
-# Upload da pasta .next para Netlify
-```
+## 📖 Documentação Adicional
 
-## 📊 Performance
-
-### Benchmarks
-
-| Métrica | Valor |
-|---------|-------|
-| Lighthouse Performance | 95+ |
-| First Contentful Paint | < 1.5s |
-| Time to Interactive | < 2.5s |
-| Dashboard Load (com MV) | < 500ms |
-| Dashboard Load (sem MV) | < 2s |
-
-### Otimizações Implementadas
-
-- ✅ **Materialized Views** - Dashboard 30-40x mais rápido
-- ✅ **React Query** - Cache automático de requisições
-- ✅ **Code Splitting** - Carrega apenas o necessário
-- ✅ **Server Components** - Reduz JavaScript no cliente
-- ✅ **Tailwind JIT** - CSS otimizado
-
-## 🐛 Troubleshooting
-
-### "Missing Supabase environment variables"
-
-**Solução:** Verifique se o arquivo `.env.local` existe e está configurado corretamente.
-
-### "Failed to fetch" ou erros de conexão
-
-**Solução:**
-1. Verifique se o projeto Supabase está ativo
-2. Confirme que as credenciais estão corretas
-3. Veja o console do navegador para detalhes
-
-### Dashboard vazio
-
-**Solução:**
-1. Execute `EXECUTAR_AGORA.sql` no Supabase
-2. Insira dados de teste (usuários, salários)
-3. Recarregue a página
-
-### Tipos TypeScript não reconhecidos
-
-**Solução:**
-```bash
-# Reinstale as dependências
-rm -rf node_modules
-npm install
-
-# Reinicie o TypeScript server no VSCode
-Ctrl+Shift+P → "TypeScript: Restart TS Server"
-```
-
-## 📚 Próximos Passos
-
-Recursos que podem ser adicionados:
-
-- [ ] Autenticação de usuários (Supabase Auth)
-- [ ] Filtros e busca avançada
-- [ ] Gráficos com Recharts/Chart.js
-- [ ] Exportação para CSV/PDF
-- [ ] Notificações de vencimentos
-- [ ] App mobile com React Native
-- [ ] Modo offline com Service Workers
-- [ ] Testes com Jest + Testing Library
+- [GUIA_RAPIDO.md](./GUIA_RAPIDO.md) - Setup em 5 minutos
+- [APPLE_DESIGN_GUIDE.md](./APPLE_DESIGN_GUIDE.md) - Guia de design
+- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) - Documentação da API
+- [DATABASE_STRUCTURE.md](./DATABASE_STRUCTURE.md) - Estrutura do banco
+- [CHANGELOG_APPLE_DESIGN.md](./CHANGELOG_APPLE_DESIGN.md) - Mudanças de design
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Para contribuir:
+Contribuições são bem-vindas! Sinta-se à vontade para:
 
-1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'Add nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
-5. Abra um Pull Request
+1. Fazer fork do projeto
+2. Criar uma branch para sua feature (`git checkout -b feature/NovaFuncionalidade`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
+5. Abrir um Pull Request
 
 ## 📝 Licença
 
-Este projeto é open source e está disponível sob a licença MIT.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 👨‍💻 Autor
+
+**Geison Hoehr**
 
 ## 🙏 Agradecimentos
 
-- **Next.js** - Framework incrível
-- **Supabase** - Backend as a Service
-- **Shadcn/ui** - Inspiração para componentes
-- **Vercel** - Hospedagem gratuita
-
-## 📞 Suporte
-
-Se encontrar problemas:
-
-1. Verifique a seção **Troubleshooting** acima
-2. Abra uma issue no GitHub
-3. Consulte a documentação:
-   - [Next.js Docs](https://nextjs.org/docs)
-   - [Supabase Docs](https://supabase.com/docs)
-   - [React Query Docs](https://tanstack.com/query/latest)
+- Next.js Team pelo excelente framework
+- Supabase pela plataforma incrível
+- Vercel pelo hosting gratuito
+- Comunidade open source
 
 ---
 
-**Feito com ❤️ usando Next.js + TypeScript + Supabase**
+**Desenvolvido com ❤️ e Next.js**
 
-**Versão:** 3.0.0
-**Data:** Outubro 2025
+Se este projeto foi útil, considere dar uma ⭐!
+

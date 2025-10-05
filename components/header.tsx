@@ -4,24 +4,37 @@ import { Moon, Sun, LogOut, User } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
 
 export function Header() {
   const { theme, setTheme } = useTheme()
   const { user, signOut } = useAuth()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
-    <header className="sticky top-0 z-50 border-b glass">
+    <header className="sticky top-0 z-50 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl">
       <div className="flex h-16 items-center justify-between px-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl font-bold">Financeiro v3.0</h1>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+            <span className="text-white font-bold text-sm">F</span>
+          </div>
+          <h1 className="text-xl font-semibold text-zinc-900 dark:text-white">Financeiro</h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {/* User Info */}
           {user && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/50">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{user.name || user.email}</span>
+            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+              <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
+                <User className="h-3 w-3 text-white" />
+              </div>
+              <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {user.name || user.email?.split('@')[0]}
+              </span>
             </div>
           )}
 
@@ -31,12 +44,14 @@ export function Header() {
             size="icon"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             title="Alternar tema"
-            className="rounded-full"
+            className="rounded-2xl w-10 h-10 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5" />
+            {!mounted ? (
+              <div className="h-5 w-5" />
+            ) : theme === 'dark' ? (
+              <Sun className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
             ) : (
-              <Moon className="h-5 w-5" />
+              <Moon className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
             )}
           </Button>
 
@@ -47,7 +62,7 @@ export function Header() {
               size="icon"
               onClick={signOut}
               title="Sair"
-              className="rounded-full hover:text-destructive"
+              className="rounded-2xl w-10 h-10 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
             >
               <LogOut className="h-5 w-5" />
             </Button>
