@@ -65,9 +65,15 @@ export async function middleware(req: NextRequest) {
 
   // Se não está logado e não está em página pública
   if (!session && !isPublicPath) {
-    const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = '/login'
-    return NextResponse.redirect(redirectUrl)
+    // Em desenvolvimento, permitir acesso temporário para debug
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 DEV MODE: Permitindo acesso sem sessão para debug')
+      // Não redirecionar em desenvolvimento
+    } else {
+      const redirectUrl = req.nextUrl.clone()
+      redirectUrl.pathname = '/login'
+      return NextResponse.redirect(redirectUrl)
+    }
   }
 
   // Debug: Log session info
