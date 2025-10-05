@@ -53,6 +53,7 @@ export function useMetas() {
     mutationFn: async (meta: InsertMeta) => {
       const { data, error } = await supabase
         .from('metas')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .insert(meta)
         .select()
         .single()
@@ -70,6 +71,7 @@ export function useMetas() {
     mutationFn: async ({ id, ...meta }: Partial<Meta> & { id: number }) => {
       const { data, error } = await supabase
         .from('metas')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .update(meta)
         .eq('id', id)
         .select()
@@ -86,6 +88,7 @@ export function useMetas() {
   // Soft delete meta
   const deleteMeta = useMutation({
     mutationFn: async (id: number) => {
+      // @ts-expect-error - RPC function types not generated
       const { error } = await supabase.rpc('soft_delete', {
         p_tabela: 'metas',
         p_id: id,

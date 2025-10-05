@@ -55,6 +55,7 @@ export function useAssinaturas() {
     mutationFn: async (assinatura: InsertAssinatura) => {
       const { data, error } = await supabase
         .from('assinaturas')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .insert(assinatura)
         .select()
         .single()
@@ -74,6 +75,7 @@ export function useAssinaturas() {
     mutationFn: async ({ id, ...assinatura }: Partial<Assinatura> & { id: number }) => {
       const { data, error } = await supabase
         .from('assinaturas')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .update(assinatura)
         .eq('id', id)
         .select()
@@ -92,6 +94,7 @@ export function useAssinaturas() {
   // Soft delete assinatura
   const deleteAssinatura = useMutation({
     mutationFn: async (id: number) => {
+      // @ts-expect-error - RPC function types not generated
       const { error } = await supabase.rpc('soft_delete', {
         p_tabela: 'assinaturas',
         p_id: id,

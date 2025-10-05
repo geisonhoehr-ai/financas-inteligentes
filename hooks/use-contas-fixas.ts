@@ -51,6 +51,7 @@ export function useContasFixas() {
     mutationFn: async (conta: InsertContaFixa) => {
       const { data, error } = await supabase
         .from('contas_fixas')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .insert(conta)
         .select()
         .single()
@@ -70,6 +71,7 @@ export function useContasFixas() {
     mutationFn: async ({ id, ...conta }: Partial<ContaFixa> & { id: number }) => {
       const { data, error } = await supabase
         .from('contas_fixas')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .update(conta)
         .eq('id', id)
         .select()
@@ -88,6 +90,7 @@ export function useContasFixas() {
   // Soft delete conta fixa
   const deleteContaFixa = useMutation({
     mutationFn: async (id: number) => {
+      // @ts-expect-error - RPC function types not generated
       const { error } = await supabase.rpc('soft_delete', {
         p_tabela: 'contas_fixas',
         p_id: id,

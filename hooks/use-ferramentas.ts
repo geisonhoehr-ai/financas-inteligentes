@@ -55,6 +55,7 @@ export function useFerramentas() {
     mutationFn: async (ferramenta: InsertFerramenta) => {
       const { data, error } = await supabase
         .from('ferramentas_ia_dev')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .insert(ferramenta)
         .select()
         .single()
@@ -74,6 +75,7 @@ export function useFerramentas() {
     mutationFn: async ({ id, ...ferramenta }: Partial<Ferramenta> & { id: number }) => {
       const { data, error } = await supabase
         .from('ferramentas_ia_dev')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .update(ferramenta)
         .eq('id', id)
         .select()
@@ -92,6 +94,7 @@ export function useFerramentas() {
   // Soft delete ferramenta
   const deleteFerramenta = useMutation({
     mutationFn: async (id: number) => {
+      // @ts-expect-error - RPC function types not generated
       const { error } = await supabase.rpc('soft_delete', {
         p_tabela: 'ferramentas_ia_dev',
         p_id: id,

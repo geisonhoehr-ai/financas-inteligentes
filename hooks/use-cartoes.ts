@@ -55,6 +55,7 @@ export function useCartoes() {
     mutationFn: async (cartao: InsertCartao) => {
       const { data, error } = await supabase
         .from('cartoes')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .insert(cartao)
         .select()
         .single()
@@ -72,6 +73,7 @@ export function useCartoes() {
     mutationFn: async ({ id, ...cartao }: Partial<Cartao> & { id: number }) => {
       const { data, error } = await supabase
         .from('cartoes')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .update(cartao)
         .eq('id', id)
         .select()
@@ -88,6 +90,7 @@ export function useCartoes() {
   // Soft delete cartao
   const deleteCartao = useMutation({
     mutationFn: async (id: number) => {
+      // @ts-expect-error - RPC function types not generated
       const { error } = await supabase.rpc('soft_delete', {
         p_tabela: 'cartoes',
         p_id: id,

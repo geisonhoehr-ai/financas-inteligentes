@@ -59,6 +59,7 @@ export function useParcelas() {
     mutationFn: async (parcela: InsertParcela) => {
       const { data, error } = await supabase
         .from('compras_parceladas')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .insert(parcela)
         .select()
         .single()
@@ -78,6 +79,7 @@ export function useParcelas() {
     mutationFn: async ({ id, ...parcela }: Partial<Parcela> & { id: number }) => {
       const { data, error } = await supabase
         .from('compras_parceladas')
+        // @ts-expect-error - Table exists in DB but not in generated types
         .update(parcela)
         .eq('id', id)
         .select()
@@ -96,6 +98,7 @@ export function useParcelas() {
   // Soft delete parcela
   const deleteParcela = useMutation({
     mutationFn: async (id: number) => {
+      // @ts-expect-error - RPC function types not generated
       const { error } = await supabase.rpc('soft_delete', {
         p_tabela: 'compras_parceladas',
         p_id: id,
