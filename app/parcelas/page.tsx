@@ -15,10 +15,12 @@ export default function ParcelasPage() {
   const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
-  // Filtrar parcelas pela família ativa
+  // Filtrar parcelas pela família ativa (temporariamente desabilitado)
   const parcelas = useMemo(() => {
-    if (!familiaAtiva?.id) return todasParcelas
-    return todasParcelas.filter(p => p.familia_id === familiaAtiva.id)
+    // TODO: Implementar filtragem quando familia_id for adicionado à tabela compras_parceladas
+    return todasParcelas
+    // if (!familiaAtiva?.id) return todasParcelas
+    // return todasParcelas.filter(p => p.familia_id === familiaAtiva.id)
   }, [todasParcelas, familiaAtiva?.id])
 
   return (

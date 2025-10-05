@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
@@ -182,9 +183,11 @@ export function UploadComprovante({
               {preview ? (
                 // Preview de imagem
                 <div className="relative rounded-lg overflow-hidden border-2 border-primary/20">
-                  <img
+                  <Image
                     src={preview}
                     alt="Preview"
+                    width={400}
+                    height={192}
                     className="w-full h-48 object-cover"
                   />
                   <Button

@@ -15,10 +15,12 @@ export default function AssinaturasPage() {
   const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
-  // Filtrar assinaturas pela família ativa
+  // Filtrar assinaturas pela família ativa (temporariamente desabilitado)
   const assinaturas = useMemo(() => {
-    if (!familiaAtiva?.id) return todasAssinaturas
-    return todasAssinaturas.filter(a => a.familia_id === familiaAtiva.id)
+    // TODO: Implementar filtragem quando familia_id for adicionado à tabela assinaturas
+    return todasAssinaturas
+    // if (!familiaAtiva?.id) return todasAssinaturas
+    // return todasAssinaturas.filter(a => a.familia_id === familiaAtiva.id)
   }, [todasAssinaturas, familiaAtiva?.id])
 
   return (

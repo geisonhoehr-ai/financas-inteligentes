@@ -17,7 +17,7 @@ export default function ConvitePage({ params }: { params: Promise<{ codigo: stri
   useEffect(() => {
     // Validar convite quando página carregar
     validarConvite(codigo)
-  }, [codigo])
+  }, [codigo, validarConvite])
 
   useEffect(() => {
     // Atualizar info do convite quando validação retornar

@@ -93,3 +93,27 @@ export function SheetFooter({ children }: SheetFooterProps) {
     </div>
   )
 }
+
+interface SheetTitleProps {
+  children: React.ReactNode
+}
+
+export function SheetTitle({ children }: SheetTitleProps) {
+  return (
+    <h3 className="text-lg font-semibold leading-none tracking-tight">
+      {children}
+    </h3>
+  )
+}
+
+interface SheetDescriptionProps {
+  children: React.ReactNode
+}
+
+export function SheetDescription({ children }: SheetDescriptionProps) {
+  return (
+    <p className="text-sm text-muted-foreground">
+      {children}
+    </p>
+  )
+}
