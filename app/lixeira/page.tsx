@@ -7,7 +7,7 @@ import { formatCurrency, formatDateTime } from '@/lib/utils'
 import { Trash2, RotateCcw, Receipt } from 'lucide-react'
 
 export default function LixeiraPage() {
-  const { itens, isLoading, restoreItem, isRestoring } = useLixeira()
+  const { items: itens, isLoading, restoreItem, isRestoring } = useLixeira()
 
   if (isLoading) {
     return (
