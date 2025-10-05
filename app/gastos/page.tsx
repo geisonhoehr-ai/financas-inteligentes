@@ -132,11 +132,6 @@ export default function GastosPage() {
                         <p className="text-sm text-zinc-600 dark:text-zinc-300">
                           Categoria: {gasto.categoria || 'Não especificada'}
                         </p>
-                        {gasto.observacoes && (
-                          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
-                            {gasto.observacoes}
-                          </p>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-3">
@@ -208,7 +203,6 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
     valor: gasto?.valor || '',
     categoria: gasto?.categoria || '',
     data: gasto?.data ? new Date(gasto.data).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-    observacoes: gasto?.observacoes || '',
     tipo_pagamento: gasto?.tipo_pagamento || 'dinheiro'
   })
 
@@ -307,19 +301,6 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
           <option value="pix">📱 PIX</option>
           <option value="transferencia">🏦 Transferência</option>
         </select>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Observações
-        </label>
-        <Input
-          type="text"
-          placeholder="Observações adicionais..."
-          value={formData.observacoes}
-          onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
-          className="rounded-xl border-zinc-200 dark:border-zinc-700"
-        />
       </div>
 
       <div className="flex gap-3 pt-4">
