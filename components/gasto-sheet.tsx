@@ -1,11 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGastos } from '@/hooks/use-gastos'
+import { useFamilias } from '@/hooks/use-familias'
+import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetHeader, SheetContent, SheetFooter } from '@/components/ui/sheet'
 import { CATEGORIAS, TIPOS_PAGAMENTO, InsertGasto } from '@/types'
+import { Users } from 'lucide-react'
 
 interface GastoSheetProps {
   open: boolean
@@ -13,7 +16,13 @@ interface GastoSheetProps {
 }
 
 export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
+  const { user } = useAuth()
   const { createGasto, isCreating } = useGastos()
+  const { familias } = useFamilias()
+  const familiaAtiva = familias?.[0]
+  const [membros, setMembros] = useState<any[]>([])
+  const [showResponsabilidade, setShowResponsabilidade] = useState(false)
+  
   const [form, setForm] = useState<Partial<InsertGasto>>({
     descricao: '',
     valor: 0,
@@ -21,7 +30,19 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
     data: new Date().toISOString().split('T')[0],
     categoria: 'Alimentação',
     tipo_pagamento: 'PIX',
+    pago_por: user?.id,
+    responsavel_por: user?.id,
   })
+
+  // Carregar membros da família
+  useEffect(() => {
+    const carregarMembros = async () => {
+      if (familiaAtiva?.membros) {
+        setMembros(familiaAtiva.membros)
+      }
+    }
+    carregarMembros()
+  }, [familiaAtiva])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -137,6 +158,73 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
               required
             />
           </div>
+
+          {/* Mostrar campos de responsabilidade se houver família */}
+          {membros.length > 0 && (
+            <>
+              <div className="border-t pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowResponsabilidade(!showResponsabilidade)}
+                  className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                >
+                  <Users className="h-4 w-4" />
+                  {showResponsabilidade ? 'Ocultar' : 'Configurar'} Responsabilidade
+                </button>
+              </div>
+
+              {showResponsabilidade && (
+                <>
+                  {/* Pago Por */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Pago Por (Quem usou o cartão/dinheiro)
+                    </label>
+                    <select
+                      className="flex h-12 w-full rounded-xl border-2 border-input bg-background px-4 text-base ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:border-primary hover:border-input/80"
+                      value={form.pago_por || user?.id}
+                      onChange={(e) => setForm({ ...form, pago_por: e.target.value })}
+                    >
+                      <option value={user?.id}>Eu</option>
+                      {membros.map((membro: any) => (
+                        <option key={membro.user_id} value={membro.user_id}>
+                          {membro.user?.nome || 'Membro'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Responsável Por */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Responsável Por (Quem realmente deve)
+                    </label>
+                    <select
+                      className="flex h-12 w-full rounded-xl border-2 border-input bg-background px-4 text-base ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:border-primary hover:border-input/80"
+                      value={form.responsavel_por || user?.id}
+                      onChange={(e) => setForm({ ...form, responsavel_por: e.target.value })}
+                    >
+                      <option value={user?.id}>Eu</option>
+                      {membros.map((membro: any) => (
+                        <option key={membro.user_id} value={membro.user_id}>
+                          {membro.user?.nome || 'Membro'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Aviso de Dívida Interna */}
+                  {form.pago_por !== form.responsavel_por && (
+                    <div className="p-3 rounded-xl bg-primary/10 border-2 border-primary/20">
+                      <p className="text-xs font-medium text-primary">
+                        💡 Uma dívida interna será criada automaticamente
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          )}
         </SheetContent>
 
         <SheetFooter>

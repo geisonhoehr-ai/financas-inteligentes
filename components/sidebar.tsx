@@ -15,7 +15,8 @@ import {
   Building,
   Wrench,
   TrendingUp,
-  X
+  X,
+  Users
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -74,6 +75,11 @@ const navigation = [
     name: 'Relatórios',
     href: '/relatorios',
     icon: PieChart,
+  },
+  {
+    name: 'Dívidas',
+    href: '/dividas',
+    icon: Users,
   },
   {
     name: 'Lixeira',
