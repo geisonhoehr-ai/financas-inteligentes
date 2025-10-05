@@ -5,34 +5,67 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useFamilias } from '@/hooks/use-familias'
-import { Users, Building, UserPlus, Copy, Settings, Shield } from 'lucide-react'
+import { useConvites } from '@/hooks/use-convites'
+import { Users, Building, UserPlus, Copy, Settings, Shield, Share2, Check } from 'lucide-react'
+import { showToast } from '@/lib/toast'
 
 export default function ConfiguracoesPage() {
   const { familias, isLoading, createFamilia, generateInviteCode, useMembros } = useFamilias()
-  const [familiaAtualId, setFamiliaAtualId] = useState<number | null>(
+  const [familiaAtualId, setFamiliaAtualId] = useState<string | null>(
     familias[0]?.id || null
   )
   const { data: membros = [] } = useMembros(familiaAtualId)
+  const { convites, createConvite, isCreating, gerarLinkConvite } = useConvites(familiaAtualId)
   const [showNewFamilia, setShowNewFamilia] = useState(false)
+  const [showConvites, setShowConvites] = useState(false)
   const [novaFamilia, setNovaFamilia] = useState({
     nome: '',
     modo_calculo: 'familiar' as 'familiar' | 'individual'
   })
+  const [novoConvite, setNovoConvite] = useState({
+    max_usos: null as number | null,
+    dias_validade: 7
+  })
 
   const handleCreateFamilia = () => {
+    // TODO: Get admin_id from auth context (useAuth hook)
     createFamilia({
       nome: novaFamilia.nome,
       modo_calculo: novaFamilia.modo_calculo,
-      admin_id: 1, // TODO: Get from auth context
+      // admin_id será definido automaticamente pelo backend via auth.uid()
     })
     setNovaFamilia({ nome: '', modo_calculo: 'familiar' })
     setShowNewFamilia(false)
   }
 
+  const handleCreateConvite = () => {
+    if (!familiaAtualId) {
+      showToast.error('Selecione uma família primeiro')
+      return
+    }
+
+    const validade = novoConvite.dias_validade
+      ? new Date(Date.now() + novoConvite.dias_validade * 24 * 60 * 60 * 1000).toISOString()
+      : null
+
+    createConvite({
+      familia_id: familiaAtualId,
+      max_usos: novoConvite.max_usos,
+      validade,
+    })
+    setNovoConvite({ max_usos: null, dias_validade: 7 })
+  }
+
+  const copyInviteLink = (codigo: string) => {
+    const link = gerarLinkConvite(codigo)
+    navigator.clipboard.writeText(link)
+    showToast.success(`Link copiado: ${link}`)
+  }
+
   const copyInviteCode = (codigo: string | null) => {
     if (!codigo) return
     navigator.clipboard.writeText(codigo)
-    alert(`Código copiado: ${codigo}`)
+    showToast.success(`Código copiado: ${codigo}`)
   }
 
   if (isLoading) {
@@ -254,33 +287,139 @@ export default function ConfiguracoesPage() {
                     </div>
                   </div>
 
-                  {/* Membros da Família */}
-                  {familiaAtualId === familia.id && membros.length > 0 && (
-                    <div className="mt-4 pt-4 border-t">
-                      <h5 className="text-sm font-medium mb-2">Membros ({membros.length})</h5>
-                      <div className="space-y-2">
-                        {membros.map((membro: any) => (
-                          <div key={membro.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                <span className="text-xs font-semibold text-primary">
-                                  {membro.usuario?.nome?.[0] || '?'}
-                                </span>
+                  {/* Membros e Convites da Família */}
+                  {familiaAtualId === familia.id && (
+                    <div className="mt-4 pt-4 border-t space-y-4">
+                      {/* Membros */}
+                      {membros.length > 0 && (
+                        <div>
+                          <h5 className="text-sm font-medium mb-2">Membros ({membros.length})</h5>
+                          <div className="space-y-2">
+                            {membros.map((membro: any) => (
+                              <div key={membro.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <span className="text-xs font-semibold text-primary">
+                                      {membro.usuario?.nome?.[0] || '?'}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium">{membro.usuario?.nome || 'Usuário'}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {membro.papel} • {membro.usuario?.tipo || 'pessoa'}
+                                    </p>
+                                  </div>
+                                </div>
+                                {membro.papel === 'admin' && (
+                                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
+                                    Admin
+                                  </span>
+                                )}
                               </div>
-                              <div>
-                                <p className="text-sm font-medium">{membro.usuario?.nome || 'Usuário'}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {membro.papel} • {membro.usuario?.tipo || 'pessoa'}
-                                </p>
-                              </div>
-                            </div>
-                            {membro.papel === 'admin' && (
-                              <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full font-medium">
-                                Admin
-                              </span>
-                            )}
+                            ))}
                           </div>
-                        ))}
+                        </div>
+                      )}
+
+                      {/* Convites */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <h5 className="text-sm font-medium">Convites ({convites.length})</h5>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setShowConvites(!showConvites)}
+                          >
+                            <Share2 className="h-3 w-3 mr-1" />
+                            Gerar Convite
+                          </Button>
+                        </div>
+
+                        {/* Formulário Novo Convite */}
+                        {showConvites && (
+                          <Card className="mb-3">
+                            <CardContent className="p-4 space-y-3">
+                              <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                  <label className="text-xs font-medium">Máx. Usos</label>
+                                  <Input
+                                    type="number"
+                                    placeholder="Ilimitado"
+                                    value={novoConvite.max_usos || ''}
+                                    onChange={(e) => setNovoConvite({
+                                      ...novoConvite,
+                                      max_usos: e.target.value ? parseInt(e.target.value) : null
+                                    })}
+                                    className="h-9"
+                                  />
+                                </div>
+                                <div className="space-y-1">
+                                  <label className="text-xs font-medium">Validade (dias)</label>
+                                  <Input
+                                    type="number"
+                                    value={novoConvite.dias_validade}
+                                    onChange={(e) => setNovoConvite({
+                                      ...novoConvite,
+                                      dias_validade: parseInt(e.target.value) || 7
+                                    })}
+                                    className="h-9"
+                                  />
+                                </div>
+                              </div>
+                              <Button
+                                onClick={handleCreateConvite}
+                                disabled={isCreating}
+                                className="w-full h-9"
+                                size="sm"
+                              >
+                                {isCreating ? 'Criando...' : 'Criar Convite'}
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        )}
+
+                        {/* Lista de Convites */}
+                        <div className="space-y-2">
+                          {convites.length === 0 ? (
+                            <p className="text-xs text-muted-foreground text-center py-2">
+                              Nenhum convite ativo
+                            </p>
+                          ) : (
+                            convites.map((convite) => (
+                              <div key={convite.id} className="p-3 rounded-lg bg-muted/50 border">
+                                <div className="flex items-center justify-between mb-2">
+                                  <code className="text-sm font-mono font-semibold">{convite.codigo}</code>
+                                  <div className="flex items-center gap-1">
+                                    {convite.ativo ? (
+                                      <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full">
+                                        Ativo
+                                      </span>
+                                    ) : (
+                                      <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">
+                                        Inativo
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+                                  <span>Usos: {convite.usos_atual}/{convite.max_usos || '∞'}</span>
+                                  {convite.validade && (
+                                    <span>Expira: {new Date(convite.validade).toLocaleDateString()}</span>
+                                  )}
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => copyInviteLink(convite.codigo)}
+                                  className="w-full h-8"
+                                >
+                                  <Share2 className="h-3 w-3 mr-1" />
+                                  Copiar Link
+                                </Button>
+                              </div>
+                            ))
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}

@@ -1,12 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useParcelas } from '@/hooks/use-parcelas'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
+import { useFamilias } from '@/hooks/use-familias'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, CreditCard, TrendingDown, Calendar, DollarSign } from 'lucide-react'
 
 export default function ParcelasPage() {
+  const { parcelas: todasParcelas, isLoading } = useParcelas()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  const { familias } = useFamilias()
+  const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+
+  // Filtrar parcelas pela família ativa
+  const parcelas = useMemo(() => {
+    if (!familiaAtiva?.id) return todasParcelas
+    return todasParcelas.filter(p => p.familia_id === familiaAtiva.id)
+  }, [todasParcelas, familiaAtiva?.id])
 
   return (
     <div className="space-y-4 md:space-y-6">

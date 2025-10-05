@@ -1,20 +1,31 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useGastos } from '@/hooks/use-gastos'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
+import { useFamilias } from '@/hooks/use-familias'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { formatCurrency, formatDateTime } from '@/lib/utils'
-import { Plus, Receipt, Trash2, Edit3 } from 'lucide-react'
+import { Plus, Receipt, Trash2, Edit3, Lock } from 'lucide-react'
 
 export default function GastosPage() {
-  const { gastos, isLoading, deleteGasto, isDeleting } = useGastos()
+  const { gastos: todosGastos, isLoading, deleteGasto, isDeleting } = useGastos()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  const { familias } = useFamilias()
+  const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const [showAddDrawer, setShowAddDrawer] = useState(false)
   const [editingGasto, setEditingGasto] = useState<any>(null)
 
-  const handleDelete = async (id: number) => {
+  // Filtrar gastos pela família ativa
+  const gastos = useMemo(() => {
+    if (!familiaAtiva?.id) return todosGastos
+    return todosGastos.filter(g => g.familia_id === familiaAtiva.id)
+  }, [todosGastos, familiaAtiva?.id])
+
+  const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir este gasto?')) {
       await deleteGasto(id)
     }
@@ -120,9 +131,14 @@ export default function GastosPage() {
                           <Receipt className="h-5 w-5 text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="font-medium text-zinc-900 dark:text-white truncate">
-                            {gasto.descricao}
-                          </h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-zinc-900 dark:text-white truncate">
+                              {gasto.descricao}
+                            </h4>
+                            {gasto.privado && (
+                              <Lock className="h-3 w-3 text-muted-foreground flex-shrink-0" title="Gasto privado" />
+                            )}
+                          </div>
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
                             {formatDateTime(gasto.data)}
                           </p>

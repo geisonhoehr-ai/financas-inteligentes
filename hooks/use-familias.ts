@@ -3,48 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { showToast } from '@/lib/toast'
-
-export interface Familia {
-  id: number
-  nome: string
-  admin_id: number | null
-  modo_calculo: 'familiar' | 'individual'
-  codigo_convite: string | null
-  ativa: boolean
-  data_criacao: string
-  data_atualizacao: string
-}
-
-export interface FamiliaMembro {
-  id: number
-  familia_id: number
-  usuario_id: number
-  papel: 'admin' | 'membro' | 'dependente' | 'visualizador'
-  aprovado: boolean
-  data_entrada: string
-  // Joined data
-  usuario?: {
-    id: number
-    nome: string
-    email?: string
-    tipo: 'pessoa' | 'empresa'
-  }
-}
-
-export interface InsertFamilia {
-  nome: string
-  admin_id?: number | null
-  modo_calculo?: 'familiar' | 'individual'
-  codigo_convite?: string
-  ativa?: boolean
-}
-
-export interface InsertMembro {
-  familia_id: number
-  usuario_id: number
-  papel?: 'admin' | 'membro' | 'dependente' | 'visualizador'
-  aprovado?: boolean
-}
+import type { Familia, FamiliaMembro, InsertFamilia, InsertMembro } from '@/types/app.types'
 
 export function useFamilias() {
   const queryClient = useQueryClient()
@@ -56,7 +15,7 @@ export function useFamilias() {
       const { data, error } = await supabase
         .from('familias')
         .select('*')
-        .eq('ativa', true)
+        .eq('deletado', false)
         .order('nome', { ascending: true })
 
       if (error) throw error
@@ -65,7 +24,7 @@ export function useFamilias() {
   })
 
   // Fetch membros de uma família
-  const useMembros = (familiaId: number | null) => {
+  const useMembros = (familiaId: string | null) => {
     return useQuery({
       queryKey: ['familia-membros', familiaId],
       queryFn: async () => {
@@ -83,10 +42,11 @@ export function useFamilias() {
             )
           `)
           .eq('familia_id', familiaId)
+          .eq('deletado', false)
           .order('papel', { ascending: true })
 
         if (error) throw error
-        return data as any[]
+        return data as FamiliaMembro[]
       },
       enabled: !!familiaId,
     })
@@ -122,11 +82,14 @@ export function useFamilias() {
 
   // Update familia
   const updateFamilia = useMutation({
-    mutationFn: async ({ id, ...familia }: Partial<Familia> & { id: number }) => {
+    mutationFn: async ({ id, ...familia }: Partial<Familia> & { id: string }) => {
       const { data, error } = await supabase
         .from('familias')
         // @ts-expect-error - Table exists in DB but not in generated types
-        .update(familia)
+        .update({
+          ...familia,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id)
         .select()
         .single()
@@ -167,10 +130,15 @@ export function useFamilias() {
 
   // Remove membro from familia
   const removeMembro = useMutation({
-    mutationFn: async ({ familiaId, usuarioId }: { familiaId: number; usuarioId: number }) => {
+    mutationFn: async ({ familiaId, usuarioId }: { familiaId: string; usuarioId: string }) => {
+      // Soft delete ao invés de delete permanente
       const { error } = await supabase
         .from('familia_membros')
-        .delete()
+        // @ts-expect-error - Table exists in DB but not in generated types
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString()
+        })
         .eq('familia_id', familiaId)
         .eq('usuario_id', usuarioId)
 
@@ -187,13 +155,16 @@ export function useFamilias() {
 
   // Generate new invite code
   const generateInviteCode = useMutation({
-    mutationFn: async (familiaId: number) => {
+    mutationFn: async (familiaId: string) => {
       const novoCodigo = Math.random().toString(36).substring(2, 10).toUpperCase()
-      
+
       const { data, error } = await supabase
         .from('familias')
         // @ts-expect-error - Table exists in DB but not in generated types
-        .update({ codigo_convite: novoCodigo })
+        .update({
+          codigo_convite: novoCodigo,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', familiaId)
         .select()
         .single()

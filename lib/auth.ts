@@ -31,20 +31,21 @@ export async function signUp(email: string, password: string, name?: string): Pr
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
         .select('id')
-        .eq('email', email)
+        .eq('id', data.user.id)
         .single()
 
       // Se não existe, criar registro na tabela users
       if (checkError && checkError.code === 'PGRST116') {
         // @ts-expect-error - Type conflict with generated schema
         const { error: dbError } = await supabase.from('users').insert({
+          id: data.user.id,
           nome: name || email.split('@')[0],
           email: email,
           tipo: 'pessoa',
           ativo: true,
-          cor: '#007aff',
-          data_criacao: new Date().toISOString(),
-          data_atualizacao: new Date().toISOString(),
+          cor: '#007AFF',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         })
 
         if (dbError) console.warn('Aviso ao criar usuário no DB:', dbError)

@@ -4,13 +4,14 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { DashboardData } from '@/types'
 
-export function useDashboard() {
+export function useDashboard(familiaId?: string) {
   const { data: dashboard, isLoading, error } = useQuery({
-    queryKey: ['dashboard'],
+    queryKey: ['dashboard', familiaId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('mv_dashboard_mensal')
         .select('*')
+        .eq(familiaId ? 'familia_id' : 'usuario_id', familiaId || 'current_user')
         .single()
 
       if (error) {

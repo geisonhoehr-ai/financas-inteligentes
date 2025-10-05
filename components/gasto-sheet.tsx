@@ -32,6 +32,8 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
     tipo_pagamento: 'PIX',
     pago_por: user?.id,
     responsavel_por: user?.id,
+    privado: false,
+    visivel_familia: true,
   })
 
   // Carregar membros da família
@@ -157,6 +159,23 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
               className="h-12 text-base"
               required
             />
+          </div>
+
+          {/* Gasto Privado */}
+          <div className="flex items-center gap-3 p-4 rounded-xl border-2 border-input hover:border-primary/20 transition-all">
+            <input
+              type="checkbox"
+              id="privado"
+              checked={form.privado || false}
+              onChange={(e) => setForm({ ...form, privado: e.target.checked })}
+              className="h-5 w-5 rounded border-2 border-input text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            />
+            <label htmlFor="privado" className="flex-1 cursor-pointer">
+              <div className="font-medium">🔒 Gasto Privado</div>
+              <div className="text-xs text-muted-foreground">
+                Apenas você verá este gasto (ideal para presentes ou compras íntimas)
+              </div>
+            </label>
           </div>
 
           {/* Mostrar campos de responsabilidade se houver família */}

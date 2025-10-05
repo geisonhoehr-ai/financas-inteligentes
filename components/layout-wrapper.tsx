@@ -8,6 +8,7 @@ import { PerfilSelector } from '@/components/perfil-selector'
 import { DashboardToggle } from '@/components/dashboard-toggle'
 import { useAuth } from '@/components/auth-provider'
 import { useFamilias } from '@/hooks/use-familias'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -18,6 +19,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user } = useAuth()
   const { familias, isLoading } = useFamilias()
+  const { familiaAtiva } = useFamiliaAtiva()
   
   // Se for página de autenticação, renderizar apenas o conteúdo
   if (pathname.startsWith('/login') || pathname.startsWith('/convite')) {
@@ -36,7 +38,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
         <Header onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {/* Seletor de Perfil - apenas se o usuário tiver famílias */}
-          {!isLoading && familias && familias.length > 0 && (
+          {!isLoading && familiaAtiva && (
             <div className="mb-6">
               <PerfilSelector />
             </div>

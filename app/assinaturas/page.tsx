@@ -1,12 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useAssinaturas } from '@/hooks/use-assinaturas'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
+import { useFamilias } from '@/hooks/use-familias'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus, Calendar, TrendingDown, CreditCard, Repeat } from 'lucide-react'
 
 export default function AssinaturasPage() {
+  const { assinaturas: todasAssinaturas, isLoading } = useAssinaturas()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  const { familias } = useFamilias()
+  const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+
+  // Filtrar assinaturas pela família ativa
+  const assinaturas = useMemo(() => {
+    if (!familiaAtiva?.id) return todasAssinaturas
+    return todasAssinaturas.filter(a => a.familia_id === familiaAtiva.id)
+  }, [todasAssinaturas, familiaAtiva?.id])
 
   return (
     <div className="space-y-4 md:space-y-6">

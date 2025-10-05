@@ -7,23 +7,27 @@ import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useDividas } from '@/hooks/use-dividas'
 import { useFamilias } from '@/hooks/use-familias'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
+import { UploadComprovante } from '@/components/upload-comprovante'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Check, 
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Check,
   X,
   Plus,
   Calendar,
   Receipt,
   Users,
-  AlertCircle
+  AlertCircle,
+  Upload
 } from 'lucide-react'
 
 export default function DividasPage() {
   const { familias } = useFamilias()
-  const familiaAtiva = familias?.[0] // Por enquanto, pega a primeira família
+  const { familiaAtivaId } = useFamiliaAtiva()
+  const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const {
     dividasQueDevo,
     dividasQueRecebo,
@@ -37,6 +41,8 @@ export default function DividasPage() {
 
   const [showAddDivida, setShowAddDivida] = useState(false)
   const [selectedDivida, setSelectedDivida] = useState<any>(null)
+  const [showUploadComprovante, setShowUploadComprovante] = useState(false)
+  const [dividaParaComprovante, setDividaParaComprovante] = useState<any>(null)
 
   const resumoAtual = resumo?.[0]
   const saldoLiquido = resumoAtual?.saldo_liquido || 0
@@ -166,6 +172,17 @@ export default function DividasPage() {
                   <div className="flex gap-2">
                     <Button
                       size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setDividaParaComprovante(divida)
+                        setShowUploadComprovante(true)
+                      }}
+                      title="Enviar comprovante"
+                    >
+                      <Upload className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
                       onClick={() => marcarComoPaga({ id: divida.id })}
                       disabled={isMarking}
                       className="bg-green-600 hover:bg-green-700"
@@ -276,6 +293,54 @@ export default function DividasPage() {
               💡 Dica: As dívidas são criadas automaticamente quando você registra um gasto
               indicando que foi pago por um membro mas é responsabilidade de outro.
             </p>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Sheet para upload de comprovante */}
+      <Sheet open={showUploadComprovante} onOpenChange={setShowUploadComprovante}>
+        <SheetContent side="bottom" className="h-auto max-h-[90vh]">
+          <SheetHeader>
+            <SheetTitle>Enviar Comprovante</SheetTitle>
+            <SheetDescription>
+              Anexe o comprovante de pagamento da dívida
+            </SheetDescription>
+          </SheetHeader>
+          <div className="mt-6">
+            {dividaParaComprovante && (
+              <>
+                <div className="mb-4 p-4 rounded-lg bg-muted/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">
+                        {dividaParaComprovante.credor_nome || dividaParaComprovante.devedor_nome}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {dividaParaComprovante.descricao}
+                      </p>
+                    </div>
+                    <p className="text-lg font-bold">
+                      {formatCurrency(dividaParaComprovante.valor)}
+                    </p>
+                  </div>
+                </div>
+
+                <UploadComprovante
+                  dividaId={dividaParaComprovante.id}
+                  comprovanteAtual={dividaParaComprovante.comprovante_url}
+                  onUploadSuccess={() => {
+                    setShowUploadComprovante(false)
+                    setDividaParaComprovante(null)
+                    // Refresh data
+                    window.location.reload()
+                  }}
+                  onCancel={() => {
+                    setShowUploadComprovante(false)
+                    setDividaParaComprovante(null)
+                  }}
+                />
+              </>
+            )}
           </div>
         </SheetContent>
       </Sheet>

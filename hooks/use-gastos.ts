@@ -49,11 +49,14 @@ export function useGastos() {
 
   // Update gasto
   const updateGasto = useMutation({
-    mutationFn: async ({ id, ...gasto }: Partial<Gasto> & { id: number }) => {
+    mutationFn: async ({ id, ...gasto }: Partial<Gasto> & { id: string }) => {
       const { data, error } = await supabase
         .from('gastos')
         // @ts-expect-error - Type conflict with generated schema
-        .update(gasto)
+        .update({
+          ...gasto,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id)
         .select()
         .single()
@@ -74,12 +77,15 @@ export function useGastos() {
 
   // Soft delete gasto
   const deleteGasto = useMutation({
-    mutationFn: async (id: number) => {
-      // @ts-expect-error - RPC function types not generated
-      const { error } = await supabase.rpc('soft_delete', {
-        p_tabela: 'gastos',
-        p_id: id,
-      })
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('gastos')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
 
       if (error) throw error
     },

@@ -1,13 +1,18 @@
 'use client'
 
 import { useDashboard } from '@/hooks/use-dashboard'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
+import { useFamilias } from '@/hooks/use-familias'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DashboardChart } from '@/components/dashboard-chart'
 import { formatCurrency, formatDateTime } from '@/lib/utils'
-import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import { TrendingUp, TrendingDown, DollarSign, Info } from 'lucide-react'
 
 export default function DashboardPage() {
-  const { dashboard, isLoading } = useDashboard()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  const { familias } = useFamilias()
+  const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
+  const { dashboard, isLoading } = useDashboard(familiaAtiva?.id)
 
   if (isLoading) {
     return (
@@ -27,11 +32,27 @@ export default function DashboardPage() {
   return (
     <div className="space-y-4 md:space-y-6">
       <div>
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard Financeiro</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard Financeiro</h2>
+          {familiaAtiva && (
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+              <span>{familiaAtiva.modo_calculo === 'familiar' ? '👨‍👩‍👧‍👦' : '🏢'}</span>
+              <span className="hidden sm:inline">{familiaAtiva.nome}</span>
+            </div>
+          )}
+        </div>
         {dashboard?.atualizado_em && (
           <p className="text-xs md:text-sm text-muted-foreground mt-1 md:mt-2">
             Última atualização: {formatDateTime(dashboard.atualizado_em)}
           </p>
+        )}
+        {!familiaAtiva && (
+          <div className="mt-3 flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+            <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <p className="text-sm text-amber-900 dark:text-amber-100">
+              Crie uma família em Configurações para começar a usar o sistema
+            </p>
+          </div>
         )}
       </div>
 
