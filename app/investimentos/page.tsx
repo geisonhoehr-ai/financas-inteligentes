@@ -9,18 +9,18 @@ export default function InvestimentosPage() {
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Investimentos</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Investimentos</h2>
+          <p className="text-sm text-muted-foreground">
             Acompanhe seus investimentos e rentabilidade
           </p>
         </div>
         <Button 
           onClick={() => setShowAddDrawer(true)}
-          className="h-12 rounded-xl bg-primary hover:bg-primary/90 shadow-lg shadow-primary/30"
+          className="h-12 rounded-xl bg-primary hover:bg-primary/90 shadow-lg shadow-primary/30 w-full sm:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Novo Investimento
@@ -28,7 +28,7 @@ export default function InvestimentosPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-4">
+      <div className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Investido</CardTitle>

@@ -6,19 +6,17 @@ import { FileText, Download, Calendar, PieChart, BarChart3, TrendingUp } from 'l
 
 export default function RelatoriosPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Relatórios</h2>
-          <p className="text-muted-foreground">
-            Visualize e exporte relatórios financeiros
-          </p>
-        </div>
+      <div>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Relatórios</h2>
+        <p className="text-sm text-muted-foreground">
+          Visualize e exporte relatórios financeiros
+        </p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Relatórios Disponíveis</CardTitle>
@@ -55,8 +53,8 @@ export default function RelatoriosPage() {
 
       {/* Report Types */}
       <div>
-        <h3 className="text-xl font-semibold mb-4">Tipos de Relatórios</h3>
-        <div className="grid gap-4 md:grid-cols-2">
+        <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4">Tipos de Relatórios</h3>
+        <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2">
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <div className="flex items-center gap-3">

@@ -32,18 +32,18 @@ export default function GastosPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Gastos</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Gastos</h2>
+          <p className="text-sm text-muted-foreground">
             Gerencie seus gastos do dia a dia
           </p>
         </div>
         <Button 
           onClick={() => setShowAddDrawer(true)}
-          className="rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30"
+          className="rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 w-full sm:w-auto"
         >
           <Plus className="h-5 w-5 mr-2" />
           Novo Gasto
@@ -51,7 +51,7 @@ export default function GastosPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card className="border-0 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20">
           <CardHeader className="pb-3">
             <CardTitle className="text-blue-600 dark:text-blue-400">Total do Mês</CardTitle>
@@ -114,14 +114,14 @@ export default function GastosPage() {
             {gastos.map((gasto) => (
               <Card key={gasto.id} className="border-0 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <div className="w-10 h-10 flex-shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                           <Receipt className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <div>
-                          <h4 className="font-medium text-zinc-900 dark:text-white">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-medium text-zinc-900 dark:text-white truncate">
                             {gasto.descricao}
                           </h4>
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -129,19 +129,19 @@ export default function GastosPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="ml-13">
+                      <div className="sm:ml-13">
                         <p className="text-sm text-zinc-600 dark:text-zinc-300">
                           Categoria: {gasto.categoria || 'Não especificada'}
                         </p>
                         {gasto.observacoes && (
-                          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
                             {gasto.observacoes}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
+                    <div className="flex items-center justify-between sm:justify-end gap-3">
+                      <div className="text-left sm:text-right">
                         <p className="text-lg font-semibold text-red-600 dark:text-red-400">
                           -{formatCurrency(parseFloat(gasto.valor.toString()))}
                         </p>

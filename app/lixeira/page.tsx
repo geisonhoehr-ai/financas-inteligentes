@@ -21,18 +21,18 @@ export default function LixeiraPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Lixeira</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Lixeira</h2>
+          <p className="text-sm text-muted-foreground">
             Itens excluídos que podem ser restaurados
           </p>
         </div>
         <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           <Trash2 className="h-4 w-4" />
-          {itens.length} itens na lixeira
+          {itens.length} {itens.length === 1 ? 'item' : 'itens'} na lixeira
         </div>
       </div>
 
