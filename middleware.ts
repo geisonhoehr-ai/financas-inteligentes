@@ -70,6 +70,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
+  // Debug: Log session info
+  if (req.nextUrl.pathname === '/') {
+    console.log('🔍 Middleware - Session:', session ? 'exists' : 'none')
+    console.log('🔍 Middleware - User:', session?.user?.email || 'none')
+  }
+
   // Se está logado e tentando acessar página de login
   if (session && req.nextUrl.pathname.startsWith('/login')) {
     const redirectUrl = req.nextUrl.clone()
