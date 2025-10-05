@@ -1,0 +1,11 @@
+{
+  "name": "controle-financeiro-familiar",
+  "version": "1.0.0",
+  "description": "Sistema completo de controle financeiro familiar com CRUD",
+  "scripts": {
+    "start": "npx serve"
+  },
+  "keywords": ["financeiro", "controle", "familia", "orcamento"],
+  "author": "Seu Nome",
+  "license": "MIT"
+}

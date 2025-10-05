@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financeiro v3.0 - Supabase</title>
+
+    <!-- React & Babel -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { margin: 0; }
+
+        /* Dark Mode */
+        .dark { background: #000; color: #fff; }
+        .dark .card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .dark .card:hover { background: rgba(255, 255, 255, 0.08); }
+        .dark .input, .dark .user-select { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; }
+        .dark .input:focus, .dark .user-select:focus { background: rgba(255, 255, 255, 0.15); border-color: #007AFF; }
+        .dark .user-select option { background: #1a1a1a; color: #fff; }
+        .dark .sidebar { background: #18181b; border-color: #27272a; }
+        .dark .header { background: #18181b; border-color: #27272a; }
+
+        /* Light Mode */
+        .light { background: #f5f5f7; color: #1d1d1f; }
+        .light .card { background: #fff; border: 1px solid #e5e5e7; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .light .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .light .input, .light .user-select { background: #fff; border: 1px solid #d2d2d7; color: #1d1d1f; }
+        .light .input:focus, .light .user-select:focus { border-color: #007AFF; }
+        .light .user-select option { background: #fff; color: #1d1d1f; }
+        .light .sidebar { background: #fff; border-color: #e5e5e7; }
+        .light .header { background: #fff; border-color: #e5e5e7; }
+        .light .text-white { color: #1d1d1f !important; }
+        .light .text-zinc-400 { color: #86868b !important; }
+        .light .text-zinc-900 { color: #1d1d1f !important; }
+        .light .bg-zinc-900 { background: #fff !important; }
+        .light .bg-zinc-800 { background: #f5f5f7 !important; }
+        .light .border-zinc-800 { border-color: #e5e5e7 !important; }
+        .light .bg-black { background: #f5f5f7 !important; }
+
+        /* Common */
+        .card { backdrop-filter: blur(20px); transition: all 0.3s; }
+        .card:hover { transform: translateY(-2px); }
+        .btn { background: #007AFF; transition: all 0.2s; color: #fff; }
+        .btn:hover { background: #0051D5; transform: scale(1.02); }
+        .input, .user-select { transition: all 0.2s; }
+        .user-select { cursor: pointer; font-weight: 500; }
+        .user-select:hover { opacity: 0.9; }
+
+        /* Select */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23fff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+        select option { padding: 12px; font-size: 15px; }
+
+        /* Modal */
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .modal-field { margin-bottom: 1rem; }
+        .modal-field label {
+            display: block;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Sidebar */
+        .sidebar { transition: transform 0.3s; }
+        .sidebar-hidden { transform: translateX(-100%); }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #007AFF;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Trash Icon Animation */
+        .trash-item {
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ==============================================
+        // 🔧 CONFIGURAÇÃO SUPABASE
+        // ==============================================
+        // ⚠️ IMPORTANTE: Substitua com suas credenciais reais!
+        const SUPABASE_CONFIG = {
+            url: 'https://SEU-PROJETO.supabase.co',
+            anonKey: 'SUA-CHAVE-ANONIMA-AQUI'
+        };
+
+        // Inicializar Supabase
+        const supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+
+        // ==============================================
+        // 📊 APP PRINCIPAL
+        // ==============================================
+        function App() {
+            // Estado
+            const [data, setData] = useState({
+                users: [],
+                salaries: [],
+                exp: [],
+                parc: [],
+                gas: [],
+                subs: [],
+                bills: [],
+                tools: [],
+                cards: [],
+                debts: [],
+                loans: [],
+                goals: [],
+                budgets: [],
+                investments: [],
+                patrimony: []
+            });
+
+            const [dashboardData, setDashboardData] = useState(null);
+            const [deletedItems, setDeletedItems] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [saving, setSaving] = useState(false);
+            const [currentUser, setCurrentUser] = useState(1);
+            const [view, setView] = useState('dashboard');
+            const [modal, setModal] = useState(null);
+            const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+            const [sidebarOpen, setSidebarOpen] = useState(true);
+
+            // ==============================================
+            // 🔄 CARREGAR DADOS DO SUPABASE
+            // ==============================================
+
+            useEffect(() => {
+                carregarTodosDados();
+            }, []);
+
+            const carregarTodosDados = async () => {
+                setLoading(true);
+                try {
+                    await Promise.all([
+                        carregarUsuarios(),
+                        carregarSalarios(),
+                        carregarGastos(),
+                        carregarParcelas(),
+                        carregarGasolina(),
+                        carregarAssinaturas(),
+                        carregarContasFixas(),
+                        carregarFerramentas(),
+                        carregarCartoes(),
+                        carregarDividas(),
+                        carregarEmprestimos(),
+                        carregarMetas(),
+                        carregarOrcamentos(),
+                        carregarInvestimentos(),
+                        carregarPatrimonio(),
+                        carregarDashboard()
+                    ]);
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    alert('Erro ao carregar dados. Verifique sua conexão com Supabase.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            // Carregar Usuários
+            const carregarUsuarios = async () => {
+                const { data: users, error } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && users) {
+                    setData(prev => ({
+                        ...prev,
+                        users: users.map(u => ({
+                            id: u.id,
+                            nome: u.nome,
+                            tipo: u.tipo
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Salários
+            const carregarSalarios = async () => {
+                const { data: salaries, error } = await supabase
+                    .from('salaries')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('created_at', { ascending: false });
+
+                if (!error && salaries) {
+                    setData(prev => ({
+                        ...prev,
+                        salaries: salaries.map(s => ({
+                            id: s.id,
+                            valor: parseFloat(s.valor),
+                            usuarioId: s.usuario_id,
+                            mes: s.mes
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Gastos
+            const carregarGastos = async () => {
+                const { data: gastos, error } = await supabase
+                    .from('gastos')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('data', { ascending: false });
+
+                if (!error && gastos) {
+                    setData(prev => ({
+                        ...prev,
+                        exp: gastos.map(g => ({
+                            id: g.id,
+                            descricao: g.descricao,
+                            valor: parseFloat(g.valor),
+                            usuarioId: g.usuario_id,
+                            data: g.data,
+                            categoria: g.categoria,
+                            tipoPagamento: g.tipo_pagamento
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Parcelas
+            const carregarParcelas = async () => {
+                const { data: parcelas, error } = await supabase
+                    .from('compras_parceladas')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('data_compra', { ascending: false });
+
+                if (!error && parcelas) {
+                    setData(prev => ({
+                        ...prev,
+                        parc: parcelas.map(p => ({
+                            id: p.id,
+                            descricao: p.descricao,
+                            valorTotal: parseFloat(p.valor_total),
+                            totalParcelas: p.total_parcelas,
+                            parcelasPagas: p.parcelas_pagas,
+                            valorParcela: parseFloat(p.valor_parcela || (p.valor_total / p.total_parcelas)),
+                            usuarioId: p.usuario_id,
+                            dataCompra: p.data_compra,
+                            categoria: p.categoria,
+                            finalizada: p.finalizada
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Gasolina
+            const carregarGasolina = async () => {
+                const { data: gasolina, error } = await supabase
+                    .from('gasolina')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('data', { ascending: false });
+
+                if (!error && gasolina) {
+                    setData(prev => ({
+                        ...prev,
+                        gas: gasolina.map(g => ({
+                            id: g.id,
+                            descricao: g.descricao,
+                            valor: parseFloat(g.valor),
+                            litros: parseFloat(g.litros),
+                            usuarioId: g.usuario_id,
+                            data: g.data
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Assinaturas
+            const carregarAssinaturas = async () => {
+                const { data: assinaturas, error } = await supabase
+                    .from('assinaturas')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && assinaturas) {
+                    setData(prev => ({
+                        ...prev,
+                        subs: assinaturas.map(s => ({
+                            id: s.id,
+                            nome: s.nome,
+                            valor: parseFloat(s.valor),
+                            usuarioId: s.usuario_id,
+                            ativa: s.ativa
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Contas Fixas
+            const carregarContasFixas = async () => {
+                const { data: contas, error } = await supabase
+                    .from('contas_fixas')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && contas) {
+                    setData(prev => ({
+                        ...prev,
+                        bills: contas.map(c => ({
+                            id: c.id,
+                            nome: c.nome,
+                            valor: parseFloat(c.valor),
+                            usuarioId: c.usuario_id
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Ferramentas
+            const carregarFerramentas = async () => {
+                const { data: ferramentas, error } = await supabase
+                    .from('ferramentas_ia_dev')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && ferramentas) {
+                    setData(prev => ({
+                        ...prev,
+                        tools: ferramentas.map(f => ({
+                            id: f.id,
+                            nome: f.nome,
+                            valor: parseFloat(f.valor),
+                            usuarioId: f.usuario_id
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Cartões
+            const carregarCartoes = async () => {
+                const { data: cartoes, error } = await supabase
+                    .from('cartoes')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && cartoes) {
+                    setData(prev => ({
+                        ...prev,
+                        cards: cartoes.map(c => ({
+                            id: c.id,
+                            nome: c.nome,
+                            limite: parseFloat(c.limite),
+                            usuarioId: c.usuario_id
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Dívidas
+            const carregarDividas = async () => {
+                const { data: dividas, error } = await supabase
+                    .from('dividas')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && dividas) {
+                    setData(prev => ({
+                        ...prev,
+                        debts: dividas.map(d => ({
+                            id: d.id,
+                            nome: d.nome,
+                            valor: parseFloat(d.valor),
+                            usuarioId: d.usuario_id
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Empréstimos
+            const carregarEmprestimos = async () => {
+                const { data: emprestimos, error } = await supabase
+                    .from('emprestimos')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('descricao');
+
+                if (!error && emprestimos) {
+                    setData(prev => ({
+                        ...prev,
+                        loans: emprestimos.map(e => ({
+                            id: e.id,
+                            descricao: e.descricao,
+                            valorTotal: parseFloat(e.valor_total),
+                            valorParcela: parseFloat(e.valor_parcela),
+                            totalParcelas: e.total_parcelas,
+                            parcelasPagas: e.parcelas_pagas,
+                            usuarioId: e.usuario_id,
+                            quitado: e.quitado
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Metas
+            const carregarMetas = async () => {
+                const { data: metas, error } = await supabase
+                    .from('metas')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && metas) {
+                    setData(prev => ({
+                        ...prev,
+                        goals: metas.map(m => ({
+                            id: m.id,
+                            nome: m.nome,
+                            valorAlvo: parseFloat(m.valor_alvo),
+                            valorAtual: parseFloat(m.valor_atual || 0),
+                            usuarioId: m.usuario_id
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Orçamentos
+            const carregarOrcamentos = async () => {
+                const { data: orcamentos, error } = await supabase
+                    .from('orcamentos')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('categoria');
+
+                if (!error && orcamentos) {
+                    setData(prev => ({
+                        ...prev,
+                        budgets: orcamentos.map(o => ({
+                            id: o.id,
+                            categoria: o.categoria,
+                            limite: parseFloat(o.limite),
+                            usuarioId: o.usuario_id
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Investimentos
+            const carregarInvestimentos = async () => {
+                const { data: investimentos, error } = await supabase
+                    .from('investimentos')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && investimentos) {
+                    setData(prev => ({
+                        ...prev,
+                        investments: investimentos.map(i => ({
+                            id: i.id,
+                            nome: i.nome,
+                            valor: parseFloat(i.valor),
+                            tipo: i.tipo,
+                            usuarioId: i.usuario_id
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Patrimônio
+            const carregarPatrimonio = async () => {
+                const { data: patrimonio, error } = await supabase
+                    .from('patrimonio')
+                    .select('*')
+                    .eq('deletado', false)
+                    .order('nome');
+
+                if (!error && patrimonio) {
+                    setData(prev => ({
+                        ...prev,
+                        patrimony: patrimonio.map(p => ({
+                            id: p.id,
+                            nome: p.nome,
+                            valor: parseFloat(p.valor),
+                            tipo: p.tipo,
+                            usuarioId: p.usuario_id
+                        }))
+                    }));
+                }
+            };
+
+            // Carregar Dashboard (Materialized View)
+            const carregarDashboard = async () => {
+                const { data: dashboard, error } = await supabase
+                    .from('mv_dashboard_mensal')
+                    .select('*')
+                    .single();
+
+                if (!error && dashboard) {
+                    setDashboardData({
+                        receitasTotal: parseFloat(dashboard.receitas_total || 0),
+                        gastosMes: parseFloat(dashboard.gastos_mes || 0),
+                        parcelasMes: parseFloat(dashboard.parcelas_mes || 0),
+                        gasolinaMes: parseFloat(dashboard.gasolina_mes || 0),
+                        assinaturasMes: parseFloat(dashboard.assinaturas_mes || 0),
+                        contasFixasMes: parseFloat(dashboard.contas_fixas_mes || 0),
+                        ferramentasMes: parseFloat(dashboard.ferramentas_mes || 0),
+                        emprestimosMes: parseFloat(dashboard.emprestimos_mes || 0),
+                        totalSaidas: parseFloat(dashboard.total_saidas || 0),
+                        saldoFinal: parseFloat(dashboard.saldo_final || 0),
+                        atualizado: dashboard.atualizado_em
+                    });
+                }
+            };
+
+            // Carregar Itens Deletados (Lixeira)
+            const carregarLixeira = async () => {
+                const tabelas = [
+                    { nome: 'gastos', label: 'Gasto' },
+                    { nome: 'compras_parceladas', label: 'Parcela' },
+                    { nome: 'gasolina', label: 'Gasolina' },
+                    { nome: 'assinaturas', label: 'Assinatura' },
+                    { nome: 'contas_fixas', label: 'Conta Fixa' },
+                    { nome: 'ferramentas_ia_dev', label: 'Ferramenta' },
+                    { nome: 'cartoes', label: 'Cartão' },
+                    { nome: 'dividas', label: 'Dívida' },
+                    { nome: 'emprestimos', label: 'Empréstimo' },
+                    { nome: 'metas', label: 'Meta' },
+                    { nome: 'orcamentos', label: 'Orçamento' },
+                    { nome: 'investimentos', label: 'Investimento' },
+                    { nome: 'patrimonio', label: 'Patrimônio' }
+                ];
+
+                const todosItens = [];
+                const dataLimite = new Date();
+                dataLimite.setDate(dataLimite.getDate() - 30); // Últimos 30 dias
+
+                for (const tabela of tabelas) {
+                    const { data: itens } = await supabase
+                        .from(tabela.nome)
+                        .select('*')
+                        .eq('deletado', true)
+                        .gte('deletado_em', dataLimite.toISOString());
+
+                    if (itens && itens.length > 0) {
+                        todosItens.push(...itens.map(item => ({
+                            ...item,
+                            tabela: tabela.nome,
+                            tipoLabel: tabela.label
+                        })));
+                    }
+                }
+
+                // Ordenar por data de exclusão (mais recentes primeiro)
+                todosItens.sort((a, b) => new Date(b.deletado_em) - new Date(a.deletado_em));
+                setDeletedItems(todosItens);
+            };
+
+            // Carregar lixeira quando a aba for selecionada
+            useEffect(() => {
+                if (view === 'trash') {
+                    carregarLixeira();
+                }
+            }, [view]);
+
+            // ==============================================
+            // 💾 SALVAR DADOS (CRUD)
+            // ==============================================
+
+            const save = async (key, item) => {
+                setSaving(true);
+                try {
+                    // Mapear chaves para nomes de tabelas
+                    const tableMap = {
+                        users: 'users',
+                        salaries: 'salaries',
+                        exp: 'gastos',
+                        parc: 'compras_parceladas',
+                        gas: 'gasolina',
+                        subs: 'assinaturas',
+                        bills: 'contas_fixas',
+                        tools: 'ferramentas_ia_dev',
+                        cards: 'cartoes',
+                        debts: 'dividas',
+                        loans: 'emprestimos',
+                        goals: 'metas',
+                        budgets: 'orcamentos',
+                        investments: 'investimentos',
+                        patrimony: 'patrimonio'
+                    };
+
+                    const tableName = tableMap[key];
+                    if (!tableName) {
+                        console.error('Tabela não encontrada para:', key);
+                        return;
+                    }
+
+                    // Converter camelCase para snake_case
+                    const dbItem = convertToSnakeCase(item);
+
+                    let result;
+                    if (item.id) {
+                        // Update
+                        result = await supabase
+                            .from(tableName)
+                            .update(dbItem)
+                            .eq('id', item.id)
+                            .select()
+                            .single();
+                    } else {
+                        // Insert
+                        result = await supabase
+                            .from(tableName)
+                            .insert(dbItem)
+                            .select()
+                            .single();
+                    }
+
+                    if (result.error) {
+                        console.error('Erro ao salvar:', result.error);
+                        alert('Erro ao salvar: ' + result.error.message);
+                        return;
+                    }
+
+                    // Recarregar dados
+                    await carregarTodosDados();
+
+                    // Refresh dashboard
+                    await supabase.rpc('refresh_dashboard_views');
+
+                    setModal(null);
+                } catch (error) {
+                    console.error('Erro ao salvar:', error);
+                    alert('Erro ao salvar dados');
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            // Soft Delete
+            const del = async (tabela, id, descricao = 'este item') => {
+                if (!confirm(`Excluir "${descricao}"?\n\n(Pode ser restaurado nos próximos 30 dias)`)) return;
+
+                setSaving(true);
+                try {
+                    const { error } = await supabase.rpc('soft_delete', {
+                        p_tabela: tabela,
+                        p_id: id
+                    });
+
+                    if (error) {
+                        console.error('Erro ao deletar:', error);
+                        alert('Erro ao deletar: ' + error.message);
+                        return;
+                    }
+
+                    // Recarregar dados
+                    await carregarTodosDados();
+
+                    // Refresh dashboard
+                    await supabase.rpc('refresh_dashboard_views');
+                } catch (error) {
+                    console.error('Erro ao deletar:', error);
+                    alert('Erro ao deletar');
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            // Restaurar item da lixeira
+            const restaurar = async (tabela, id, descricao) => {
+                if (!confirm(`Restaurar "${descricao}"?`)) return;
+
+                setSaving(true);
+                try {
+                    const { error } = await supabase.rpc('soft_undelete', {
+                        p_tabela: tabela,
+                        p_id: id
+                    });
+
+                    if (error) {
+                        console.error('Erro ao restaurar:', error);
+                        alert('Erro ao restaurar: ' + error.message);
+                        return;
+                    }
+
+                    // Recarregar lixeira e dados
+                    await carregarLixeira();
+                    await carregarTodosDados();
+
+                    // Refresh dashboard
+                    await supabase.rpc('refresh_dashboard_views');
+
+                    alert('Item restaurado com sucesso!');
+                } catch (error) {
+                    console.error('Erro ao restaurar:', error);
+                    alert('Erro ao restaurar');
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            // Deletar permanentemente
+            const deletarPermanente = async (tabela, id, descricao) => {
+                if (!confirm(`⚠️ ATENÇÃO!\n\nDeletar PERMANENTEMENTE "${descricao}"?\n\nEsta ação NÃO pode ser desfeita!`)) return;
+
+                setSaving(true);
+                try {
+                    const { error } = await supabase
+                        .from(tabela)
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) {
+                        console.error('Erro ao deletar permanentemente:', error);
+                        alert('Erro ao deletar: ' + error.message);
+                        return;
+                    }
+
+                    // Recarregar lixeira
+                    await carregarLixeira();
+
+                    alert('Item deletado permanentemente');
+                } catch (error) {
+                    console.error('Erro ao deletar permanentemente:', error);
+                    alert('Erro ao deletar');
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            // ==============================================
+            // 🔄 HELPERS
+            // ==============================================
+
+            // Converter objeto de camelCase para snake_case
+            const convertToSnakeCase = (obj) => {
+                const converted = {};
+                for (const [key, value] of Object.entries(obj)) {
+                    const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+                    converted[snakeKey] = value;
+                }
+                return converted;
+            };
+
+            // Formatar moeda
+            const fmt = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+
+            // Toggle tema
+            const toggleTheme = () => {
+                const newTheme = theme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            };
+
+            // ==============================================
+            // 📊 CÁLCULOS (usando Materialized View quando possível)
+            // ==============================================
+
+            // Usar dashboard materializado quando disponível
+            const income = dashboardData?.receitasTotal || data.salaries.reduce((a, s) => a + s.valor, 0);
+            const expTotal = dashboardData?.gastosMes || data.exp.reduce((a, e) => a + e.valor, 0);
+            const parcTotal = dashboardData?.parcelasMes || data.parc.filter(p => !p.finalizada).reduce((a, p) => a + p.valorParcela, 0);
+            const gasTotal = dashboardData?.gasolinaMes || data.gas.reduce((a, g) => a + g.valor, 0);
+            const subsTotal = dashboardData?.assinaturasMes || data.subs.filter(s => s.ativa).reduce((a, s) => a + s.valor, 0);
+            const billsTotal = dashboardData?.contasFixasMes || data.bills.reduce((a, b) => a + b.valor, 0);
+            const toolsTotal = dashboardData?.ferramentasMes || data.tools.reduce((a, t) => a + t.valor, 0);
+            const loansTotal = dashboardData?.emprestimosMes || data.loans.filter(l => !l.quitado).reduce((a, l) => a + l.valorParcela, 0);
+
+            const totalOut = dashboardData?.totalSaidas || (expTotal + parcTotal + gasTotal + subsTotal + billsTotal + toolsTotal + loansTotal);
+            const balance = dashboardData?.saldoFinal || (income - totalOut);
+
+            const debtsTotal = data.debts.reduce((a, d) => a + d.valor, 0);
+            const invTotal = data.investments.reduce((a, i) => a + i.valor, 0);
+            const patTotal = data.patrimony.reduce((a, p) => a + p.valor, 0);
+
+            // ==============================================
+            // 🎨 COMPONENTES
+            // ==============================================
+
+            // Loading Spinner
+            if (loading) {
+                return (
+                    <div className={`min-h-screen flex items-center justify-center ${theme}`}>
+                        <div className="text-center">
+                            <div className="spinner mx-auto mb-4"></div>
+                            <p className="text-zinc-400">Carregando dados...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Dashboard View
+            const Dashboard = () => (
+                <div className="space-y-6">
+                    <h2 className="text-3xl font-bold">Dashboard Financeiro</h2>
+
+                    {dashboardData && (
+                        <p className="text-sm text-zinc-400">
+                            Última atualização: {new Date(dashboardData.atualizado).toLocaleString('pt-BR')}
+                        </p>
+                    )}
+
+                    {/* Cards Principais */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="card p-6">
+                            <div className="text-zinc-400 text-sm mb-2">Receitas</div>
+                            <div className="text-3xl font-bold text-green-500">{fmt(income)}</div>
+                        </div>
+                        <div className="card p-6">
+                            <div className="text-zinc-400 text-sm mb-2">Despesas</div>
+                            <div className="text-3xl font-bold text-red-500">{fmt(totalOut)}</div>
+                        </div>
+                        <div className="card p-6">
+                            <div className="text-zinc-400 text-sm mb-2">Saldo</div>
+                            <div className={`text-3xl font-bold ${balance >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                {fmt(balance)}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Detalhamento */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="card p-4">
+                            <div className="text-zinc-400 text-xs mb-1">Gastos Variáveis</div>
+                            <div className="text-xl font-semibold">{fmt(expTotal)}</div>
+                        </div>
+                        <div className="card p-4">
+                            <div className="text-zinc-400 text-xs mb-1">Parcelas</div>
+                            <div className="text-xl font-semibold">{fmt(parcTotal)}</div>
+                        </div>
+                        <div className="card p-4">
+                            <div className="text-zinc-400 text-xs mb-1">Gasolina</div>
+                            <div className="text-xl font-semibold">{fmt(gasTotal)}</div>
+                        </div>
+                        <div className="card p-4">
+                            <div className="text-zinc-400 text-xs mb-1">Assinaturas</div>
+                            <div className="text-xl font-semibold">{fmt(subsTotal)}</div>
+                        </div>
+                        <div className="card p-4">
+                            <div className="text-zinc-400 text-xs mb-1">Contas Fixas</div>
+                            <div className="text-xl font-semibold">{fmt(billsTotal)}</div>
+                        </div>
+                        <div className="card p-4">
+                            <div className="text-zinc-400 text-xs mb-1">Ferramentas</div>
+                            <div className="text-xl font-semibold">{fmt(toolsTotal)}</div>
+                        </div>
+                        <div className="card p-4">
+                            <div className="text-zinc-400 text-xs mb-1">Empréstimos</div>
+                            <div className="text-xl font-semibold">{fmt(loansTotal)}</div>
+                        </div>
+                        <div className="card p-4">
+                            <div className="text-zinc-400 text-xs mb-1">Investimentos</div>
+                            <div className="text-xl font-semibold text-blue-500">{fmt(invTotal)}</div>
+                        </div>
+                    </div>
+
+                    {/* Patrimônio */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="card p-6">
+                            <div className="text-zinc-400 text-sm mb-2">Dívidas Totais</div>
+                            <div className="text-2xl font-bold text-red-500">{fmt(debtsTotal)}</div>
+                        </div>
+                        <div className="card p-6">
+                            <div className="text-zinc-400 text-sm mb-2">Patrimônio</div>
+                            <div className="text-2xl font-bold text-green-500">{fmt(patTotal)}</div>
+                        </div>
+                    </div>
+                </div>
+            );
+
+            // Lixeira View
+            const TrashView = () => (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-3xl font-bold">🗑️ Lixeira</h2>
+                        <button
+                            onClick={carregarLixeira}
+                            className="btn px-4 py-2 rounded-lg"
+                            disabled={saving}
+                        >
+                            {saving ? 'Atualizando...' : 'Atualizar'}
+                        </button>
+                    </div>
+
+                    <p className="text-zinc-400 text-sm">
+                        Itens deletados nos últimos 30 dias. Após esse período, serão removidos permanentemente.
+                    </p>
+
+                    {deletedItems.length === 0 ? (
+                        <div className="card p-12 text-center">
+                            <div className="text-6xl mb-4">🎉</div>
+                            <p className="text-zinc-400">Nenhum item na lixeira</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {deletedItems.map((item, idx) => (
+                                <div key={idx} className="card p-4 trash-item">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">
+                                                    {item.tipoLabel}
+                                                </span>
+                                                <span className="text-xs text-zinc-400">
+                                                    Deletado em {new Date(item.deletado_em).toLocaleString('pt-BR')}
+                                                </span>
+                                            </div>
+                                            <div className="font-semibold mb-1">
+                                                {item.descricao || item.nome || 'Sem descrição'}
+                                            </div>
+                                            {item.valor && (
+                                                <div className="text-zinc-400">
+                                                    Valor: {fmt(parseFloat(item.valor))}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => restaurar(item.tabela, item.id, item.descricao || item.nome)}
+                                                className="px-3 py-1 bg-green-500 hover:bg-green-600 rounded text-sm"
+                                                disabled={saving}
+                                            >
+                                                ↺ Restaurar
+                                            </button>
+                                            <button
+                                                onClick={() => deletarPermanente(item.tabela, item.id, item.descricao || item.nome)}
+                                                className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-sm"
+                                                disabled={saving}
+                                            >
+                                                🗑️ Deletar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+
+            // Gastos View (exemplo simplificado)
+            const GastosView = () => (
+                <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-3xl font-bold">Gastos Variáveis</h2>
+                        <button
+                            onClick={() => setModal({ type: 'exp', item: {} })}
+                            className="btn px-4 py-2 rounded-lg"
+                        >
+                            + Novo Gasto
+                        </button>
+                    </div>
+
+                    <div className="space-y-3">
+                        {data.exp.map(e => (
+                            <div key={e.id} className="card p-4 flex justify-between items-center">
+                                <div>
+                                    <div className="font-semibold">{e.descricao}</div>
+                                    <div className="text-sm text-zinc-400">
+                                        {e.categoria} • {e.tipoPagamento} • {new Date(e.data).toLocaleDateString('pt-BR')}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="text-xl font-bold">{fmt(e.valor)}</div>
+                                    <button
+                                        onClick={() => del('gastos', e.id, e.descricao)}
+                                        className="text-red-500 hover:text-red-400"
+                                        disabled={saving}
+                                    >
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+
+            // ==============================================
+            // 🎨 RENDER PRINCIPAL
+            // ==============================================
+
+            return (
+                <div className={`min-h-screen ${theme}`}>
+                    {/* Header */}
+                    <div className="header sticky top-0 z-50 border-b px-6 py-4 flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => setSidebarOpen(!sidebarOpen)}
+                                className="md:hidden text-2xl"
+                            >
+                                ☰
+                            </button>
+                            <h1 className="text-2xl font-bold">Financeiro v3.0</h1>
+                            {saving && <div className="spinner"></div>}
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <select
+                                value={currentUser}
+                                onChange={(e) => setCurrentUser(Number(e.target.value))}
+                                className="user-select px-4 py-2 rounded-lg"
+                            >
+                                {data.users.map(u => (
+                                    <option key={u.id} value={u.id}>
+                                        {u.nome} ({u.tipo})
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={toggleTheme}
+                                className="text-2xl"
+                                title="Alternar tema"
+                            >
+                                {theme === 'dark' ? '☀️' : '🌙'}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex">
+                        {/* Sidebar */}
+                        <div className={`sidebar fixed md:static inset-y-0 left-0 w-64 border-r p-6 ${!sidebarOpen && 'sidebar-hidden md:translate-x-0'} z-40`}>
+                            <nav className="space-y-2">
+                                <button
+                                    onClick={() => setView('dashboard')}
+                                    className={`w-full text-left px-4 py-3 rounded-lg transition ${view === 'dashboard' ? 'bg-blue-500' : 'hover:bg-zinc-800'}`}
+                                >
+                                    📊 Dashboard
+                                </button>
+                                <button
+                                    onClick={() => setView('exp')}
+                                    className={`w-full text-left px-4 py-3 rounded-lg transition ${view === 'exp' ? 'bg-blue-500' : 'hover:bg-zinc-800'}`}
+                                >
+                                    💸 Gastos
+                                </button>
+                                <button
+                                    onClick={() => setView('trash')}
+                                    className={`w-full text-left px-4 py-3 rounded-lg transition ${view === 'trash' ? 'bg-blue-500' : 'hover:bg-zinc-800'}`}
+                                >
+                                    🗑️ Lixeira
+                                </button>
+                                {/* Adicione outros menus aqui */}
+                            </nav>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 p-6">
+                            {view === 'dashboard' && <Dashboard />}
+                            {view === 'exp' && <GastosView />}
+                            {view === 'trash' && <TrashView />}
+                        </div>
+                    </div>
+
+                    {/* Modals (adicionar conforme necessário) */}
+                </div>
+            );
+        }
+
+        // Renderizar app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

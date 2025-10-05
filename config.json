@@ -1,0 +1,38 @@
+{
+  "tiposPagamento": [
+    { "id": "pix", "nome": "PIX", "cor": "#32BCAD" },
+    { "id": "dinheiro", "nome": "Dinheiro", "cor": "#4CAF50" },
+    { "id": "cartao_credito", "nome": "Cartão Crédito", "cor": "#2196F3" },
+    { "id": "cartao_debito", "nome": "Cartão Débito", "cor": "#FF9800" },
+    { "id": "transferencia", "nome": "Transferência", "cor": "#9C27B0" },
+    { "id": "boleto", "nome": "Boleto", "cor": "#FF5722" }
+  ],
+  "categoriasGastos": [
+    { "id": "alimentacao", "nome": "Alimentação", "cor": "#FF6B6B" },
+    { "id": "transporte", "nome": "Transporte", "cor": "#4ECDC4" },
+    { "id": "saude", "nome": "Saúde", "cor": "#45B7D1" },
+    { "id": "educacao", "nome": "Educação", "cor": "#96CEB4" },
+    { "id": "lazer", "nome": "Lazer", "cor": "#FFEAA7" },
+    { "id": "vestuario", "nome": "Vestuário", "cor": "#DFE6E9" },
+    { "id": "moradia", "nome": "Moradia", "cor": "#74B9FF" },
+    { "id": "outros", "nome": "Outros", "cor": "#A29BFE" }
+  ],
+  "categoriasParcelas": [
+    { "id": "eletrodomesticos", "nome": "Eletrodomésticos" },
+    { "id": "eletronicos", "nome": "Eletrônicos" },
+    { "id": "moveis", "nome": "Móveis" },
+    { "id": "vestuario", "nome": "Vestuário" },
+    { "id": "veiculo", "nome": "Veículo" },
+    { "id": "reforma", "nome": "Reforma" },
+    { "id": "outros", "nome": "Outros" }
+  ],
+  "tiposUsuario": [
+    { "id": "pessoa", "nome": "Pessoa" },
+    { "id": "empresa", "nome": "Empresa" }
+  ],
+  "tiposVeiculo": [
+    { "id": "carro", "nome": "Carro" },
+    { "id": "moto", "nome": "Moto" }
+  ]
+}
+
