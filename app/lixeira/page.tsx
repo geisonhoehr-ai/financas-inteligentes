@@ -104,7 +104,7 @@ export default function LixeiraPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <Button
-                      onClick={() => restoreItem(item.tabela, item.id)}
+                      onClick={() => restoreItem({ tabela: item.tabela, id: item.id })}
                       disabled={isRestoring}
                       className="rounded-xl bg-green-600 hover:bg-green-700 text-white"
                     >
