@@ -36,37 +36,37 @@ export default function DashboardPage() {
 
       {/* Cards Principais */}
       <div className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
+        <Card className="border-primary/20 hover:border-primary/40">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Receitas</CardTitle>
-            <TrendingUp className="h-4 w-4 text-green-500" />
+            <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl md:text-3xl font-bold text-green-500">
+            <div className="text-2xl md:text-3xl font-bold text-green-600 dark:text-green-500">
               {formatCurrency(receitas)}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-primary/20 hover:border-primary/40">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Despesas</CardTitle>
-            <TrendingDown className="h-4 w-4 text-red-500" />
+            <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl md:text-3xl font-bold text-red-500">
+            <div className="text-2xl md:text-3xl font-bold text-red-600 dark:text-red-500">
               {formatCurrency(despesas)}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="sm:col-span-2 lg:col-span-1">
+        <Card className="sm:col-span-2 lg:col-span-1 border-primary/20 hover:border-primary/40">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Saldo</CardTitle>
-            <DollarSign className="h-4 w-4" />
+            <DollarSign className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl md:text-3xl font-bold ${saldo >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            <div className={`text-2xl md:text-3xl font-bold ${saldo >= 0 ? 'text-green-600 dark:text-green-500' : 'text-red-600 dark:text-red-500'}`}>
               {formatCurrency(saldo)}
             </div>
           </CardContent>

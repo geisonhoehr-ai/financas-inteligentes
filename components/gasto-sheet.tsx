@@ -93,7 +93,7 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
               Categoria
             </label>
             <select
-              className="flex h-12 w-full rounded-xl border border-input bg-background px-4 text-base ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-12 w-full rounded-xl border-2 border-input bg-background px-4 text-base ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:border-primary hover:border-input/80"
               value={form.categoria}
               onChange={(e) => setForm({ ...form, categoria: e.target.value })}
             >
@@ -116,10 +116,10 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
                   key={tipo}
                   type="button"
                   onClick={() => setForm({ ...form, tipo_pagamento: tipo })}
-                  className={`h-12 rounded-xl border-2 font-medium transition-all ${
+                  className={`h-12 rounded-xl border-2 font-semibold transition-all duration-200 active:scale-95 ${
                     form.tipo_pagamento === tipo
-                      ? 'border-primary bg-primary text-primary-foreground shadow-sm scale-95'
-                      : 'border-input hover:border-muted-foreground/50 hover:bg-muted/50'
+                      ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/30 scale-[0.98]'
+                      : 'border-input hover:border-primary/50 hover:bg-accent'
                   }`}
                 >
                   {tipo}

@@ -43,7 +43,7 @@ export default function GastosPage() {
         </div>
         <Button 
           onClick={() => setShowAddDrawer(true)}
-          className="rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 w-full sm:w-auto"
+          className="w-full sm:w-auto shadow-lg shadow-primary/30"
         >
           <Plus className="h-5 w-5 mr-2" />
           Novo Gasto
@@ -52,12 +52,12 @@ export default function GastosPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="border-0 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20">
+        <Card className="border-0 bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/10 dark:to-primary/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-blue-600 dark:text-blue-400">Total do Mês</CardTitle>
+            <CardTitle className="text-primary">Total do Mês</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+            <div className="text-2xl font-bold text-primary">
               {formatCurrency(gastos.reduce((sum, gasto) => sum + parseFloat(gasto.valor.toString()), 0))}
             </div>
           </CardContent>
@@ -102,7 +102,6 @@ export default function GastosPage() {
               </p>
               <Button 
                 onClick={() => setShowAddDrawer(true)}
-                className="rounded-2xl bg-blue-600 hover:bg-blue-700"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Adicionar Gasto
@@ -117,8 +116,8 @@ export default function GastosPage() {
                   <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 flex-shrink-0 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                          <Receipt className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <div className="w-10 h-10 flex-shrink-0 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
+                          <Receipt className="h-5 w-5 text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="font-medium text-zinc-900 dark:text-white truncate">
@@ -335,7 +334,7 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
         <Button
           type="submit"
           disabled={isCreating || isUpdating}
-          className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+          className="flex-1"
         >
           {isCreating || isUpdating ? 'Salvando...' : (gasto ? 'Atualizar' : 'Adicionar')}
         </Button>
