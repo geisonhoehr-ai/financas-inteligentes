@@ -278,7 +278,7 @@ export default function DividasPage() {
 
       {/* Sheet para adicionar dívida */}
       <Sheet open={showAddDivida} onOpenChange={setShowAddDivida}>
-        <SheetContent side="bottom" className="h-[90vh]">
+        <SheetContent className="h-[90vh]">
           <SheetHeader>
             <SheetTitle>Registrar Dívida</SheetTitle>
             <SheetDescription>
@@ -299,7 +299,7 @@ export default function DividasPage() {
 
       {/* Sheet para upload de comprovante */}
       <Sheet open={showUploadComprovante} onOpenChange={setShowUploadComprovante}>
-        <SheetContent side="bottom" className="h-auto max-h-[90vh]">
+        <SheetContent className="h-auto max-h-[90vh]">
           <SheetHeader>
             <SheetTitle>Enviar Comprovante</SheetTitle>
             <SheetDescription>
