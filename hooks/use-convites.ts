@@ -46,7 +46,7 @@ export function useConvites(familiaId?: string) {
   const queryClient = useQueryClient()
 
   // TODO: Implementar busca de convites quando tabela estiver disponível
-  const { data: convites = [], isLoading } = useQuery({
+  const { data: convites = [], isLoading } = useQuery<Convite[]>({
     queryKey: ['convites', familiaId],
     queryFn: async () => {
       console.log('Busca de convites desabilitada temporariamente')
@@ -73,13 +73,17 @@ export function useConvites(familiaId?: string) {
   // Validar convite por código
   const validarConvite = useMutation({
     mutationFn: async (codigo: string) => {
-      const { data, error } = await supabase
-        .rpc('validar_convite', { p_codigo: codigo })
+      // TODO: Implementar quando função RPC estiver disponível no banco
+      console.log('Validação de convite desabilitada temporariamente:', codigo)
+      throw new Error('Funcionalidade de validação de convites temporariamente desabilitada')
+      
+      // const { data, error } = await supabase
+      //   .rpc('validar_convite', { p_codigo: codigo })
 
-      if (error) throw error
+      // if (error) throw error
 
-      // RPC retorna array, pegar primeiro item
-      return data && data.length > 0 ? data[0] : null
+      // // RPC retorna array, pegar primeiro item
+      // return data && data.length > 0 ? data[0] : null
     },
     onError: (error: any) => {
       showToast.error(`Erro ao validar convite: ${error.message}`)
@@ -89,27 +93,31 @@ export function useConvites(familiaId?: string) {
   // Aceitar convite
   const aceitarConvite = useMutation({
     mutationFn: async (codigo: string) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
+      // TODO: Implementar quando função RPC estiver disponível no banco
+      console.log('Aceitar convite desabilitado temporariamente:', codigo)
+      throw new Error('Funcionalidade de aceitar convites temporariamente desabilitada')
+      
+      // const { data: user } = await supabase.auth.getUser()
+      // if (!user.user) throw new Error('Usuário não autenticado')
 
-      const { data, error } = await supabase
-        .rpc('aceitar_convite', {
-          p_codigo: codigo,
-          p_usuario_id: user.user.id,
-        })
+      // const { data, error } = await supabase
+      //   .rpc('aceitar_convite', {
+      //     p_codigo: codigo,
+      //     p_usuario_id: user.user.id,
+      //   })
 
-      if (error) throw error
+      // if (error) throw error
 
-      // RPC retorna array, pegar primeiro item
-      const resultado = data && data.length > 0 ? data[0] : null
+      // // RPC retorna array, pegar primeiro item
+      // const resultado = data && data.length > 0 ? data[0] : null
 
-      if (!resultado?.sucesso) {
-        throw new Error(resultado?.mensagem || 'Erro ao aceitar convite')
-      }
+      // if (!resultado?.sucesso) {
+      //   throw new Error(resultado?.mensagem || 'Erro ao aceitar convite')
+      // }
 
-      return resultado
+      // return resultado
     },
-    onSuccess: (data) => {
+    onSuccess: (data: ConviteAceite) => {
       queryClient.invalidateQueries({ queryKey: ['familias'] })
       queryClient.invalidateQueries({ queryKey: ['familia-membros'] })
       showToast.success(data.mensagem)

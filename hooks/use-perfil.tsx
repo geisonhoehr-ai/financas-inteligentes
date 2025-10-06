@@ -19,7 +19,7 @@ interface PerfilContextType {
   isEmpresa: boolean
 }
 
-const PerfilContext = createContext<PerfilContextType | undefined>(undefined)
+export const PerfilContext = createContext<PerfilContextType | undefined>(undefined)
 
 interface PerfilProviderProps {
   children: ReactNode

@@ -78,16 +78,19 @@ export function useGastos() {
   // Soft delete gasto
   const deleteGasto = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('gastos')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
+      // TODO: Implementar quando tipos do Supabase estiverem corretos
+      console.log('Soft delete de gasto desabilitado temporariamente:', id)
+      throw new Error('Funcionalidade de soft delete temporariamente desabilitada')
+      
+      // const { error } = await supabase
+      //   .from('gastos')
+      //   .update({
+      //     deletado: true,
+      //     deletado_em: new Date().toISOString()
+      //   })
+      //   .eq('id', id)
 
-      if (error) throw error
+      // if (error) throw error
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
