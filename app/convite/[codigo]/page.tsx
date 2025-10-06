@@ -22,9 +22,10 @@ export default function ConvitePage({ params }: { params: Promise<{ codigo: stri
   useEffect(() => {
     // Atualizar info do convite quando validação retornar
     if (validacaoData) {
-      setConviteInfo(validacaoData as ConviteValidacao)
-      if (!validacaoData.valido) {
-        setErro(validacaoData.mensagem)
+      const conviteData = validacaoData as ConviteValidacao
+      setConviteInfo(conviteData)
+      if (!conviteData.valido) {
+        setErro(conviteData.mensagem)
       }
     }
   }, [validacaoData])
