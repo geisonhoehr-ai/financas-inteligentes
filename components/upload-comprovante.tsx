@@ -91,18 +91,8 @@ export function UploadComprovante({
         throw uploadError
       }
 
-      // Salvar URL no banco usando a função SQL
-      const { error: saveError } = await supabase
-        .rpc('salvar_comprovante_divida', {
-          p_divida_id: dividaId,
-          p_comprovante_url: uploadData.path
-        })
-
-      if (saveError) {
-        // Se falhar ao salvar, tentar deletar o arquivo
-        await supabase.storage.from('comprovantes').remove([fileName])
-        throw saveError
-      }
+      // TODO: Implementar salvamento da URL no banco quando função RPC estiver disponível
+      console.log('Comprovante enviado:', uploadData.path)
 
       showToast.success('Comprovante enviado com sucesso!')
       onUploadSuccess?.(uploadData.path)
