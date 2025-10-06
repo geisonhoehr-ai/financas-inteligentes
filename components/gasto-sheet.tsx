@@ -20,8 +20,7 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
   const { createGasto, isCreating } = useGastos()
   const { familias } = useFamilias()
   const familiaAtiva = familias?.[0]
-  const [membros, setMembros] = useState<any[]>([])
-  const [showResponsabilidade, setShowResponsabilidade] = useState(false)
+  // TODO: Implementar estado de membros quando necessário
   
   const [form, setForm] = useState<Partial<InsertGasto>>({
     descricao: '',
@@ -34,15 +33,7 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
     visivel_familia: true,
   })
 
-  // Carregar membros da família
-  useEffect(() => {
-    const carregarMembros = async () => {
-      if (familiaAtiva?.membros) {
-        setMembros(familiaAtiva.membros)
-      }
-    }
-    carregarMembros()
-  }, [familiaAtiva])
+  // TODO: Implementar carregamento de membros quando estrutura estiver pronta
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -176,27 +167,7 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
             </label>
           </div>
 
-          {/* Mostrar campos de responsabilidade se houver família */}
-          {membros.length > 0 && (
-            <>
-              <div className="border-t pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowResponsabilidade(!showResponsabilidade)}
-                  className="flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                >
-                  <Users className="h-4 w-4" />
-                  {showResponsabilidade ? 'Ocultar' : 'Configurar'} Responsabilidade
-                </button>
-              </div>
-
-              {showResponsabilidade && (
-                <>
-                  {/* TODO: Implementar sistema de dívidas internas quando tipos estiverem corretos */}
-                </>
-              )}
-            </>
-          )}
+          {/* TODO: Implementar campos de responsabilidade quando sistema de membros estiver pronto */}
         </SheetContent>
 
         <SheetFooter>
