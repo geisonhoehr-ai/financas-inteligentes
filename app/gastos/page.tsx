@@ -138,7 +138,9 @@ export default function GastosPage() {
                               {gasto.descricao}
                             </h4>
                             {gasto.privado && (
-                              <Lock className="h-3 w-3 text-muted-foreground flex-shrink-0" title="Gasto privado" />
+                              <div title="Gasto privado">
+                                <Lock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                              </div>
                             )}
                           </div>
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
