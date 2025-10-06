@@ -236,15 +236,11 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
     }
 
     try {
+      // TODO: Implementar edição de gastos quando tipos estiverem corretos
       if (gasto) {
-        await updateGasto({ 
-          id: gasto.id.toString(), 
-          descricao: gastoData.descricao,
-          valor: gastoData.valor,
-          categoria: gastoData.categoria,
-          data: gastoData.data,
-          tipo_pagamento: gastoData.tipo_pagamento
-        })
+        console.log('Edição de gasto temporariamente desabilitada')
+        onClose()
+        return
       } else {
         await createGasto(gastoData)
       }
