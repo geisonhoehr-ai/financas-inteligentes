@@ -237,7 +237,14 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
 
     try {
       if (gasto) {
-        await updateGasto({ id: gasto.id.toString(), ...gastoData })
+        await updateGasto({ 
+          id: gasto.id.toString(), 
+          descricao: gastoData.descricao,
+          valor: gastoData.valor,
+          categoria: gastoData.categoria,
+          data: gastoData.data,
+          tipo_pagamento: gastoData.tipo_pagamento
+        })
       } else {
         await createGasto(gastoData)
       }
