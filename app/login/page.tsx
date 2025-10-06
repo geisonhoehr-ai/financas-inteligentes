@@ -30,8 +30,10 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
       } else if (user) {
-        // O AuthProvider vai gerenciar o redirecionamento automaticamente
-        console.log('Login successful, waiting for redirect...')
+        console.log('Login successful, redirecting...')
+        // Redirecionar imediatamente
+        router.push('/')
+        router.refresh()
       }
     } catch (err: any) {
       console.error('❌ Erro geral:', err)
@@ -94,6 +96,7 @@ export default function LoginPage() {
                 className="h-12 rounded-xl text-base"
                 required
                 autoFocus
+                autoComplete="email"
               />
             </div>
 
@@ -108,6 +111,7 @@ export default function LoginPage() {
                 className="h-12 rounded-xl text-base"
                 required
                 minLength={6}
+                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               />
             </div>
 

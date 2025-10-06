@@ -63,29 +63,19 @@ export async function middleware(req: NextRequest) {
   const publicPaths = ['/login', '/test-login']
   const isPublicPath = publicPaths.some(path => req.nextUrl.pathname.startsWith(path))
 
-  // Se não está logado e não está em página pública
+  // Se não está logado e não está em página pública, redirecionar para login
   if (!session && !isPublicPath) {
-    // Em desenvolvimento, permitir acesso temporário para debug
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔧 DEV MODE: Permitindo acesso sem sessão para debug')
-      // Não redirecionar em desenvolvimento
-    } else {
-      const redirectUrl = req.nextUrl.clone()
-      redirectUrl.pathname = '/login'
-      return NextResponse.redirect(redirectUrl)
-    }
+    const redirectUrl = req.nextUrl.clone()
+    redirectUrl.pathname = '/login'
+    console.log('🔒 Middleware: Redirecionando para login (sem sessão)')
+    return NextResponse.redirect(redirectUrl)
   }
 
-  // Debug: Log session info
-  if (req.nextUrl.pathname === '/') {
-    console.log('🔍 Middleware - Session:', session ? 'exists' : 'none')
-    console.log('🔍 Middleware - User:', session?.user?.email || 'none')
-  }
-
-  // Se está logado e tentando acessar página de login
+  // Se está logado e tentando acessar página de login, redirecionar para home
   if (session && req.nextUrl.pathname.startsWith('/login')) {
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/'
+    console.log('✅ Middleware: Redirecionando para home (já autenticado)')
     return NextResponse.redirect(redirectUrl)
   }
 
