@@ -31,9 +31,10 @@ export default function LoginPage() {
         setError(error.message)
       } else if (user) {
         console.log('Login successful, redirecting...')
-        // Redirecionar imediatamente
-        router.push('/')
-        router.refresh()
+        // Aguardar um pouco para garantir que os cookies sejam salvos
+        await new Promise(resolve => setTimeout(resolve, 100))
+        // Redirecionar usando window.location para forçar reload completo
+        window.location.href = '/'
       }
     } catch (err: any) {
       console.error('❌ Erro geral:', err)

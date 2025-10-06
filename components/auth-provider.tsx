@@ -47,6 +47,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('🔐 Auth state change:', _event, session?.user?.email)
+
       setUser(
         session?.user
           ? {
@@ -58,12 +60,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       )
       setIsLoading(false)
 
-      // Redirecionar após login/logout
-      if (_event === 'SIGNED_IN') {
-        router.push('/')
-      } else if (_event === 'SIGNED_OUT') {
-        router.push('/login')
-      }
+      // Nota: Não redirecionar aqui pois a página de login já faz isso
+      // O redirecionamento automático pode causar loops com o middleware
     })
 
     return () => subscription.unsubscribe()
