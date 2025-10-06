@@ -45,66 +45,21 @@ export interface NovoConvite {
 export function useConvites(familiaId?: string) {
   const queryClient = useQueryClient()
 
-  // Buscar convites de uma família
+  // TODO: Implementar busca de convites quando tabela estiver disponível
   const { data: convites = [], isLoading } = useQuery({
     queryKey: ['convites', familiaId],
     queryFn: async () => {
-      const query = supabase
-        .from('convites')
-        .select(`
-          *,
-          familia:familias!familia_id(nome),
-          criador:users!criado_por(nome)
-        `)
-        .eq('deletado', false)
-        .order('created_at', { ascending: false })
-
-      if (familiaId) {
-        query.eq('familia_id', familiaId)
-      }
-
-      const { data, error } = await query
-
-      if (error) throw error
-
-      return (data || []).map((c: any) => ({
-        ...c,
-        familia_nome: c.familia?.nome,
-        criador_nome: c.criador?.nome,
-      }))
+      console.log('Busca de convites desabilitada temporariamente')
+      return []
     },
-    enabled: !!familiaId,
+    enabled: false, // Desabilitar temporariamente
   })
 
-  // Criar novo convite
+  // TODO: Implementar criação de convites quando tabela estiver disponível
   const createConvite = useMutation({
     mutationFn: async (novoConvite: NovoConvite) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('convites')
-        .insert({
-          familia_id: novoConvite.familia_id,
-          criado_por: user.user.id,
-          max_usos: novoConvite.max_usos,
-          validade: novoConvite.validade,
-          ativo: true,
-        })
-        .select(`
-          *,
-          familia:familias!familia_id(nome),
-          criador:users!criado_por(nome)
-        `)
-        .single()
-
-      if (error) throw error
-
-      return {
-        ...data,
-        familia_nome: data.familia?.nome,
-        criador_nome: data.criador?.nome,
-      }
+      console.log('Criação de convite desabilitada temporariamente:', novoConvite)
+      throw new Error('Funcionalidade de convites temporariamente desabilitada')
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['convites'] })
@@ -164,15 +119,11 @@ export function useConvites(familiaId?: string) {
     },
   })
 
-  // Desativar convite
+  // TODO: Implementar desativação de convites quando tabela estiver disponível
   const desativarConvite = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('convites')
-        .update({ ativo: false, updated_at: new Date().toISOString() })
-        .eq('id', id)
-
-      if (error) throw error
+      console.log('Desativação de convite desabilitada temporariamente:', id)
+      throw new Error('Funcionalidade de convites temporariamente desabilitada')
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['convites'] })
@@ -183,15 +134,11 @@ export function useConvites(familiaId?: string) {
     },
   })
 
-  // Reativar convite
+  // TODO: Implementar reativação de convites quando tabela estiver disponível
   const reativarConvite = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('convites')
-        .update({ ativo: true, updated_at: new Date().toISOString() })
-        .eq('id', id)
-
-      if (error) throw error
+      console.log('Reativação de convite desabilitada temporariamente:', id)
+      throw new Error('Funcionalidade de convites temporariamente desabilitada')
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['convites'] })
@@ -202,23 +149,11 @@ export function useConvites(familiaId?: string) {
     },
   })
 
-  // Soft delete convite
+  // TODO: Implementar exclusão de convites quando tabela estiver disponível
   const deleteConvite = useMutation({
     mutationFn: async (id: string) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { error } = await supabase
-        .from('convites')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id)
-
-      if (error) throw error
+      console.log('Exclusão de convite desabilitada temporariamente:', id)
+      throw new Error('Funcionalidade de convites temporariamente desabilitada')
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['convites'] })
