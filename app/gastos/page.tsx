@@ -237,7 +237,7 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
 
     try {
       if (gasto) {
-        await updateGasto({ id: gasto.id, ...gastoData })
+        await updateGasto({ id: gasto.id.toString(), ...gastoData })
       } else {
         await createGasto(gastoData)
       }
