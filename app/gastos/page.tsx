@@ -19,11 +19,13 @@ export default function GastosPage() {
   const [showAddDrawer, setShowAddDrawer] = useState(false)
   const [editingGasto, setEditingGasto] = useState<any>(null)
 
-  // Filtrar gastos pela família ativa
+  // Filtrar gastos pela família ativa (temporariamente desabilitado)
   const gastos = useMemo(() => {
-    if (!familiaAtiva?.id) return todosGastos
-    return todosGastos.filter(g => g.familia_id === familiaAtiva.id)
-  }, [todosGastos, familiaAtiva?.id])
+    // TODO: Implementar filtragem quando familia_id for adicionado à tabela gastos
+    return todosGastos
+    // if (!familiaAtiva?.id) return todosGastos
+    // return todosGastos.filter(g => g.familia_id === familiaAtiva.id)
+  }, [todosGastos])
 
   const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir este gasto?')) {
