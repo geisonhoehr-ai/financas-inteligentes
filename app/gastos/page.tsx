@@ -172,7 +172,7 @@ export default function GastosPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(gasto.id)}
+                          onClick={() => handleDelete(gasto.id.toString())}
                           disabled={isDeleting}
                           className="h-8 w-8 p-0 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
                         >
