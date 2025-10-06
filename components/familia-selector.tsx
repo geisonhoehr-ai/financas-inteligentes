@@ -31,8 +31,10 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
     setIsOpen(false)
   }
 
-  const getFamiliaIcon = (tipo: string) => {
-    return tipo === 'empresa' ? Building2 : Users
+  const getFamiliaIcon = () => {
+    // Por enquanto, sempre usar ícone de família
+    // TODO: Implementar tipos de família quando necessário
+    return Users
   }
 
   return (
@@ -44,7 +46,7 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
         className="h-8 px-2 gap-2 text-sm font-medium hover:bg-accent"
       >
         {(() => {
-          const Icon = getFamiliaIcon(familiaAtiva.tipo)
+          const Icon = getFamiliaIcon()
           return <Icon className="h-4 w-4" />
         })()}
         <span className="hidden sm:inline max-w-[120px] truncate">
@@ -69,7 +71,7 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
               </div>
               
               {familias.map((familia) => {
-                const Icon = getFamiliaIcon(familia.tipo)
+                const Icon = getFamiliaIcon()
                 const isSelected = familia.id === familiaAtivaId
                 
                 return (
@@ -86,8 +88,8 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
                     <Icon className="h-4 w-4 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{familia.nome}</div>
-                      <div className="text-xs text-muted-foreground capitalize">
-                        {familia.tipo}
+                      <div className="text-xs text-muted-foreground">
+                        Família
                       </div>
                     </div>
                     {isSelected && (
