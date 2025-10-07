@@ -47,36 +47,12 @@ export function useDividas(familiaId?: string) {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('vw_dividas_internas')
-        .select(`
-          id,
-          familia_id,
-          credor_id,
-          credor_nome,
-          devedor_id,
-          devedor_nome,
-          valor,
-          descricao,
-          gasto_original_id,
-          parcela_numero,
-          parcela_total,
-          status,
-          data_criacao,
-          data_vencimento,
-          data_pagamento,
-          comprovante_url,
-          observacoes
-        `)
-        .eq('familia_id', familiaId)
-        .order('data_criacao', { ascending: false })
+        .rpc('buscar_dividas', {
+          p_familia_id: familiaId
+        })
 
       if (error) throw error
-
-      return data.map(d => ({
-        ...d,
-        credor_nome: d.credor_nome,
-        devedor_nome: d.devedor_nome
-      })) || []
+      return data || []
     },
     enabled: !!familiaId,
   })
@@ -100,89 +76,53 @@ export function useDividas(familiaId?: string) {
   const { data: dividasQueDevo = [] } = useQuery({
     queryKey: ['dividas-devo', familiaId],
     queryFn: async () => {
+      if (!familiaId) return []
+
       const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
+      if (!user.user) return []
+
       const { data, error } = await supabase
-        .from('vw_dividas_internas')
-        .select(`
-          id,
-          familia_id,
-          credor_id,
-          credor_nome,
-          devedor_id,
-          devedor_nome,
-          valor,
-          descricao,
-          status,
-          data_criacao,
-          data_vencimento,
-          data_pagamento
-        `)
-        .eq('familia_id', familiaId)
-        .eq('devedor_id', user.user.id)
-        .eq('status', 'pendente')
-        .order('data_criacao', { ascending: false })
+        .rpc('buscar_dividas_que_devo', {
+          p_familia_id: familiaId
+        })
 
       if (error) throw error
-
-      return data.map(d => ({
-        ...d,
-        credor_nome: d.credor_nome,
-        devedor_nome: d.devedor_nome
-      })) || []
+      return data || []
     },
     enabled: !!familiaId,
   })
   const { data: dividasQueRecebo = [] } = useQuery({
     queryKey: ['dividas-recebo', familiaId],
     queryFn: async () => {
+      if (!familiaId) return []
+
       const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
+      if (!user.user) return []
+
       const { data, error } = await supabase
-        .from('vw_dividas_internas')
-        .select(`
-          id,
-          familia_id,
-          credor_id,
-          credor_nome,
-          devedor_id,
-          devedor_nome,
-          valor,
-          descricao,
-          status,
-          data_criacao,
-          data_vencimento,
-          data_pagamento
-        `)
-        .eq('familia_id', familiaId)
-        .eq('credor_id', user.user.id)
-        .eq('status', 'pendente')
-        .order('data_criacao', { ascending: false })
+        .rpc('buscar_dividas_que_recebo', {
+          p_familia_id: familiaId
+        })
 
       if (error) throw error
-
-      return data.map(d => ({
-        ...d,
-        credor_nome: d.credor_nome,
-        devedor_nome: d.devedor_nome
-      })) || []
+      return data || []
     },
     enabled: !!familiaId,
   })
   const createDivida = useMutation({
     mutationFn: async (divida: Partial<DividaInterna>) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('dividas_internas')
-        .insert({
-          ...divida,
-          status: 'pendente',
-          data_criacao: new Date().toISOString()
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_divida', {
+        p_familia_id: divida.familia_id,
+        p_credor_id: divida.credor_id,
+        p_devedor_id: divida.devedor_id,
+        p_valor: divida.valor,
+        p_descricao: divida.descricao,
+        p_gasto_original_id: divida.gasto_original_id || null,
+        p_parcela_numero: divida.parcela_numero || null,
+        p_parcela_total: divida.parcela_total || null,
+        p_data_vencimento: divida.data_vencimento || null,
+        p_observacoes: divida.observacoes || null
+      })
 
       if (error) throw error
       return data
@@ -200,20 +140,10 @@ export function useDividas(familiaId?: string) {
   })
   const marcarComoPaga = useMutation({
     mutationFn: async ({ id, comprovanteUrl }: { id: string; comprovanteUrl?: string }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('dividas_internas')
-        .update({
-          status: 'paga',
-          data_pagamento: new Date().toISOString(),
-          comprovante_url: comprovanteUrl
-        })
-        .eq('id', id)
-        .eq('devedor_id', user.user.id)
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('marcar_divida_como_paga', {
+        p_id: id,
+        p_comprovante_url: comprovanteUrl || null
+      })
 
       if (error) throw error
       return data
@@ -231,19 +161,10 @@ export function useDividas(familiaId?: string) {
   })
   const cancelarDivida = useMutation({
     mutationFn: async ({ id, motivo }: { id: string; motivo?: string }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('dividas_internas')
-        .update({
-          status: 'cancelada',
-          observacoes: motivo
-        })
-        .eq('id', id)
-        .or(`credor_id.eq.${user.user.id},devedor_id.eq.${user.user.id}`)
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('cancelar_divida', {
+        p_id: id,
+        p_motivo: motivo || null
+      })
 
       if (error) throw error
       return data

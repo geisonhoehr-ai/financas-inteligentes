@@ -2,19 +2,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 export interface Gasolina {
-  id: number
+  id: string
   descricao?: string
   valor: number
   litros: number
   preco_litro: number
   km_atual?: number
-  usuario_id: number
+  usuario_id: string
   data: string
   posto?: string
   tipo_combustivel?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
   deletado: boolean
   deletado_em: string | null
-  deletado_por: number | null
+  deletado_por: string | null
   created_at: string
 }
 export interface InsertGasolina {
@@ -23,10 +26,12 @@ export interface InsertGasolina {
   litros: number
   preco_litro: number
   km_atual?: number
-  usuario_id: number
   data: string
   posto?: string
   tipo_combustivel?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
 }
 export function useGasolina() {
   const queryClient = useQueryClient()
@@ -37,11 +42,7 @@ export function useGasolina() {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('gasolina')
-        .select()
-        .eq('usuario_id', user.user.id)
-        .eq('deletado', false)
-        .order('data', { ascending: false })
+        .rpc('buscar_gasolina')
 
       if (error) throw error
       return data || []
@@ -49,19 +50,19 @@ export function useGasolina() {
   })
   const createGasolina = useMutation({
     mutationFn: async (gasolina: InsertGasolina) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('gasolina')
-        .insert({
-          ...gasolina,
-          usuario_id: user.user.id,
-          deletado: false,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_gasolina', {
+        p_descricao: gasolina.descricao || null,
+        p_valor: gasolina.valor,
+        p_litros: gasolina.litros,
+        p_preco_litro: gasolina.preco_litro,
+        p_km_atual: gasolina.km_atual || null,
+        p_data: gasolina.data,
+        p_posto: gasolina.posto || null,
+        p_tipo_combustivel: gasolina.tipo_combustivel || null,
+        p_familia_id: gasolina.familia_id || null,
+        p_visivel_familia: gasolina.visivel_familia || true,
+        p_privado: gasolina.privado || false
+      })
 
       if (error) throw error
       return data
@@ -73,20 +74,20 @@ export function useGasolina() {
     },
   })
   const updateGasolina = useMutation({
-    mutationFn: async ({ id, ...gasolina }: Partial<Gasolina> & { id: number }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('gasolina')
-        .update({
-          ...gasolina,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async ({ id, ...gasolina }: Partial<Gasolina> & { id: string }) => {
+      const { data, error } = await supabase.rpc('atualizar_gasolina', {
+        p_id: id,
+        p_descricao: gasolina.descricao || null,
+        p_valor: gasolina.valor || 0,
+        p_litros: gasolina.litros || 0,
+        p_preco_litro: gasolina.preco_litro || 0,
+        p_km_atual: gasolina.km_atual || null,
+        p_data: gasolina.data || new Date().toISOString(),
+        p_posto: gasolina.posto || null,
+        p_tipo_combustivel: gasolina.tipo_combustivel || null,
+        p_visivel_familia: gasolina.visivel_familia || true,
+        p_privado: gasolina.privado || false
+      })
 
       if (error) throw error
       return data
@@ -98,22 +99,10 @@ export function useGasolina() {
     },
   })
   const deleteGasolina = useMutation({
-    mutationFn: async (id: number) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('gasolina')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc('deletar_gasolina', {
+        p_id: id
+      })
 
       if (error) throw error
       return data

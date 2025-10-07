@@ -5,33 +5,19 @@ import { Gasto, InsertGasto } from '@/types'
 import { showToast } from '@/lib/toast'
 export function useGastos() {
   const queryClient = useQueryClient()
-  const { data: gastos = [], isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['gastos'],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
-      if (!user.user) return []
+      if (!user.user) return { gastos: [], stats: { total_mes: 0, total_hoje: 0, total_gastos: 0 } }
 
-      const { data, error } = await supabase
-        .from('gastos')
-        .select(`
-          id,
-          descricao,
-          valor,
-          data,
-          categoria_id,
-          usuario_id,
-          familia_id,
-          created_at,
-          updated_at,
-          deletado,
-          deletado_em
-        `)
-        .eq('usuario_id', user.user.id)
-        .eq('deletado', false)
-        .order('data', { ascending: false })
+      const { data, error } = await supabase.rpc('buscar_gastos_com_stats', {
+        p_limit: 50,
+        p_offset: 0
+      })
 
       if (error) throw error
-      return data || []
+      return data || { gastos: [], stats: { total_mes: 0, total_hoje: 0, total_gastos: 0 } }
     },
   })
   const createGasto = useMutation({
@@ -154,8 +140,20 @@ export function useGastos() {
     },
   })
 
+  const defaultData = {
+    gastos: [],
+    stats: {
+      total_mes: 0,
+      total_hoje: 0,
+      total_gastos: 0
+    }
+  }
+
+  const { gastos = [], stats = defaultData.stats } = data || defaultData
+
   return {
     gastos,
+    stats,
     isLoading,
     error,
     createGasto: createGasto.mutate,

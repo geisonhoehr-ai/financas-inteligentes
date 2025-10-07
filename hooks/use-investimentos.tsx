@@ -2,17 +2,20 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 export interface Investimento {
-  id: number
+  id: string
   nome: string
   tipo: string
   valor_investido: number
   valor_atual: number
-  usuario_id: number
+  usuario_id: string
   data_aplicacao: string
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
   deletado: boolean
   deletado_em: string | null
-  deletado_por: number | null
+  deletado_por: string | null
   created_at: string
 }
 export interface InsertInvestimento {
@@ -20,9 +23,11 @@ export interface InsertInvestimento {
   tipo: string
   valor_investido: number
   valor_atual: number
-  usuario_id: number
   data_aplicacao: string
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
 }
 export function useInvestimentos() {
   const queryClient = useQueryClient()
@@ -33,11 +38,7 @@ export function useInvestimentos() {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('investimentos')
-        .select()
-        .eq('usuario_id', user.user.id)
-        .eq('deletado', false)
-        .order('data_aplicacao', { ascending: false })
+        .rpc('buscar_investimentos')
 
       if (error) throw error
       return data || []
@@ -45,19 +46,17 @@ export function useInvestimentos() {
   })
   const createInvestimento = useMutation({
     mutationFn: async (investimento: InsertInvestimento) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('investimentos')
-        .insert({
-          ...investimento,
-          usuario_id: user.user.id,
-          deletado: false,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_investimento', {
+        p_nome: investimento.nome,
+        p_tipo: investimento.tipo,
+        p_valor_investido: investimento.valor_investido,
+        p_valor_atual: investimento.valor_atual,
+        p_data_aplicacao: investimento.data_aplicacao,
+        p_observacoes: investimento.observacoes || null,
+        p_familia_id: investimento.familia_id || null,
+        p_visivel_familia: investimento.visivel_familia || true,
+        p_privado: investimento.privado || false
+      })
 
       if (error) throw error
       return data
@@ -67,20 +66,18 @@ export function useInvestimentos() {
     },
   })
   const updateInvestimento = useMutation({
-    mutationFn: async ({ id, ...investimento }: Partial<Investimento> & { id: number }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('investimentos')
-        .update({
-          ...investimento,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async ({ id, ...investimento }: Partial<Investimento> & { id: string }) => {
+      const { data, error } = await supabase.rpc('atualizar_investimento', {
+        p_id: id,
+        p_nome: investimento.nome || '',
+        p_tipo: investimento.tipo || '',
+        p_valor_investido: investimento.valor_investido || 0,
+        p_valor_atual: investimento.valor_atual || 0,
+        p_data_aplicacao: investimento.data_aplicacao || new Date().toISOString(),
+        p_observacoes: investimento.observacoes || null,
+        p_visivel_familia: investimento.visivel_familia || true,
+        p_privado: investimento.privado || false
+      })
 
       if (error) throw error
       return data
@@ -90,22 +87,10 @@ export function useInvestimentos() {
     },
   })
   const deleteInvestimento = useMutation({
-    mutationFn: async (id: number) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('investimentos')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc('deletar_investimento', {
+        p_id: id
+      })
 
       if (error) throw error
       return data

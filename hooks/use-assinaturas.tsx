@@ -3,31 +3,36 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database.types'
 export interface Assinatura {
-  id: number
+  id: string
   nome: string
   valor: number
   dia_vencimento: number
-  usuario_id: number
+  usuario_id: string
   categoria?: string
   status: string
   data_inicio: string
   data_fim?: string | null
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
   deletado: boolean
   deletado_em: string | null
-  deletado_por: number | null
+  deletado_por: string | null
   created_at: string
 }
 export interface InsertAssinatura {
   nome: string
   valor: number
   dia_vencimento: number
-  usuario_id: number
   categoria?: string
   status?: string
   data_inicio: string
   data_fim?: string | null
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
 }
 export function useAssinaturas() {
   const queryClient = useQueryClient()
@@ -38,32 +43,27 @@ export function useAssinaturas() {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('assinaturas')
-        .select()
-        .eq('usuario_id', user.user.id)
-        .eq('deletado', false)
-        .order('dia_vencimento', { ascending: true })
+        .rpc('buscar_assinaturas')
 
       if (error) throw error
       return data || []
     },
   })
   const createAssinatura = useMutation({
-    mutationFn: async (assinatura: Database['public']['Tables']['assinaturas']['Insert']) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('assinaturas')
-        .insert({
-          ...assinatura,
-          usuario_id: user.user.id,
-          status: 'ativa',
-          deletado: false,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+    mutationFn: async (assinatura: InsertAssinatura) => {
+      const { data, error } = await supabase.rpc('criar_assinatura', {
+        p_nome: assinatura.nome,
+        p_valor: assinatura.valor,
+        p_dia_vencimento: assinatura.dia_vencimento,
+        p_categoria: assinatura.categoria || null,
+        p_status: assinatura.status || 'ativa',
+        p_data_inicio: assinatura.data_inicio,
+        p_data_fim: assinatura.data_fim || null,
+        p_observacoes: assinatura.observacoes || null,
+        p_familia_id: assinatura.familia_id || null,
+        p_visivel_familia: assinatura.visivel_familia || true,
+        p_privado: assinatura.privado || false
+      })
 
       if (error) throw error
       return data
@@ -75,20 +75,20 @@ export function useAssinaturas() {
     },
   })
   const updateAssinatura = useMutation({
-    mutationFn: async ({ id, ...assinatura }: Partial<Database['public']['Tables']['assinaturas']['Update']> & { id: number }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('assinaturas')
-        .update({
-          ...assinatura,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async ({ id, ...assinatura }: Partial<Assinatura> & { id: string }) => {
+      const { data, error } = await supabase.rpc('atualizar_assinatura', {
+        p_id: id,
+        p_nome: assinatura.nome || '',
+        p_valor: assinatura.valor || 0,
+        p_dia_vencimento: assinatura.dia_vencimento || 1,
+        p_categoria: assinatura.categoria || null,
+        p_status: assinatura.status || 'ativa',
+        p_data_inicio: assinatura.data_inicio || new Date().toISOString(),
+        p_data_fim: assinatura.data_fim || null,
+        p_observacoes: assinatura.observacoes || null,
+        p_visivel_familia: assinatura.visivel_familia || true,
+        p_privado: assinatura.privado || false
+      })
 
       if (error) throw error
       return data
@@ -100,22 +100,10 @@ export function useAssinaturas() {
     },
   })
   const deleteAssinatura = useMutation({
-    mutationFn: async (id: number) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('assinaturas')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc('deletar_assinatura', {
+        p_id: id
+      })
 
       if (error) throw error
       return data

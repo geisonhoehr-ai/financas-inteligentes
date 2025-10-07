@@ -2,31 +2,36 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 export interface Ferramenta {
-  id: number
+  id: string
   nome: string
   valor: number
-  usuario_id: number
+  usuario_id: string
   categoria: string
   periodicidade: string
   status: string
   data_inicio: string
   data_fim?: string | null
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
   deletado: boolean
   deletado_em: string | null
-  deletado_por: number | null
+  deletado_por: string | null
   created_at: string
 }
 export interface InsertFerramenta {
   nome: string
   valor: number
-  usuario_id: number
   categoria: string
   periodicidade?: string
   status?: string
   data_inicio: string
   data_fim?: string | null
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
 }
 export function useFerramentas() {
   const queryClient = useQueryClient()
@@ -37,11 +42,7 @@ export function useFerramentas() {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('ferramentas')
-        .select()
-        .eq('usuario_id', user.user.id)
-        .eq('deletado', false)
-        .order('created_at', { ascending: false })
+        .rpc('buscar_ferramentas')
 
       if (error) throw error
       return data || []
@@ -49,20 +50,19 @@ export function useFerramentas() {
   })
   const createFerramenta = useMutation({
     mutationFn: async (ferramenta: InsertFerramenta) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('ferramentas')
-        .insert({
-          ...ferramenta,
-          usuario_id: user.user.id,
-          status: 'ativa',
-          deletado: false,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_ferramenta', {
+        p_nome: ferramenta.nome,
+        p_valor: ferramenta.valor,
+        p_categoria: ferramenta.categoria,
+        p_periodicidade: ferramenta.periodicidade || null,
+        p_status: ferramenta.status || 'ativa',
+        p_data_inicio: ferramenta.data_inicio,
+        p_data_fim: ferramenta.data_fim || null,
+        p_observacoes: ferramenta.observacoes || null,
+        p_familia_id: ferramenta.familia_id || null,
+        p_visivel_familia: ferramenta.visivel_familia || true,
+        p_privado: ferramenta.privado || false
+      })
 
       if (error) throw error
       return data
@@ -74,20 +74,20 @@ export function useFerramentas() {
     },
   })
   const updateFerramenta = useMutation({
-    mutationFn: async ({ id, ...ferramenta }: Partial<Ferramenta> & { id: number }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('ferramentas')
-        .update({
-          ...ferramenta,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async ({ id, ...ferramenta }: Partial<Ferramenta> & { id: string }) => {
+      const { data, error } = await supabase.rpc('atualizar_ferramenta', {
+        p_id: id,
+        p_nome: ferramenta.nome || '',
+        p_valor: ferramenta.valor || 0,
+        p_categoria: ferramenta.categoria || '',
+        p_periodicidade: ferramenta.periodicidade || null,
+        p_status: ferramenta.status || 'ativa',
+        p_data_inicio: ferramenta.data_inicio || new Date().toISOString(),
+        p_data_fim: ferramenta.data_fim || null,
+        p_observacoes: ferramenta.observacoes || null,
+        p_visivel_familia: ferramenta.visivel_familia || true,
+        p_privado: ferramenta.privado || false
+      })
 
       if (error) throw error
       return data
@@ -99,22 +99,10 @@ export function useFerramentas() {
     },
   })
   const deleteFerramenta = useMutation({
-    mutationFn: async (id: number) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('ferramentas')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc('deletar_ferramenta', {
+        p_id: id
+      })
 
       if (error) throw error
       return data

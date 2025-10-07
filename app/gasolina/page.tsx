@@ -3,9 +3,14 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Plus, Car, TrendingUp, Fuel, MapPin } from 'lucide-react'
+import { useGasolina } from '@/hooks/use-gasolina'
+import { formatCurrency } from '@/lib/utils'
 
 export default function GasolinaPage() {
+  const { abastecimentos, stats, isLoading, createGasolina, isCreating } = useGasolina()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
   return (
@@ -35,7 +40,7 @@ export default function GasolinaPage() {
             <Fuel className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ 0,00</div>
+            <div className="text-2xl font-bold">{formatCurrency(stats.gastoTotal)}</div>
             <p className="text-xs text-muted-foreground">Este mês</p>
           </CardContent>
         </Card>
@@ -46,7 +51,7 @@ export default function GasolinaPage() {
             <TrendingUp className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-500">0 L</div>
+            <div className="text-2xl font-bold text-blue-500">{stats.litrosTotais.toFixed(1)} L</div>
             <p className="text-xs text-muted-foreground">Abastecidos</p>
           </CardContent>
         </Card>
@@ -57,7 +62,7 @@ export default function GasolinaPage() {
             <MapPin className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-500">R$ 0,00</div>
+            <div className="text-2xl font-bold text-orange-500">{formatCurrency(stats.precoMedio)}</div>
             <p className="text-xs text-muted-foreground">Por litro</p>
           </CardContent>
         </Card>
@@ -68,32 +73,258 @@ export default function GasolinaPage() {
             <Car className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">0</div>
+            <div className="text-2xl font-bold text-green-500">{stats.totalAbastecimentos}</div>
             <p className="text-xs text-muted-foreground">Este mês</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Empty State */}
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <Car className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">
-            Nenhum abastecimento registrado
-          </h3>
-          <p className="text-muted-foreground text-center mb-6">
-            Registre seus abastecimentos para acompanhar consumo e gastos com combustível
-          </p>
-          <Button 
-            onClick={() => setShowAddDrawer(true)}
-            className="h-12 rounded-xl bg-primary hover:bg-primary/90"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            Adicionar Abastecimento
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Lista de Abastecimentos */}
+      {abastecimentos.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Car className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">
+              Nenhum abastecimento registrado
+            </h3>
+            <p className="text-muted-foreground text-center mb-6">
+              Registre seus abastecimentos para acompanhar consumo e gastos com combustível
+            </p>
+            <Button 
+              onClick={() => setShowAddDrawer(true)}
+              className="h-12 rounded-xl bg-primary hover:bg-primary/90"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Adicionar Abastecimento
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {abastecimentos.map((abastecimento) => (
+            <Card key={abastecimento.id}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium">{abastecimento.posto || 'Posto não informado'}</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(abastecimento.data).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-semibold">{formatCurrency(abastecimento.valor)}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {abastecimento.litros.toFixed(1)} L ({formatCurrency(abastecimento.preco_litro)}/L)
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Drawer de Adicionar */}
+      <Drawer open={showAddDrawer} onOpenChange={setShowAddDrawer}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Novo Abastecimento</DrawerTitle>
+            <DrawerDescription>
+              Registre um novo abastecimento de combustível
+            </DrawerDescription>
+          </DrawerHeader>
+          <GasolinaForm onClose={() => setShowAddDrawer(false)} />
+        </DrawerContent>
+      </Drawer>
     </div>
+  )
+}
+
+function GasolinaForm({ onClose }: { onClose: () => void }) {
+  const { createGasolina, isCreating } = useGasolina()
+  const [formData, setFormData] = useState({
+    valor: '',
+    litros: '',
+    preco_litro: '',
+    km_atual: '',
+    data: new Date().toISOString().split('T')[0],
+    posto: '',
+    tipo_combustivel: 'gasolina',
+    descricao: ''
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    const gasolinaData = {
+      ...formData,
+      valor: parseFloat(formData.valor.toString()),
+      litros: parseFloat(formData.litros.toString()),
+      preco_litro: parseFloat(formData.preco_litro.toString()),
+      km_atual: formData.km_atual ? parseInt(formData.km_atual.toString()) : undefined
+    }
+
+    try {
+      await createGasolina(gasolinaData)
+      onClose()
+    } catch (error) {
+      console.error('Erro ao salvar abastecimento:', error)
+    }
+  }
+
+  const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valor = parseFloat(e.target.value) || 0
+    const litros = parseFloat(formData.litros) || 0
+    setFormData({
+      ...formData,
+      valor: e.target.value,
+      preco_litro: litros > 0 ? (valor / litros).toFixed(3) : formData.preco_litro
+    })
+  }
+
+  const handleLitrosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const litros = parseFloat(e.target.value) || 0
+    const valor = parseFloat(formData.valor) || 0
+    setFormData({
+      ...formData,
+      litros: e.target.value,
+      preco_litro: litros > 0 ? (valor / litros).toFixed(3) : formData.preco_litro
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="p-4 space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            Valor Total *
+          </label>
+          <Input
+            type="number"
+            step="0.01"
+            placeholder="0,00"
+            value={formData.valor}
+            onChange={handleValorChange}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            Litros *
+          </label>
+          <Input
+            type="number"
+            step="0.01"
+            placeholder="0,00"
+            value={formData.litros}
+            onChange={handleLitrosChange}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            Preço por Litro *
+          </label>
+          <Input
+            type="number"
+            step="0.001"
+            placeholder="0,000"
+            value={formData.preco_litro}
+            onChange={(e) => setFormData({ ...formData, preco_litro: e.target.value })}
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            Data *
+          </label>
+          <Input
+            type="date"
+            value={formData.data}
+            onChange={(e) => setFormData({ ...formData, data: e.target.value })}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            Posto
+          </label>
+          <Input
+            type="text"
+            placeholder="Ex: Shell, BR..."
+            value={formData.posto}
+            onChange={(e) => setFormData({ ...formData, posto: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium">
+            Quilometragem
+          </label>
+          <Input
+            type="number"
+            placeholder="Ex: 12345"
+            value={formData.km_atual}
+            onChange={(e) => setFormData({ ...formData, km_atual: e.target.value })}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          Tipo de Combustível
+        </label>
+        <select
+          value={formData.tipo_combustivel}
+          onChange={(e) => setFormData({ ...formData, tipo_combustivel: e.target.value })}
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+        >
+          <option value="gasolina">⛽ Gasolina Comum</option>
+          <option value="gasolina_aditivada">⛽ Gasolina Aditivada</option>
+          <option value="etanol">🌱 Etanol</option>
+          <option value="diesel">🚛 Diesel</option>
+          <option value="gnv">🔋 GNV</option>
+        </select>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          Observações
+        </label>
+        <Input
+          type="text"
+          placeholder="Ex: Tanque cheio, promoção..."
+          value={formData.descricao}
+          onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+        />
+      </div>
+
+      <div className="flex gap-3 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+          className="flex-1"
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          disabled={isCreating}
+          className="flex-1"
+        >
+          {isCreating ? 'Salvando...' : 'Adicionar'}
+        </Button>
+      </div>
+    </form>
   )
 }
 

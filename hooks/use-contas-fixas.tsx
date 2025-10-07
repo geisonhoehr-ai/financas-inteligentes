@@ -2,27 +2,32 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 export interface ContaFixa {
-  id: number
+  id: string
   nome: string
   valor: number
   dia_vencimento: number
-  usuario_id: number
+  usuario_id: string
   categoria: string
   status: string
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
   deletado: boolean
   deletado_em: string | null
-  deletado_por: number | null
+  deletado_por: string | null
   created_at: string
 }
 export interface InsertContaFixa {
   nome: string
   valor: number
   dia_vencimento: number
-  usuario_id: number
   categoria: string
   status?: string
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
 }
 export function useContasFixas() {
   const queryClient = useQueryClient()
@@ -33,11 +38,7 @@ export function useContasFixas() {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('contas_fixas')
-        .select()
-        .eq('usuario_id', user.user.id)
-        .eq('deletado', false)
-        .order('dia_vencimento', { ascending: true })
+        .rpc('buscar_contas_fixas')
 
       if (error) throw error
       return data || []
@@ -45,20 +46,17 @@ export function useContasFixas() {
   })
   const createContaFixa = useMutation({
     mutationFn: async (conta: InsertContaFixa) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('contas_fixas')
-        .insert({
-          ...conta,
-          usuario_id: user.user.id,
-          status: 'ativa',
-          deletado: false,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_conta_fixa', {
+        p_nome: conta.nome,
+        p_valor: conta.valor,
+        p_dia_vencimento: conta.dia_vencimento,
+        p_categoria: conta.categoria,
+        p_status: conta.status || 'ativa',
+        p_observacoes: conta.observacoes || null,
+        p_familia_id: conta.familia_id || null,
+        p_visivel_familia: conta.visivel_familia || true,
+        p_privado: conta.privado || false
+      })
 
       if (error) throw error
       return data
@@ -70,20 +68,18 @@ export function useContasFixas() {
     },
   })
   const updateContaFixa = useMutation({
-    mutationFn: async ({ id, ...conta }: Partial<ContaFixa> & { id: number }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('contas_fixas')
-        .update({
-          ...conta,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async ({ id, ...conta }: Partial<ContaFixa> & { id: string }) => {
+      const { data, error } = await supabase.rpc('atualizar_conta_fixa', {
+        p_id: id,
+        p_nome: conta.nome || '',
+        p_valor: conta.valor || 0,
+        p_dia_vencimento: conta.dia_vencimento || 1,
+        p_categoria: conta.categoria || '',
+        p_status: conta.status || 'ativa',
+        p_observacoes: conta.observacoes || null,
+        p_visivel_familia: conta.visivel_familia || true,
+        p_privado: conta.privado || false
+      })
 
       if (error) throw error
       return data
@@ -95,22 +91,10 @@ export function useContasFixas() {
     },
   })
   const deleteContaFixa = useMutation({
-    mutationFn: async (id: number) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('contas_fixas')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc('deletar_conta_fixa', {
+        p_id: id
+      })
 
       if (error) throw error
       return data

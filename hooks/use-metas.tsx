@@ -2,29 +2,34 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 export interface Meta {
-  id: number
+  id: string
   nome: string
   valor_objetivo: number
   valor_atual: number
-  usuario_id: number
+  usuario_id: string
   categoria?: string
   prazo?: string | null
   status: string
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
   deletado: boolean
   deletado_em: string | null
-  deletado_por: number | null
+  deletado_por: string | null
   created_at: string
 }
 export interface InsertMeta {
   nome: string
   valor_objetivo: number
   valor_atual?: number
-  usuario_id: number
   categoria?: string
   prazo?: string | null
   status?: string
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
 }
 export function useMetas() {
   const queryClient = useQueryClient()
@@ -35,11 +40,7 @@ export function useMetas() {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('metas')
-        .select()
-        .eq('usuario_id', user.user.id)
-        .eq('deletado', false)
-        .order('created_at', { ascending: false })
+        .rpc('buscar_metas')
 
       if (error) throw error
       return data || []
@@ -47,21 +48,18 @@ export function useMetas() {
   })
   const createMeta = useMutation({
     mutationFn: async (meta: InsertMeta) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('metas')
-        .insert({
-          ...meta,
-          usuario_id: user.user.id,
-          valor_atual: meta.valor_atual || 0,
-          status: meta.status || 'em_andamento',
-          deletado: false,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_meta', {
+        p_nome: meta.nome,
+        p_valor_objetivo: meta.valor_objetivo,
+        p_valor_atual: meta.valor_atual || 0,
+        p_categoria: meta.categoria || null,
+        p_prazo: meta.prazo || null,
+        p_status: meta.status || 'em_andamento',
+        p_observacoes: meta.observacoes || null,
+        p_familia_id: meta.familia_id || null,
+        p_visivel_familia: meta.visivel_familia || true,
+        p_privado: meta.privado || false
+      })
 
       if (error) throw error
       return data
@@ -71,20 +69,19 @@ export function useMetas() {
     },
   })
   const updateMeta = useMutation({
-    mutationFn: async ({ id, ...meta }: Partial<Meta> & { id: number }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('metas')
-        .update({
-          ...meta,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async ({ id, ...meta }: Partial<Meta> & { id: string }) => {
+      const { data, error } = await supabase.rpc('atualizar_meta', {
+        p_id: id,
+        p_nome: meta.nome || '',
+        p_valor_objetivo: meta.valor_objetivo || 0,
+        p_valor_atual: meta.valor_atual || 0,
+        p_categoria: meta.categoria || null,
+        p_prazo: meta.prazo || null,
+        p_status: meta.status || 'em_andamento',
+        p_observacoes: meta.observacoes || null,
+        p_visivel_familia: meta.visivel_familia || true,
+        p_privado: meta.privado || false
+      })
 
       if (error) throw error
       return data
@@ -94,22 +91,10 @@ export function useMetas() {
     },
   })
   const deleteMeta = useMutation({
-    mutationFn: async (id: number) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('metas')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc('deletar_meta', {
+        p_id: id
+      })
 
       if (error) throw error
       return data

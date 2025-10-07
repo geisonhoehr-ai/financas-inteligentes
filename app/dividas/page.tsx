@@ -43,6 +43,45 @@ export default function DividasPage() {
   const [selectedDivida, setSelectedDivida] = useState<any>(null)
   const [showUploadComprovante, setShowUploadComprovante] = useState(false)
   const [dividaParaComprovante, setDividaParaComprovante] = useState<any>(null)
+  const [formData, setFormData] = useState({
+    descricao: '',
+    valor: '',
+    data_vencimento: '',
+    credor_id: '',
+    devedor_id: '',
+    parcela_total: '1',
+    parcela_numero: '1',
+    valor_parcela: ''
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    const dividaData = {
+      ...formData,
+      valor: parseFloat(formData.valor.toString()),
+      parcela_total: parseInt(formData.parcela_total.toString()),
+      parcela_numero: parseInt(formData.parcela_numero.toString()),
+      valor_parcela: parseFloat(formData.valor_parcela.toString())
+    }
+
+    try {
+      await createDivida(dividaData)
+      setShowAddDivida(false)
+      setFormData({
+        descricao: '',
+        valor: '',
+        data_vencimento: '',
+        credor_id: '',
+        devedor_id: '',
+        parcela_total: '1',
+        parcela_numero: '1',
+        valor_parcela: ''
+      })
+    } catch (error) {
+      console.error('Erro ao salvar dívida:', error)
+    }
+  }
 
   const resumoAtual = resumo?.[0]
   const saldoLiquido = resumoAtual?.saldo_liquido || 0
@@ -285,14 +324,143 @@ export default function DividasPage() {
               Registre uma dívida entre membros da família
             </SheetDescription>
           </SheetHeader>
-          <div className="mt-6">
-            <p className="text-sm text-muted-foreground">
-              Funcionalidade em desenvolvimento...
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              💡 Dica: As dívidas são criadas automaticamente quando você registra um gasto
-              indicando que foi pago por um membro mas é responsabilidade de outro.
-            </p>
+          <div className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Descrição *
+              </label>
+              <Input
+                type="text"
+                placeholder="Ex: Empréstimo para viagem..."
+                value={formData.descricao}
+                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Valor *
+                </label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="0,00"
+                  value={formData.valor}
+                  onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Data de Vencimento
+                </label>
+                <Input
+                  type="date"
+                  value={formData.data_vencimento}
+                  onChange={(e) => setFormData({ ...formData, data_vencimento: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Credor *
+                </label>
+                <select
+                  value={formData.credor_id}
+                  onChange={(e) => setFormData({ ...formData, credor_id: e.target.value })}
+                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+                  required
+                >
+                  <option value="">Selecione...</option>
+                  {familiaAtiva?.familia_membros.map((membro) => (
+                    <option key={membro.usuario_id} value={membro.usuario_id}>
+                      {membro.nome || membro.usuario_id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Devedor *
+                </label>
+                <select
+                  value={formData.devedor_id}
+                  onChange={(e) => setFormData({ ...formData, devedor_id: e.target.value })}
+                  className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+                  required
+                >
+                  <option value="">Selecione...</option>
+                  {familiaAtiva?.familia_membros.map((membro) => (
+                    <option key={membro.usuario_id} value={membro.usuario_id}>
+                      {membro.nome || membro.usuario_id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Parcelamento
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  placeholder="1"
+                  value={formData.parcela_total}
+                  onChange={(e) => {
+                    const total = parseInt(e.target.value) || 1
+                    const valor = parseFloat(formData.valor) || 0
+                    setFormData({
+                      ...formData,
+                      parcela_total: e.target.value,
+                      parcela_numero: '1',
+                      valor_parcela: (valor / total).toFixed(2)
+                    })
+                  }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Valor da Parcela
+                </label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="0,00"
+                  value={formData.valor_parcela}
+                  onChange={(e) => setFormData({ ...formData, valor_parcela: e.target.value })}
+                  disabled
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowAddDivida(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={isCreating}
+                className="flex-1"
+                onClick={handleSubmit}
+              >
+                {isCreating ? 'Salvando...' : 'Adicionar'}
+              </Button>
+            </div>
           </div>
         </SheetContent>
       </Sheet>

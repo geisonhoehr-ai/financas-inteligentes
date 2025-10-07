@@ -12,9 +12,9 @@ import { formatCurrency, formatDateTime } from '@/lib/utils'
 import { Plus, Receipt, Trash2, Edit3, Lock } from 'lucide-react'
 
 export default function GastosPage() {
-  const { gastos: todosGastos, isLoading, deleteGasto, isDeleting } = useGastos()
+  const { gastos: todosGastos = [], stats = { total_mes: 0, total_hoje: 0, total_gastos: 0 }, isLoading, deleteGasto, isDeleting } = useGastos()
   const { familiaAtivaId } = useFamiliaAtiva()
-  const { familias } = useFamilias()
+  const { familias = [] } = useFamilias()
   const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const [showAddDrawer, setShowAddDrawer] = useState(false)
   const [editingGasto, setEditingGasto] = useState<any>(null)
@@ -33,15 +33,17 @@ export default function GastosPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-muted-foreground">Carregando gastos...</p>
-        </div>
+  const LoadingSpinner = () => (
+    <div className="flex h-[calc(100vh-8rem)] items-center justify-center">
+      <div className="text-center">
+        <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <p className="text-muted-foreground">Carregando gastos...</p>
       </div>
-    )
+    </div>
+  )
+
+  if (isLoading) {
+    return <LoadingSpinner />
   }
 
   return (
@@ -71,7 +73,7 @@ export default function GastosPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">
-              {formatCurrency(gastos.reduce((sum, gasto) => sum + parseFloat(gasto.valor.toString()), 0))}
+              {formatCurrency(stats.total_mes)}
             </div>
           </CardContent>
         </Card>
@@ -82,7 +84,7 @@ export default function GastosPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-700 dark:text-green-300">
-              {formatCurrency(gastos.filter(g => new Date(g.data).toDateString() === new Date().toDateString()).reduce((sum, gasto) => sum + parseFloat(gasto.valor.toString()), 0))}
+              {formatCurrency(stats.total_hoje)}
             </div>
           </CardContent>
         </Card>
@@ -93,7 +95,7 @@ export default function GastosPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
-              {gastos.length}
+              {stats.total_gastos}
             </div>
           </CardContent>
         </Card>
@@ -232,7 +234,8 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
     const gastoData = {
       ...formData,
       valor: parseFloat(formData.valor.toString()),
-      usuario_id: 1, // TODO: Get from auth context
+      categoria_id: formData.categoria,
+      data: formData.data
     }
 
     try {

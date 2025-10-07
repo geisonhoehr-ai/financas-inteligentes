@@ -2,19 +2,22 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 export interface Cartao {
-  id: number
+  id: string
   nome: string
   bandeira: string
   ultimos_digitos: string
   limite: number
   dia_vencimento: number
   dia_fechamento: number
-  usuario_id: number
+  usuario_id: string
   status: string
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
   deletado: boolean
   deletado_em: string | null
-  deletado_por: number | null
+  deletado_por: string | null
   created_at: string
 }
 export interface InsertCartao {
@@ -24,9 +27,11 @@ export interface InsertCartao {
   limite: number
   dia_vencimento: number
   dia_fechamento: number
-  usuario_id: number
   status?: string
   observacoes?: string
+  familia_id?: string
+  visivel_familia?: boolean
+  privado?: boolean
 }
 export function useCartoes() {
   const queryClient = useQueryClient()
@@ -37,11 +42,7 @@ export function useCartoes() {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('cartoes')
-        .select()
-        .eq('usuario_id', user.user.id)
-        .eq('deletado', false)
-        .order('nome', { ascending: true })
+        .rpc('buscar_cartoes')
 
       if (error) throw error
       return data || []
@@ -49,20 +50,19 @@ export function useCartoes() {
   })
   const createCartao = useMutation({
     mutationFn: async (cartao: InsertCartao) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('cartoes')
-        .insert({
-          ...cartao,
-          usuario_id: user.user.id,
-          status: 'ativo',
-          deletado: false,
-          created_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_cartao', {
+        p_nome: cartao.nome,
+        p_bandeira: cartao.bandeira,
+        p_ultimos_digitos: cartao.ultimos_digitos,
+        p_limite: cartao.limite,
+        p_dia_vencimento: cartao.dia_vencimento,
+        p_dia_fechamento: cartao.dia_fechamento,
+        p_status: cartao.status || 'ativo',
+        p_observacoes: cartao.observacoes || null,
+        p_familia_id: cartao.familia_id || null,
+        p_visivel_familia: cartao.visivel_familia || true,
+        p_privado: cartao.privado || false
+      })
 
       if (error) throw error
       return data
@@ -72,20 +72,20 @@ export function useCartoes() {
     },
   })
   const updateCartao = useMutation({
-    mutationFn: async ({ id, ...cartao }: Partial<Cartao> & { id: number }) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('cartoes')
-        .update({
-          ...cartao,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async ({ id, ...cartao }: Partial<Cartao> & { id: string }) => {
+      const { data, error } = await supabase.rpc('atualizar_cartao', {
+        p_id: id,
+        p_nome: cartao.nome || '',
+        p_bandeira: cartao.bandeira || '',
+        p_ultimos_digitos: cartao.ultimos_digitos || '',
+        p_limite: cartao.limite || 0,
+        p_dia_vencimento: cartao.dia_vencimento || 1,
+        p_dia_fechamento: cartao.dia_fechamento || 1,
+        p_status: cartao.status || 'ativo',
+        p_observacoes: cartao.observacoes || null,
+        p_visivel_familia: cartao.visivel_familia || true,
+        p_privado: cartao.privado || false
+      })
 
       if (error) throw error
       return data
@@ -95,22 +95,10 @@ export function useCartoes() {
     },
   })
   const deleteCartao = useMutation({
-    mutationFn: async (id: number) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
-
-      const { data, error } = await supabase
-        .from('cartoes')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.rpc('deletar_cartao', {
+        p_id: id
+      })
 
       if (error) throw error
       return data
