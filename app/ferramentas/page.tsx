@@ -165,7 +165,7 @@ function FerramentaForm({ familiaId, onClose }: { familiaId?: string; onClose: (
       data_inicio: formData.data_inicio || new Date().toISOString().split('T')[0],
       data_fim: formData.data_fim || null,
       observacoes: formData.descricao,
-      familia_id: familiaAtiva?.id
+      familia_id: familiaId
     }
 
     try {

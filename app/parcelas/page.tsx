@@ -153,7 +153,7 @@ export default function ParcelasPage() {
   )
 }
 
-function ParcelaForm({ onClose }: { onClose: () => void }) {
+function ParcelaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
   const { createParcela, isCreating } = useParcelas()
   const [formData, setFormData] = useState({
     descricao: '',
@@ -176,7 +176,7 @@ function ParcelaForm({ onClose }: { onClose: () => void }) {
       total_parcelas: parseInt(formData.total_parcelas.toString()),
       dia_vencimento: parseInt(formData.dia_vencimento.toString()),
       data_compra: formData.data_compra || new Date().toISOString().split('T')[0],
-      familia_id: familiaAtiva?.id
+      familia_id: familiaId
     }
 
     try {
