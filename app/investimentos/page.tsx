@@ -160,9 +160,9 @@ function InvestimentoForm({ onClose }: { onClose: () => void }) {
     
     const investimentoData = {
       ...formData,
-      valor_inicial: parseFloat(formData.valor_inicial.toString()),
+      valor_investido: parseFloat(formData.valor_inicial.toString()),
       valor_atual: parseFloat(formData.valor_atual.toString()) || parseFloat(formData.valor_inicial.toString()),
-      rentabilidade: parseFloat(formData.rentabilidade.toString()) || 0
+      data_aplicacao: formData.data_aplicacao || new Date().toISOString().split('T')[0]
     }
 
     try {

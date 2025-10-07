@@ -235,7 +235,9 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
       ...formData,
       valor: parseFloat(formData.valor.toString()),
       categoria_id: formData.categoria,
-      data: formData.data
+      data: formData.data,
+      usuario_id: user?.id,
+      familia_id: familiaAtiva?.id
     }
 
     try {

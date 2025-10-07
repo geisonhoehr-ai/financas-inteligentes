@@ -174,7 +174,8 @@ function ParcelaForm({ onClose }: { onClose: () => void }) {
       valor_total: parseFloat(formData.valor_total.toString()),
       valor_parcela: parseFloat(formData.valor_parcela.toString()),
       total_parcelas: parseInt(formData.total_parcelas.toString()),
-      dia_vencimento: parseInt(formData.dia_vencimento.toString())
+      dia_vencimento: parseInt(formData.dia_vencimento.toString()),
+      data_compra: formData.data_compra || new Date().toISOString().split('T')[0]
     }
 
     try {

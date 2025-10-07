@@ -161,7 +161,9 @@ function GasolinaForm({ onClose }: { onClose: () => void }) {
       valor: parseFloat(formData.valor.toString()),
       litros: parseFloat(formData.litros.toString()),
       preco_litro: parseFloat(formData.preco_litro.toString()),
-      km_atual: formData.km_atual ? parseInt(formData.km_atual.toString()) : undefined
+      km_atual: formData.km_atual ? parseInt(formData.km_atual.toString()) : undefined,
+      data: formData.data || new Date().toISOString().split('T')[0],
+      descricao: formData.descricao
     }
 
     try {

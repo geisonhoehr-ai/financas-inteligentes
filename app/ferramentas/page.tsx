@@ -159,7 +159,10 @@ function FerramentaForm({ onClose }: { onClose: () => void }) {
     
     const ferramentaData = {
       ...formData,
-      valor: parseFloat(formData.valor.toString())
+      valor: parseFloat(formData.valor.toString()),
+      data_inicio: formData.data_inicio || new Date().toISOString().split('T')[0],
+      data_fim: formData.data_fim || null,
+      observacoes: formData.descricao
     }
 
     try {

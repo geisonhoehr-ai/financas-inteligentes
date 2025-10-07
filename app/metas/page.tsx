@@ -158,7 +158,7 @@ function MetaForm({ onClose }: { onClose: () => void }) {
     
     const metaData = {
       ...formData,
-      valor_meta: parseFloat(formData.valor_meta.toString()),
+      valor_objetivo: parseFloat(formData.valor_meta.toString()),
       valor_atual: parseFloat(formData.valor_atual.toString()) || 0
     }
 

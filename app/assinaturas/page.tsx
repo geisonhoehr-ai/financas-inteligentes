@@ -173,7 +173,10 @@ function AssinaturaForm({ onClose }: { onClose: () => void }) {
     const assinaturaData = {
       ...formData,
       valor: parseFloat(formData.valor.toString()),
-      dia_vencimento: parseInt(formData.dia_vencimento.toString())
+      dia_vencimento: parseInt(formData.dia_vencimento.toString()),
+      data_inicio: formData.data_inicio,
+      data_fim: formData.data_fim || null,
+      observacoes: formData.descricao
     }
 
     try {
