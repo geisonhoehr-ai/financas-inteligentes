@@ -16,7 +16,9 @@ import {
   Wrench,
   TrendingUp,
   X,
-  Users
+  Users,
+  BarChart3,
+  DollarSign
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -80,6 +82,11 @@ const navigation = [
     name: 'Dívidas',
     href: '/dividas',
     icon: Users,
+  },
+  {
+    name: 'Análise',
+    href: '/analytics',
+    icon: BarChart3,
   },
   {
     name: 'Lixeira',

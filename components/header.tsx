@@ -1,6 +1,6 @@
 'use client'
 
-import { Moon, Sun, LogOut, User, Menu, Bell, ChevronDown } from 'lucide-react'
+import { Moon, Sun, LogOut, User, Menu, ChevronDown } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useAuth } from '@/components/auth-provider'
 import { useDividas } from '@/hooks/use-dividas'
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { NotificationCenter, NotificationButton } from '@/components/notifications/notification-center'
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -26,6 +27,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { theme, setTheme } = useTheme()
   const { user, signOut } = useAuth()
   const [mounted, setMounted] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
   const { familias } = useFamilias()
   const { familiaAtivaId, setFamiliaAtivaId, familiaAtiva } = useFamiliaAtiva()
   const { dividasQueDevo } = useDividas(familiaAtiva?.id)
@@ -93,23 +95,26 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-1 md:gap-2">
+          {/* Notificações Inteligentes */}
+          {user && (
+            <NotificationButton onClick={() => setShowNotifications(true)} />
+          )}
+          
           {/* Notificações de Dívidas */}
           {user && totalDividasPendentes > 0 && (
-            <Link href="/dividas">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative rounded-2xl w-10 h-10 hover:bg-amber-100 dark:hover:bg-amber-900/20"
-                title={`${totalDividasPendentes} dívida(s) pendente(s)`}
-              >
-                <Bell className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                {totalDividasPendentes > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
-                    {totalDividasPendentes > 9 ? '9+' : totalDividasPendentes}
-                  </span>
-                )}
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-2xl w-10 h-10 hover:bg-amber-100 dark:hover:bg-amber-900/20"
+              title={`${totalDividasPendentes} dívida(s) pendente(s)`}
+              asChild
+            >
+              <Link href="/dividas">
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
+                  {totalDividasPendentes > 9 ? '9+' : totalDividasPendentes}
+                </span>
+              </Link>
+            </Button>
           )}
 
           {/* User Info - Hidden on mobile */}
@@ -155,6 +160,12 @@ export function Header({ onMenuClick }: HeaderProps) {
           )}
         </div>
       </div>
+      
+      {/* Notification Center */}
+      <NotificationCenter 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)} 
+      />
     </header>
   )
 }
