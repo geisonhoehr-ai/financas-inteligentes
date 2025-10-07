@@ -51,7 +51,7 @@ export default function InvestimentosPage() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">{stats.rentabilidade >= 0 ? '+' : ''}{stats.rentabilidade.toFixed(2)}%</div>
+            <div className="text-2xl font-bold text-green-500">{parseFloat(stats.rentabilidade) >= 0 ? '+' : ''}{stats.rentabilidade}%</div>
             <p className="text-xs text-muted-foreground">Este mês</p>
           </CardContent>
         </Card>
@@ -114,7 +114,7 @@ export default function InvestimentosPage() {
                   <div className="text-right">
                     <p className="text-lg font-semibold">{formatCurrency(investimento.valor_atual)}</p>
                     <p className="text-sm text-muted-foreground">
-                      {investimento.rentabilidade >= 0 ? '+' : ''}{investimento.rentabilidade.toFixed(2)}% ({formatCurrency(investimento.valor_inicial)})
+                      {investimento.rentabilidade >= 0 ? '+' : ''}{investimento.rentabilidade.toFixed(2)}% ({formatCurrency(investimento.valor_investido)})
                     </p>
                   </div>
                 </div>

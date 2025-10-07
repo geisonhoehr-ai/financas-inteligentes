@@ -104,6 +104,18 @@ export function useInvestimentos() {
   const totalAtual = investimentos.reduce((sum, i) => sum + i.valor_atual, 0)
   const rendimento = totalAtual - totalInvestido
   const rentabilidade = totalInvestido > 0 ? ((rendimento / totalInvestido) * 100) : 0
+  
+  // Adicionar rentabilidade para cada investimento
+  const investimentosComRentabilidade = investimentos.map(investimento => {
+    const rendimentoIndividual = investimento.valor_atual - investimento.valor_investido
+    const rentabilidadeIndividual = investimento.valor_investido > 0 ? ((rendimentoIndividual / investimento.valor_investido) * 100) : 0
+    return {
+      ...investimento,
+      rendimento: rendimentoIndividual,
+      rentabilidade: rentabilidadeIndividual
+    }
+  })
+  
   const stats = {
     totalInvestido,
     rentabilidade: rentabilidade.toFixed(2),
@@ -111,7 +123,7 @@ export function useInvestimentos() {
     rendimentoTotal: rendimento,
   }
   return {
-    investimentos,
+    investimentos: investimentosComRentabilidade,
     stats,
     isLoading,
     error,
