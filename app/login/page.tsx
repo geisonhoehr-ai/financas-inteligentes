@@ -48,13 +48,7 @@ export default function LoginPage() {
     <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 mb-4">
-            <Wallet className="h-10 w-10 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Financeiro</h1>
-          <p className="text-muted-foreground">
-            Controle financeiro familiar
-          </p>
+          <h1 className="text-4xl font-bold mb-4">Controle Financeiro Familiar</h1>
         </div>
 
         {/* Card de Login */}
@@ -153,32 +147,7 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 pt-6 border-t">
-            <p className="text-xs text-center text-muted-foreground mb-2">
-              🎮 Demo:
-            </p>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setEmail('demo@financeiro.com')
-                  setPassword('demo123')
-                }}
-                className="flex-1 text-xs"
-              >
-                Usar demo
-              </Button>
-            </div>
-          </div>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-8">
-          Feito com 🍎 seguindo Apple HIG
-        </p>
       </div>
   )
 }
