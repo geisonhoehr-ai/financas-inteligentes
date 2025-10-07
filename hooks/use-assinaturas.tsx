@@ -109,3 +109,4 @@ export function useAssinaturas() {
     isDeleting: deleteAssinatura.isPending,
   }
 }
+

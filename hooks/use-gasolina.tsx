@@ -98,3 +98,4 @@ export function useGasolina() {
     isDeleting: deleteGasolina.isPending,
   }
 }
+

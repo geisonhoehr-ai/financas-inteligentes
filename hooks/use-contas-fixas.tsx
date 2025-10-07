@@ -93,3 +93,4 @@ export function useContasFixas() {
     isDeleting: deleteContaFixa.isPending,
   }
 }
+

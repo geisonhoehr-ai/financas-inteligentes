@@ -87,3 +87,4 @@ export function useInvestimentos() {
     isDeleting: deleteInvestimento.isPending,
   }
 }
+

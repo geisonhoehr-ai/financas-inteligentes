@@ -84,3 +84,4 @@ export function useLixeira() {
     isDeleting: permanentlyDeleteItem.isPending,
   }
 }
+
