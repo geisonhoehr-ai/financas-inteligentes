@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Plus, Target, TrendingUp, CheckCircle, Clock } from 'lucide-react'
 import { useMetas } from '@/hooks/use-metas'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function MetasPage() {
+  const { familiaAtiva } = useFamiliaAtiva()
   const { metas, stats, isLoading, createMeta, isCreating } = useMetas()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
@@ -133,14 +135,14 @@ export default function MetasPage() {
               Defina uma nova meta financeira
             </DrawerDescription>
           </DrawerHeader>
-          <MetaForm onClose={() => setShowAddDrawer(false)} />
+          <MetaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
     </div>
   )
 }
 
-function MetaForm({ onClose }: { onClose: () => void }) {
+function MetaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
   const { createMeta, isCreating } = useMetas()
   const [formData, setFormData] = useState({
     nome: '',
@@ -159,7 +161,8 @@ function MetaForm({ onClose }: { onClose: () => void }) {
     const metaData = {
       ...formData,
       valor_objetivo: parseFloat(formData.valor_meta.toString()),
-      valor_atual: parseFloat(formData.valor_atual.toString()) || 0
+      valor_atual: parseFloat(formData.valor_atual.toString()) || 0,
+      familia_id: familiaId
     }
 
     try {

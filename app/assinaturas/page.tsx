@@ -176,7 +176,8 @@ function AssinaturaForm({ onClose }: { onClose: () => void }) {
       dia_vencimento: parseInt(formData.dia_vencimento.toString()),
       data_inicio: formData.data_inicio,
       data_fim: formData.data_fim || null,
-      observacoes: formData.descricao
+      observacoes: formData.descricao,
+      familia_id: familiaAtiva?.id
     }
 
     try {

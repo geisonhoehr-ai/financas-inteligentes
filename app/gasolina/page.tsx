@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Plus, Car, TrendingUp, Fuel, MapPin } from 'lucide-react'
 import { useGasolina } from '@/hooks/use-gasolina'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function GasolinaPage() {
+  const { familiaAtiva } = useFamiliaAtiva()
   const { abastecimentos, stats, isLoading, createGasolina, isCreating } = useGasolina()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
@@ -133,14 +135,14 @@ export default function GasolinaPage() {
               Registre um novo abastecimento de combustível
             </DrawerDescription>
           </DrawerHeader>
-          <GasolinaForm onClose={() => setShowAddDrawer(false)} />
+          <GasolinaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
     </div>
   )
 }
 
-function GasolinaForm({ onClose }: { onClose: () => void }) {
+function GasolinaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
   const { createGasolina, isCreating } = useGasolina()
   const [formData, setFormData] = useState({
     valor: '',
@@ -163,7 +165,8 @@ function GasolinaForm({ onClose }: { onClose: () => void }) {
       preco_litro: parseFloat(formData.preco_litro.toString()),
       km_atual: formData.km_atual ? parseInt(formData.km_atual.toString()) : undefined,
       data: formData.data || new Date().toISOString().split('T')[0],
-      descricao: formData.descricao
+      descricao: formData.descricao,
+      familia_id: familiaId
     }
 
     try {

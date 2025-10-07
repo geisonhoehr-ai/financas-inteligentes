@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Plus, CreditCard, TrendingUp, Calendar, DollarSign } from 'lucide-react'
 import { useCartoes } from '@/hooks/use-cartoes'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function CartoesPage() {
+  const { familiaAtiva } = useFamiliaAtiva()
   const { cartoes, stats, isLoading, createCartao, isCreating } = useCartoes()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
@@ -133,14 +135,14 @@ export default function CartoesPage() {
               Adicione um novo cartão de crédito ou débito
             </DrawerDescription>
           </DrawerHeader>
-          <CartaoForm onClose={() => setShowAddDrawer(false)} />
+          <CartaoForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
     </div>
   )
 }
 
-function CartaoForm({ onClose }: { onClose: () => void }) {
+function CartaoForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
   const { createCartao, isCreating } = useCartoes()
   const [formData, setFormData] = useState({
     nome: '',
@@ -163,7 +165,8 @@ function CartaoForm({ onClose }: { onClose: () => void }) {
       dia_vencimento: parseInt(formData.dia_vencimento.toString()),
       dia_fechamento: parseInt(formData.dia_fechamento.toString()),
       ultimos_digitos: formData.numero_final ? formData.numero_final.toString() : '',
-      observacoes: formData.descricao
+      observacoes: formData.descricao,
+      familia_id: familiaId
     }
 
     try {

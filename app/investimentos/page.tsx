@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Plus, TrendingUp, DollarSign, PieChart, LineChart } from 'lucide-react'
 import { useInvestimentos } from '@/hooks/use-investimentos'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function InvestimentosPage() {
+  const { familiaAtiva } = useFamiliaAtiva()
   const { investimentos, stats, isLoading, createInvestimento, isCreating } = useInvestimentos()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
@@ -133,14 +135,14 @@ export default function InvestimentosPage() {
               Registre um novo investimento
             </DrawerDescription>
           </DrawerHeader>
-          <InvestimentoForm onClose={() => setShowAddDrawer(false)} />
+          <InvestimentoForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
     </div>
   )
 }
 
-function InvestimentoForm({ onClose }: { onClose: () => void }) {
+function InvestimentoForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
   const { createInvestimento, isCreating } = useInvestimentos()
   const [formData, setFormData] = useState({
     nome: '',
@@ -162,7 +164,8 @@ function InvestimentoForm({ onClose }: { onClose: () => void }) {
       ...formData,
       valor_investido: parseFloat(formData.valor_inicial.toString()),
       valor_atual: parseFloat(formData.valor_atual.toString()) || parseFloat(formData.valor_inicial.toString()),
-      data_aplicacao: formData.data_aplicacao || new Date().toISOString().split('T')[0]
+      data_aplicacao: formData.data_aplicacao || new Date().toISOString().split('T')[0],
+      familia_id: familiaId
     }
 
     try {

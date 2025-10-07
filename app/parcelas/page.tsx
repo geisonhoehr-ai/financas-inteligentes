@@ -175,7 +175,8 @@ function ParcelaForm({ onClose }: { onClose: () => void }) {
       valor_parcela: parseFloat(formData.valor_parcela.toString()),
       total_parcelas: parseInt(formData.total_parcelas.toString()),
       dia_vencimento: parseInt(formData.dia_vencimento.toString()),
-      data_compra: formData.data_compra || new Date().toISOString().split('T')[0]
+      data_compra: formData.data_compra || new Date().toISOString().split('T')[0],
+      familia_id: familiaAtiva?.id
     }
 
     try {

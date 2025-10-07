@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useGastos } from '@/hooks/use-gastos'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useFamilias } from '@/hooks/use-familias'
+import { useAuth } from '@/components/auth-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -219,6 +220,8 @@ export default function GastosPage() {
 }
 
 function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
+  const { user } = useAuth()
+  const { familiaAtiva } = useFamiliaAtiva()
   const { createGasto, updateGasto, isCreating, isUpdating } = useGastos()
   const [formData, setFormData] = useState({
     descricao: gasto?.descricao || '',

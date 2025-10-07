@@ -171,7 +171,8 @@ function ContaFixaForm({ onClose }: { onClose: () => void }) {
       ...formData,
       valor: parseFloat(formData.valor.toString()),
       dia_vencimento: parseInt(formData.dia_vencimento.toString()),
-      observacoes: formData.descricao
+      observacoes: formData.descricao,
+      familia_id: familiaAtiva?.id
     }
 
     try {
