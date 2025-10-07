@@ -126,7 +126,7 @@ export default function MetasPage() {
 
       {/* Drawer de Adicionar */}
       <Drawer open={showAddDrawer} onOpenChange={setShowAddDrawer}>
-        <DrawerContent>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>Nova Meta</DrawerTitle>
             <DrawerDescription>

@@ -126,7 +126,7 @@ export default function GasolinaPage() {
 
       {/* Drawer de Adicionar */}
       <Drawer open={showAddDrawer} onOpenChange={setShowAddDrawer}>
-        <DrawerContent>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>Novo Abastecimento</DrawerTitle>
             <DrawerDescription>

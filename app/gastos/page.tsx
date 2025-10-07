@@ -195,7 +195,7 @@ export default function GastosPage() {
         setShowAddDrawer(open)
         if (!open) setEditingGasto(null)
       }}>
-        <DrawerContent>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>
               {editingGasto ? 'Editar Gasto' : 'Novo Gasto'}

@@ -139,7 +139,7 @@ export default function ParcelasPage() {
 
       {/* Drawer de Adicionar/Editar */}
       <Drawer open={showAddDrawer} onOpenChange={setShowAddDrawer}>
-        <DrawerContent>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>Nova Parcela</DrawerTitle>
             <DrawerDescription>

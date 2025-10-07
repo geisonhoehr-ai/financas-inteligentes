@@ -9,7 +9,6 @@ import { useGastos } from '@/hooks/use-gastos'
 import { useCartoes } from '@/hooks/use-cartoes'
 import { useMetas } from '@/hooks/use-metas'
 import { useInvestimentos } from '@/hooks/use-investimentos'
-import { AuthTest } from '@/components/auth-test'
 import { formatCurrency } from '@/lib/utils'
 import {
   TrendingUp,
@@ -88,9 +87,6 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Teste de Autenticação */}
-      <AuthTest />
-      
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold">

@@ -137,7 +137,7 @@ export default function ContasFixasPage() {
 
       {/* Drawer de Adicionar */}
       <Drawer open={showAddDrawer} onOpenChange={setShowAddDrawer}>
-        <DrawerContent>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
           <DrawerHeader>
             <DrawerTitle>Nova Conta Fixa</DrawerTitle>
             <DrawerDescription>

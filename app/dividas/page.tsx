@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { useDividas } from '@/hooks/use-dividas'
 import { useFamilias } from '@/hooks/use-familias'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
@@ -316,15 +316,15 @@ export default function DividasPage() {
         </Card>
       )}
 
-      {/* Sheet para adicionar dívida */}
-      <Sheet open={showAddDivida} onOpenChange={setShowAddDivida}>
-        <SheetContent className="h-[90vh]">
-          <SheetHeader>
-            <div className="text-lg font-semibold">Registrar Dívida</div>
-            <SheetDescription>
+      {/* Drawer para adicionar dívida */}
+      <Drawer open={showAddDivida} onOpenChange={setShowAddDivida}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Registrar Dívida</DrawerTitle>
+            <DrawerDescription>
               Registre uma dívida entre membros da família
-            </SheetDescription>
-          </SheetHeader>
+            </DrawerDescription>
+          </DrawerHeader>
           <div className="mt-6 space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">
@@ -463,18 +463,18 @@ export default function DividasPage() {
               </Button>
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
 
-      {/* Sheet para upload de comprovante */}
-      <Sheet open={showUploadComprovante} onOpenChange={setShowUploadComprovante}>
-        <SheetContent className="h-auto max-h-[90vh]">
-          <SheetHeader>
-            <div className="text-lg font-semibold">Enviar Comprovante</div>
-            <SheetDescription>
+      {/* Drawer para upload de comprovante */}
+      <Drawer open={showUploadComprovante} onOpenChange={setShowUploadComprovante}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Enviar Comprovante</DrawerTitle>
+            <DrawerDescription>
               Anexe o comprovante de pagamento da dívida
-            </SheetDescription>
-          </SheetHeader>
+            </DrawerDescription>
+          </DrawerHeader>
           <div className="mt-6">
             {dividaParaComprovante && (
               <>
@@ -511,8 +511,8 @@ export default function DividasPage() {
               </>
             )}
           </div>
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
