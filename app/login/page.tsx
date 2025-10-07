@@ -1,153 +1,108 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { signIn, signUp } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Wallet } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+import { showToast } from '@/lib/toast'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [mode, setMode] = useState<'login' | 'signup'>('login')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
-
+    
+    setIsLoading(true)
     try {
-      const { user, error } =
-        mode === 'login'
-          ? await signIn(email, password)
-          : await signUp(email, password, name)
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password
+      })
 
       if (error) {
-        setError(error.message)
-      } else if (user) {
-        console.log('Login successful, redirecting...')
-        // Aguardar um pouco para garantir que os cookies sejam salvos
-        await new Promise(resolve => setTimeout(resolve, 100))
-        // Redirecionar usando window.location para forçar reload completo
-        window.location.href = '/'
+        showToast.error('Erro ao fazer login: ' + error.message)
+        return
       }
-    } catch (err: any) {
-      console.error('❌ Erro geral:', err)
-      setError(err.message || 'Ocorreu um erro')
+
+      showToast.success('Login realizado com sucesso!')
+      router.push('/')
+    } catch (error) {
+      showToast.error('Erro inesperado. Tente novamente.')
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Controle Financeiro Familiar</h1>
-        </div>
-
-        {/* Card de Login */}
-        <div className="glass rounded-2xl border p-8 shadow-2xl">
-          <div className="mb-6">
-            <h2 className="text-2xl font-semibold mb-2">
-              {mode === 'login' ? 'Bem-vindo de volta' : 'Criar conta'}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {mode === 'login'
-                ? 'Entre com suas credenciais'
-                : 'Preencha os dados para começar'}
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Nome (apenas signup) */}
-            {mode === 'signup' && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nome</label>
-                <Input
-                  type="text"
-                  placeholder="Seu nome"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="h-12 rounded-xl text-base"
-                  required
-                />
-              </div>
-            )}
-
-            {/* Email */}
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold">
+            Bem-vindo de volta!
+          </CardTitle>
+          <p className="text-muted-foreground">
+            Faça login para acessar sua conta
+          </p>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Email</label>
+              <Label htmlFor="email">Email</Label>
               <Input
+                id="email"
                 type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-12 rounded-xl text-base"
-                required
-                autoFocus
-                autoComplete="email"
               />
             </div>
 
-            {/* Senha */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Senha</label>
+              <Label htmlFor="password">Senha</Label>
               <Input
+                id="password"
                 type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12 rounded-xl text-base"
                 required
-                minLength={6}
-                autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                placeholder="Digite sua senha"
               />
             </div>
 
-            {/* Error */}
-            {error && (
-              <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-
-            {/* Botão Submit */}
             <Button
               type="submit"
-              disabled={loading}
-              className="w-full h-12 rounded-xl text-base font-semibold shadow-lg shadow-primary/30"
+              className="w-full h-12"
+              disabled={isLoading}
             >
-              {loading
-                ? 'Aguarde...'
-                : mode === 'login'
-                ? 'Entrar'
-                : 'Criar conta'}
+              {isLoading ? 'Fazendo login...' : 'Fazer Login'}
             </Button>
           </form>
 
-          {/* Toggle Mode */}
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                setMode(mode === 'login' ? 'signup' : 'login')
-                setError('')
-              }}
-              className="text-sm text-primary hover:underline"
-            >
-              {mode === 'login'
-                ? 'Não tem conta? Criar agora'
-                : 'Já tem conta? Fazer login'}
-            </button>
+          <div className="mt-6 text-center space-y-4">
+            <p className="text-muted-foreground">
+              Não tem uma conta?{' '}
+              <Link href="/register" className="text-primary hover:underline">
+                Criar conta
+              </Link>
+            </p>
+            <p className="text-muted-foreground">
+              <Link href="/" className="text-primary hover:underline">
+                Voltar para a página inicial
+              </Link>
+            </p>
           </div>
-
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

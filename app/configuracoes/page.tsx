@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { useFamilias } from '@/hooks/use-familias'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useConvites } from '@/hooks/use-convites'
+import { LimitChecker } from '@/components/limit-checker'
 import { Users, Building, UserPlus, Copy, Settings, Shield, Share2, Check } from 'lucide-react'
 import { showToast } from '@/lib/toast'
 
@@ -143,10 +144,12 @@ export default function ConfiguracoesPage() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg md:text-xl font-semibold">Minhas Famílias e Empresas</h3>
-          <Button onClick={() => setShowNewFamilia(!showNewFamilia)}>
-            <Users className="h-4 w-4 mr-2" />
-            Nova Família/Empresa
-          </Button>
+          <LimitChecker type="families" current={familias.length}>
+            <Button onClick={() => setShowNewFamilia(!showNewFamilia)}>
+              <Users className="h-4 w-4 mr-2" />
+              Nova Família/Empresa
+            </Button>
+          </LimitChecker>
         </div>
 
         {/* Formulário Nova Família */}
