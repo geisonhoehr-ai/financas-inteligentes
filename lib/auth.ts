@@ -38,7 +38,6 @@ export async function signUp(email: string, password: string, name?: string): Pr
 
       // Se não existe, criar registro na tabela users
       if (checkError && checkError.code === 'PGRST116') {
-        // @ts-expect-error - Type conflict with generated schema
         const { error: dbError } = await supabase.from('users').insert({
           id: data.user.id,
           nome: name || email.split('@')[0],
