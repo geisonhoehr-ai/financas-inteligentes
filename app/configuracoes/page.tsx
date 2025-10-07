@@ -3,17 +3,25 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Input } from '@/components/ui/input'
 import { useFamilias } from '@/hooks/use-familias'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useConvites } from '@/hooks/use-convites'
 import { Users, Building, UserPlus, Copy, Settings, Shield, Share2, Check } from 'lucide-react'
 import { showToast } from '@/lib/toast'
 
 export default function ConfiguracoesPage() {
-  const { familias, isLoading, createFamilia, generateInviteCode, useMembros } = useFamilias()
-  const [familiaAtualId, setFamiliaAtualId] = useState<string | null>(
-    familias[0]?.id || null
-  )
+  const { familias, isLoading, createFamilia, generateInviteCode, useMembros, deleteFamilia } = useFamilias()
+  const { familiaAtivaId, setFamiliaAtivaId } = useFamiliaAtiva()
+  const familiaAtualId = familiaAtivaId
   const { data: membros = [] } = useMembros(familiaAtualId)
   const { convites, createConvite, isCreating, gerarLinkConvite } = useConvites(familiaAtualId || undefined)
   const [showNewFamilia, setShowNewFamilia] = useState(false)
@@ -274,16 +282,63 @@ export default function ConfiguracoesPage() {
                     <div className="flex gap-2">
                       <Button
                         variant={familiaAtualId === familia.id ? 'default' : 'outline'}
-                        onClick={() => setFamiliaAtualId(familia.id)}
+                        onClick={() => setFamiliaAtivaId(familia.id)}
                       >
                         {familiaAtualId === familia.id ? 'Selecionada' : 'Selecionar'}
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                      >
-                        <Settings className="h-4 w-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Configurações da Família</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              const novoNome = prompt('Digite o novo nome da família:', familia.nome)
+                              if (novoNome && novoNome !== familia.nome) {
+                                updateFamilia({
+                                  id: familia.id,
+                                  nome: novoNome,
+                                  modo_calculo: familia.modo_calculo
+                                })
+                              }
+                            }}
+                          >
+                            Editar Nome
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              const novoModo = familia.modo_calculo === 'familiar' ? 'individual' : 'familiar'
+                              if (confirm(`Deseja alterar o modo de cálculo para ${novoModo === 'familiar' ? 'Pote Comum' : 'Individual'}?`)) {
+                                updateFamilia({
+                                  id: familia.id,
+                                  nome: familia.nome,
+                                  modo_calculo: novoModo
+                                })
+                              }
+                            }}
+                          >
+                            Alterar Modo de Cálculo
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-red-600 dark:text-red-400"
+                            onClick={() => {
+                              if (confirm('Tem certeza que deseja deletar esta família? Esta ação não pode ser desfeita.')) {
+                                deleteFamilia(familia.id)
+                              }
+                            }}
+                          >
+                            Deletar Família
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 

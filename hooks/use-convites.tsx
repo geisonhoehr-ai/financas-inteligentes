@@ -84,22 +84,11 @@ export function useConvites(familiaId?: string) {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
-      const codigo = Math.random().toString(36).substring(2, 10).toUpperCase()
-
-      const { data, error } = await supabase
-        .from('convites')
-        .insert({
-          ...novoConvite,
-          codigo,
-          criado_por: user.user.id,
-          usos_atual: 0,
-          ativo: true,
-          deletado: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('gerar_codigo_convite', {
+        p_familia_id: novoConvite.familia_id,
+        p_max_usos: novoConvite.max_usos || null,
+        p_validade: novoConvite.validade || null
+      })
 
       if (error) throw error
       return data

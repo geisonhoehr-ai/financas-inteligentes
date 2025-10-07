@@ -47,14 +47,14 @@ export function useDividas(familiaId?: string) {
       if (!user.user) return []
 
       const { data, error } = await supabase
-        .from('dividas_internas')
+        .from('vw_dividas_internas')
         .select(`
           id,
           familia_id,
           credor_id,
-          credor:credor_id(id, nome),
+          credor_nome,
           devedor_id,
-          devedor:devedor_id(id, nome),
+          devedor_nome,
           valor,
           descricao,
           gasto_original_id,
@@ -74,8 +74,8 @@ export function useDividas(familiaId?: string) {
 
       return data.map(d => ({
         ...d,
-        credor_nome: d.credor?.nome,
-        devedor_nome: d.devedor?.nome
+        credor_nome: d.credor_nome,
+        devedor_nome: d.devedor_nome
       })) || []
     },
     enabled: !!familiaId,
@@ -103,14 +103,14 @@ export function useDividas(familiaId?: string) {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
       const { data, error } = await supabase
-        .from('dividas_internas')
+        .from('vw_dividas_internas')
         .select(`
           id,
           familia_id,
           credor_id,
-          credor:credor_id(id, nome),
+          credor_nome,
           devedor_id,
-          devedor:devedor_id(id, nome),
+          devedor_nome,
           valor,
           descricao,
           status,
@@ -127,8 +127,8 @@ export function useDividas(familiaId?: string) {
 
       return data.map(d => ({
         ...d,
-        credor_nome: d.credor?.nome,
-        devedor_nome: d.devedor?.nome
+        credor_nome: d.credor_nome,
+        devedor_nome: d.devedor_nome
       })) || []
     },
     enabled: !!familiaId,
@@ -139,14 +139,14 @@ export function useDividas(familiaId?: string) {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
       const { data, error } = await supabase
-        .from('dividas_internas')
+        .from('vw_dividas_internas')
         .select(`
           id,
           familia_id,
           credor_id,
-          credor:credor_id(id, nome),
+          credor_nome,
           devedor_id,
-          devedor:devedor_id(id, nome),
+          devedor_nome,
           valor,
           descricao,
           status,
@@ -163,8 +163,8 @@ export function useDividas(familiaId?: string) {
 
       return data.map(d => ({
         ...d,
-        credor_nome: d.credor?.nome,
-        devedor_nome: d.devedor?.nome
+        credor_nome: d.credor_nome,
+        devedor_nome: d.devedor_nome
       })) || []
     },
     enabled: !!familiaId,

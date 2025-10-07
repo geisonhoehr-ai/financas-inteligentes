@@ -18,7 +18,7 @@ export function useGastos() {
           descricao,
           valor,
           data,
-          categoria,
+          categoria_id,
           usuario_id,
           familia_id,
           created_at,
@@ -39,19 +39,20 @@ export function useGastos() {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
-      const { data, error } = await supabase
-        .from('gastos')
-        .insert({
-          ...gasto,
-          usuario_id: user.user.id,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          deletado: false
-        })
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_gasto', {
+        p_descricao: gasto.descricao,
+        p_valor: gasto.valor,
+        p_data: gasto.data,
+        p_categoria_id: gasto.categoria_id,
+        p_familia_id: gasto.familia_id,
+        p_comprovante_url: gasto.comprovante_url
+      })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar gasto:', error)
+        throw error
+      }
+
       return data
     },
     onSuccess: () => {
@@ -69,18 +70,20 @@ export function useGastos() {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
-      const { data, error } = await supabase
-        .from('gastos')
-        .update({
-          ...gasto,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('atualizar_gasto', {
+        p_gasto_id: id,
+        p_descricao: gasto.descricao,
+        p_valor: gasto.valor,
+        p_data: gasto.data,
+        p_categoria_id: gasto.categoria_id,
+        p_comprovante_url: gasto.comprovante_url
+      })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao atualizar gasto:', error)
+        throw error
+      }
+
       return data
     },
     onSuccess: () => {
@@ -98,19 +101,15 @@ export function useGastos() {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
-      const { data, error } = await supabase
-        .from('gastos')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-        .eq('usuario_id', user.user.id)
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('deletar_gasto', {
+        p_gasto_id: id
+      })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao deletar gasto:', error)
+        throw error
+      }
+
       return data
     },
     onSuccess: () => {
@@ -127,6 +126,34 @@ export function useGastos() {
   const refreshDashboard = async () => {
     await supabase.rpc('refresh_dashboard_views')
   }
+  const restoreGasto = useMutation({
+    mutationFn: async (id: string) => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase.rpc('restaurar_gasto', {
+        p_gasto_id: id
+      })
+
+      if (error) {
+        console.error('Erro ao restaurar gasto:', error)
+        throw error
+      }
+
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gastos'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+      queryClient.invalidateQueries({ queryKey: ['lixeira'] })
+      refreshDashboard()
+      showToast.success('Gasto restaurado com sucesso!')
+    },
+    onError: (error) => {
+      showToast.error('Erro ao restaurar gasto: ' + error.message)
+    },
+  })
+
   return {
     gastos,
     isLoading,
@@ -134,9 +161,11 @@ export function useGastos() {
     createGasto: createGasto.mutate,
     updateGasto: updateGasto.mutate,
     deleteGasto: deleteGasto.mutate,
+    restoreGasto: restoreGasto.mutate,
     isCreating: createGasto.isPending,
     isUpdating: updateGasto.isPending,
     isDeleting: deleteGasto.isPending,
+    isRestoring: restoreGasto.isPending,
   }
 }
 

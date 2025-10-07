@@ -280,7 +280,7 @@ export default function DividasPage() {
       <Sheet open={showAddDivida} onOpenChange={setShowAddDivida}>
         <SheetContent className="h-[90vh]">
           <SheetHeader>
-            <SheetTitle>Registrar Dívida</SheetTitle>
+            <div className="text-lg font-semibold">Registrar Dívida</div>
             <SheetDescription>
               Registre uma dívida entre membros da família
             </SheetDescription>
@@ -301,7 +301,7 @@ export default function DividasPage() {
       <Sheet open={showUploadComprovante} onOpenChange={setShowUploadComprovante}>
         <SheetContent className="h-auto max-h-[90vh]">
           <SheetHeader>
-            <SheetTitle>Enviar Comprovante</SheetTitle>
+            <div className="text-lg font-semibold">Enviar Comprovante</div>
             <SheetDescription>
               Anexe o comprovante de pagamento da dívida
             </SheetDescription>
