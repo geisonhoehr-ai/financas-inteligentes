@@ -6,15 +6,9 @@ import { useAuth } from '@/components/auth-provider'
 import { usePlanLimits } from '@/hooks/use-subscription'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useGastos } from '@/hooks/use-gastos'
-import { useDividas } from '@/hooks/use-dividas'
-import { useAssinaturas } from '@/hooks/use-assinaturas'
-import { useContasFixas } from '@/hooks/use-contas-fixas'
-import { useGasolina } from '@/hooks/use-gasolina'
 import { useCartoes } from '@/hooks/use-cartoes'
 import { useMetas } from '@/hooks/use-metas'
 import { useInvestimentos } from '@/hooks/use-investimentos'
-import { useParcelas } from '@/hooks/use-parcelas'
-import { useFerramentas } from '@/hooks/use-ferramentas'
 import { formatCurrency } from '@/lib/utils'
 import {
   TrendingUp,
@@ -22,11 +16,7 @@ import {
   CreditCard,
   Target,
   PiggyBank,
-  Receipt,
-  Fuel,
-  Wrench,
-  Calendar,
-  DollarSign
+  Receipt
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -34,16 +24,12 @@ export default function DashboardPage() {
   const { user } = useAuth()
   const { plan, isPro } = usePlanLimits()
   const { familiaAtiva } = useFamiliaAtiva()
+  
+  // Carregar apenas dados essenciais inicialmente
   const { gastos, stats: gastosStats } = useGastos()
-  const { dividas } = useDividas()
-  const { assinaturas } = useAssinaturas()
-  const { contas } = useContasFixas()
-  const { abastecimentos } = useGasolina()
+  const { investimentos } = useInvestimentos()
   const { cartoes } = useCartoes()
   const { metas } = useMetas()
-  const { investimentos } = useInvestimentos()
-  const { parcelas } = useParcelas()
-  const { ferramentas } = useFerramentas()
 
   const stats = [
     {
@@ -196,7 +182,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-green-500">
-                      {formatCurrency(investimento.valor_atual)}
+                      {formatCurrency(investimento.valor_atual || investimento.valor)}
                     </p>
                   </div>
                 </div>

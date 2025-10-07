@@ -34,7 +34,7 @@ export default function LoginPage() {
       }
 
       showToast.success('Login realizado com sucesso!')
-      router.push('/')
+      router.push('/dashboard')
     } catch (error) {
       showToast.error('Erro inesperado. Tente novamente.')
     } finally {

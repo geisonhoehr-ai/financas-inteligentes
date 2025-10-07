@@ -7,21 +7,16 @@ export function useSubscription() {
   return useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) return null
-
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', user.user.id)
-        .single()
-
-      if (error) {
-        console.error('Erro ao buscar assinatura:', error)
-        return null
-      }
-
-      return data as UserSubscription
+      // Por enquanto, retornamos sempre o plano free
+      // TODO: Implementar sistema de assinaturas real quando necessário
+      return {
+        id: 'temp',
+        user_id: 'temp',
+        plan: 'free',
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as UserSubscription
     },
   })
 }
