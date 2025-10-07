@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Plus, Wrench, Code, Laptop, TrendingDown } from 'lucide-react'
 import { useFerramentas } from '@/hooks/use-ferramentas'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function FerramentasPage() {
+  const { familiaAtiva } = useFamiliaAtiva()
   const { ferramentas, stats, isLoading, createFerramenta, isCreating } = useFerramentas()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
@@ -133,14 +135,14 @@ export default function FerramentasPage() {
               Adicione uma nova ferramenta ou software profissional
             </DrawerDescription>
           </DrawerHeader>
-          <FerramentaForm onClose={() => setShowAddDrawer(false)} />
+          <FerramentaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
     </div>
   )
 }
 
-function FerramentaForm({ onClose }: { onClose: () => void }) {
+function FerramentaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
   const { createFerramenta, isCreating } = useFerramentas()
   const [formData, setFormData] = useState({
     nome: '',

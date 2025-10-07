@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useGastos } from '@/hooks/use-gastos'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useFamilias } from '@/hooks/use-familias'
+import { useCategorias } from '@/hooks/use-categorias'
 import { useAuth } from '@/components/auth-provider'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -222,6 +223,7 @@ export default function GastosPage() {
 function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
   const { user } = useAuth()
   const { familiaAtiva } = useFamiliaAtiva()
+  const { categorias } = useCategorias()
   const { createGasto, updateGasto, isCreating, isUpdating } = useGastos()
   const [formData, setFormData] = useState({
     descricao: gasto?.descricao || '',
@@ -306,15 +308,21 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
 
       <div className="space-y-2">
         <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Categoria
+          Categoria *
         </label>
-        <Input
-          type="text"
-          placeholder="Ex: Alimentação, Transporte, Saúde..."
+        <select
           value={formData.categoria}
           onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-          className="rounded-xl border-zinc-200 dark:border-zinc-700"
-        />
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+          required
+        >
+          <option value="">Selecione uma categoria...</option>
+          {categorias.map((categoria) => (
+            <option key={categoria.id} value={categoria.id}>
+              {categoria.icone} {categoria.nome}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="space-y-2">

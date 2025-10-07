@@ -7,9 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Plus, Building, Zap, Droplet, Wifi, Phone } from 'lucide-react'
 import { useContasFixas } from '@/hooks/use-contas-fixas'
+import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function ContasFixasPage() {
+  const { familiaAtiva } = useFamiliaAtiva()
   const { contas, stats, isLoading, createContaFixa, isCreating } = useContasFixas()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
 
@@ -144,14 +146,14 @@ export default function ContasFixasPage() {
               Adicione uma nova conta fixa mensal
             </DrawerDescription>
           </DrawerHeader>
-          <ContaFixaForm onClose={() => setShowAddDrawer(false)} />
+          <ContaFixaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
     </div>
   )
 }
 
-function ContaFixaForm({ onClose }: { onClose: () => void }) {
+function ContaFixaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
   const { createContaFixa, isCreating } = useContasFixas()
   const [formData, setFormData] = useState({
     nome: '',

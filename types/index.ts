@@ -25,13 +25,13 @@ export interface Gasto {
   id: number
   descricao: string
   valor: number
-  usuario_id: number
+  usuario_id: string
   data: string
   categoria: string
   tipo_pagamento: string
   privado?: boolean              // ← NOVO: Gasto privado
   visivel_familia?: boolean      // ← NOVO: Incluir no dashboard familiar
-  familia_id?: number | null     // ← NOVO: A qual família pertence
+  familia_id?: string | null     // ← NOVO: A qual família pertence
   deletado: boolean
   deletado_em: string | null
   deletado_por: number | null
@@ -41,13 +41,13 @@ export interface Gasto {
 export interface InsertGasto {
   descricao: string
   valor: number
-  usuario_id: number
+  usuario_id: string
   data: string
-  categoria: string
+  categoria_id: string
   tipo_pagamento: string
   privado?: boolean
   visivel_familia?: boolean
-  familia_id?: number | null
+  familia_id?: string | null
 }
 
 export interface DashboardData {
@@ -82,10 +82,10 @@ export type TipoPerfil = typeof TIPOS_PERFIL[number]
 
 export interface PerfilUsuario {
   id: number
-  usuario_id: number
+  usuario_id: string
   tipo: TipoPerfil
   nome: string                    // "Pessoal" ou "MEI Tech"
-  familia_id?: number | null
+  familia_id?: string | null
   ativo: boolean
   cor?: string
   icone?: string
@@ -94,7 +94,7 @@ export interface PerfilUsuario {
 // Categorias personalizadas
 export interface CategoriaPersonalizada {
   id: number
-  usuario_id: number
+  usuario_id: string
   nome: string
   icone?: string
   cor?: string
@@ -105,7 +105,7 @@ export interface CategoriaPersonalizada {
 // Páginas personalizadas
 export interface PaginaPersonalizada {
   id: number
-  usuario_id: number
+  usuario_id: string
   nome: string
   rota: string                    // Ex: "/educacao"
   categoria_relacionada?: string
@@ -118,17 +118,17 @@ export interface PaginaPersonalizada {
 // Salários com contexto
 export interface Salario {
   id: number
-  usuario_id: number
+  usuario_id: string
   valor: number
   mes: string
   tipo: 'principal' | 'extra' | 'bonus'
-  familia_id?: number | null      // A qual família pertence
+  familia_id?: string | null      // A qual família pertence
   visivel_familia: boolean        // Incluir na soma familiar
 }
 
 // Configurações de privacidade
 export interface ConfigPrivacidade {
-  usuario_id: number
+  usuario_id: string
   mostrar_salario_familia: boolean
   mostrar_gastos_pessoais: boolean
   permitir_edicao_outros: boolean
