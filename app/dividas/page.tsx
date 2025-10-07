@@ -63,7 +63,7 @@ export default function DividasPage() {
       valor: parseFloat(formData.valor.toString()),
       parcela_total: parseInt(formData.parcela_total.toString()),
       parcela_numero: parseInt(formData.parcela_numero.toString()),
-      valor_parcela: parseFloat(formData.valor_parcela.toString())
+      familia_id: familiaAtiva?.id
     }
 
     try {

@@ -162,7 +162,8 @@ function CartaoForm({ onClose }: { onClose: () => void }) {
       limite: parseFloat(formData.limite.toString()),
       dia_vencimento: parseInt(formData.dia_vencimento.toString()),
       dia_fechamento: parseInt(formData.dia_fechamento.toString()),
-      numero_final: formData.numero_final ? parseInt(formData.numero_final.toString()) : undefined
+      ultimos_digitos: formData.numero_final ? formData.numero_final.toString() : '',
+      observacoes: formData.descricao
     }
 
     try {
