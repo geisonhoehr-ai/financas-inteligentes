@@ -212,12 +212,18 @@ export function useFamilias() {
   })
   const deleteFamilia = useMutation({
     mutationFn: async (familiaId: string) => {
+      console.log('Tentando deletar família:', familiaId)
+      
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
+
+      console.log('Usuário autenticado:', user.user.id)
 
       const { data, error } = await supabase.rpc('deletar_familia', {
         p_familia_id: familiaId
       })
+
+      console.log('Resultado da RPC:', { data, error })
 
       if (error) {
         console.error('Erro ao deletar família:', error)
