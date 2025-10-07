@@ -21,8 +21,8 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const { familias, isLoading: familiasLoading } = useFamilias()
   const { familiaAtiva } = useFamiliaAtiva()
   
-  // Se for página de autenticação, renderizar apenas o conteúdo
-  if (pathname.startsWith('/login') || pathname.startsWith('/convite')) {
+  // Se for página pública ou de autenticação, renderizar apenas o conteúdo
+  if (pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.startsWith('/pricing') || pathname.startsWith('/convite')) {
     return <>{children}</>
   }
 
