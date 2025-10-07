@@ -37,6 +37,7 @@ export default function DividasPage() {
     createDivida,
     isMarking,
     isCanceling,
+    isCreating,
   } = useDividas(familiaAtiva?.id)
 
   const [showAddDivida, setShowAddDivida] = useState(false)
