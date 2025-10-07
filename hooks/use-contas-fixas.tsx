@@ -29,14 +29,39 @@ export function useContasFixas() {
   const { data: contas = [], isLoading, error } = useQuery({
     queryKey: ['contas-fixas'],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
       const { data, error } = await supabase
+        .from('contas_fixas')
+        .select()
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
         .order('dia_vencimento', { ascending: true })
+
+      if (error) throw error
+      return data || []
     },
   })
   const createContaFixa = useMutation({
     mutationFn: async (conta: InsertContaFixa) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('contas_fixas')
+        .insert({
+          ...conta,
+          usuario_id: user.user.id,
+          status: 'ativa',
+          deletado: false,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contas-fixas'] })
@@ -46,8 +71,22 @@ export function useContasFixas() {
   })
   const updateContaFixa = useMutation({
     mutationFn: async ({ id, ...conta }: Partial<ContaFixa> & { id: number }) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('contas_fixas')
+        .update({
+          ...conta,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contas-fixas'] })
@@ -57,11 +96,24 @@ export function useContasFixas() {
   })
   const deleteContaFixa = useMutation({
     mutationFn: async (id: number) => {
-      console.log('RPC desabilitado temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
-        p_tabela: 'contas_fixas',
-        p_id: id,
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('contas_fixas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contas-fixas'] })
@@ -92,5 +144,6 @@ export function useContasFixas() {
     isUpdating: updateContaFixa.isPending,
     isDeleting: deleteContaFixa.isPending,
   }
-}
+}
+
 

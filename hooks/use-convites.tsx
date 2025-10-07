@@ -41,15 +41,68 @@ export function useConvites(familiaId?: string) {
   const { data: convites = [], isLoading } = useQuery<Convite[]>({
     queryKey: ['convites', familiaId],
     queryFn: async () => {
-      console.log('Busca de convites desabilitada temporariamente')
-      return []
+      if (!familiaId) return []
+
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
+      const { data, error } = await supabase
+        .from('convites')
+        .select(`
+          id,
+          familia_id,
+          familia:familias!inner(nome),
+          codigo,
+          criado_por,
+          criador:users!inner(nome),
+          max_usos,
+          usos_atual,
+          validade,
+          ativo,
+          deletado,
+          deletado_em,
+          deletado_por,
+          created_at,
+          updated_at
+        `)
+        .eq('familia_id', familiaId)
+        .eq('deletado', false)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      return data.map(d => ({
+        ...d,
+        familia_nome: d.familia?.nome,
+        criador_nome: d.criador?.nome
+      })) || []
     },
     enabled: false, 
   })
   const createConvite = useMutation({
     mutationFn: async (novoConvite: NovoConvite) => {
-      console.log('Criação de convite desabilitada temporariamente:', novoConvite)
-      throw new Error('Funcionalidade de convites temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const codigo = Math.random().toString(36).substring(2, 10).toUpperCase()
+
+      const { data, error } = await supabase
+        .from('convites')
+        .insert({
+          ...novoConvite,
+          codigo,
+          criado_por: user.user.id,
+          usos_atual: 0,
+          ativo: true,
+          deletado: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['convites'] })
@@ -61,8 +114,16 @@ export function useConvites(familiaId?: string) {
   })
   const validarConvite = useMutation({
     mutationFn: async (codigo: string) => {
-      console.log('Validação de convite desabilitada temporariamente:', codigo)
-      throw new Error('Funcionalidade de validação de convites temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .rpc('validar_convite', {
+          p_codigo: codigo
+        })
+
+      if (error) throw error
+      return data
     },
     onError: (error: any) => {
       showToast.error(`Erro ao validar convite: ${error.message}`)
@@ -70,8 +131,16 @@ export function useConvites(familiaId?: string) {
   })
   const aceitarConvite = useMutation({
     mutationFn: async (codigo: string) => {
-      console.log('Aceitar convite desabilitado temporariamente:', codigo)
-      throw new Error('Funcionalidade de aceitar convites temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .rpc('aceitar_convite', {
+          p_codigo: codigo
+        })
+
+      if (error) throw error
+      return data
     },
     onSuccess: (data: ConviteAceite) => {
       queryClient.invalidateQueries({ queryKey: ['familias'] })
@@ -84,8 +153,22 @@ export function useConvites(familiaId?: string) {
   })
   const desativarConvite = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Desativação de convite desabilitada temporariamente:', id)
-      throw new Error('Funcionalidade de convites temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('convites')
+        .update({
+          ativo: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('criado_por', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['convites'] })
@@ -97,8 +180,22 @@ export function useConvites(familiaId?: string) {
   })
   const reativarConvite = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Reativação de convite desabilitada temporariamente:', id)
-      throw new Error('Funcionalidade de convites temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('convites')
+        .update({
+          ativo: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('criado_por', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['convites'] })
@@ -110,8 +207,24 @@ export function useConvites(familiaId?: string) {
   })
   const deleteConvite = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Exclusão de convite desabilitada temporariamente:', id)
-      throw new Error('Funcionalidade de convites temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('convites')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('criado_por', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['convites'] })
@@ -140,5 +253,6 @@ export function useConvites(familiaId?: string) {
     isAccepting: aceitarConvite.isPending,
     validacaoData: validarConvite.data,
   }
-}
+}
+
 

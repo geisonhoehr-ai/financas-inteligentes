@@ -29,14 +29,38 @@ export function useInvestimentos() {
   const { data: investimentos = [], isLoading, error } = useQuery({
     queryKey: ['investimentos'],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
       const { data, error } = await supabase
+        .from('investimentos')
+        .select()
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
         .order('data_aplicacao', { ascending: false })
+
+      if (error) throw error
+      return data || []
     },
   })
   const createInvestimento = useMutation({
     mutationFn: async (investimento: InsertInvestimento) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('investimentos')
+        .insert({
+          ...investimento,
+          usuario_id: user.user.id,
+          deletado: false,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['investimentos'] })
@@ -44,8 +68,22 @@ export function useInvestimentos() {
   })
   const updateInvestimento = useMutation({
     mutationFn: async ({ id, ...investimento }: Partial<Investimento> & { id: number }) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('investimentos')
+        .update({
+          ...investimento,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['investimentos'] })
@@ -53,11 +91,24 @@ export function useInvestimentos() {
   })
   const deleteInvestimento = useMutation({
     mutationFn: async (id: number) => {
-      console.log('RPC desabilitado temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
-        p_tabela: 'investimentos',
-        p_id: id,
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('investimentos')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['investimentos'] })
@@ -86,5 +137,6 @@ export function useInvestimentos() {
     isUpdating: updateInvestimento.isPending,
     isDeleting: deleteInvestimento.isPending,
   }
-}
+}
+
 

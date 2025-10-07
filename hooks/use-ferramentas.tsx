@@ -33,14 +33,39 @@ export function useFerramentas() {
   const { data: ferramentas = [], isLoading, error } = useQuery({
     queryKey: ['ferramentas'],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
       const { data, error } = await supabase
+        .from('ferramentas')
+        .select()
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
         .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data || []
     },
   })
   const createFerramenta = useMutation({
     mutationFn: async (ferramenta: InsertFerramenta) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .insert({
+          ...ferramenta,
+          usuario_id: user.user.id,
+          status: 'ativa',
+          deletado: false,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
@@ -50,8 +75,22 @@ export function useFerramentas() {
   })
   const updateFerramenta = useMutation({
     mutationFn: async ({ id, ...ferramenta }: Partial<Ferramenta> & { id: number }) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .update({
+          ...ferramenta,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
@@ -61,11 +100,24 @@ export function useFerramentas() {
   })
   const deleteFerramenta = useMutation({
     mutationFn: async (id: number) => {
-      console.log('RPC desabilitado temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
-        p_tabela: 'ferramentas_ia_dev',
-        p_id: id,
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
@@ -102,5 +154,6 @@ export function useFerramentas() {
     isUpdating: updateFerramenta.isPending,
     isDeleting: deleteFerramenta.isPending,
   }
-}
+}
+
 

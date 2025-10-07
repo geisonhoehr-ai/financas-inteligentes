@@ -41,16 +41,60 @@ export function useDividas(familiaId?: string) {
   const { data: dividas = [], isLoading } = useQuery({
     queryKey: ['dividas', familiaId],
     queryFn: async () => {
-      console.log('Busca de dívidas desabilitada temporariamente')
-      return []
+      if (!familiaId) return []
+
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
+      const { data, error } = await supabase
+        .from('dividas_internas')
+        .select(`
+          id,
+          familia_id,
+          credor_id,
+          credor:credor_id(id, nome),
+          devedor_id,
+          devedor:devedor_id(id, nome),
+          valor,
+          descricao,
+          gasto_original_id,
+          parcela_numero,
+          parcela_total,
+          status,
+          data_criacao,
+          data_vencimento,
+          data_pagamento,
+          comprovante_url,
+          observacoes
+        `)
+        .eq('familia_id', familiaId)
+        .order('data_criacao', { ascending: false })
+
+      if (error) throw error
+
+      return data.map(d => ({
+        ...d,
+        credor_nome: d.credor?.nome,
+        devedor_nome: d.devedor?.nome
+      })) || []
     },
     enabled: !!familiaId,
   })
   const { data: resumo } = useQuery<ResumoDividas[]>({
     queryKey: ['resumo-dividas', familiaId],
     queryFn: async () => {
-      console.log('Resumo de dívidas desabilitado temporariamente')
-      return []
+      if (!familiaId) return []
+
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
+      const { data, error } = await supabase
+        .rpc('obter_meu_resumo_dividas', {
+          p_familia_id: familiaId
+        })
+
+      if (error) throw error
+      return data || []
     },
   })
   const { data: dividasQueDevo = [] } = useQuery({
@@ -58,8 +102,34 @@ export function useDividas(familiaId?: string) {
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
-      console.log('Busca de dívidas que devo desabilitada temporariamente')
-      return []
+      const { data, error } = await supabase
+        .from('dividas_internas')
+        .select(`
+          id,
+          familia_id,
+          credor_id,
+          credor:credor_id(id, nome),
+          devedor_id,
+          devedor:devedor_id(id, nome),
+          valor,
+          descricao,
+          status,
+          data_criacao,
+          data_vencimento,
+          data_pagamento
+        `)
+        .eq('familia_id', familiaId)
+        .eq('devedor_id', user.user.id)
+        .eq('status', 'pendente')
+        .order('data_criacao', { ascending: false })
+
+      if (error) throw error
+
+      return data.map(d => ({
+        ...d,
+        credor_nome: d.credor?.nome,
+        devedor_nome: d.devedor?.nome
+      })) || []
     },
     enabled: !!familiaId,
   })
@@ -68,15 +138,54 @@ export function useDividas(familiaId?: string) {
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
-      console.log('Busca de dívidas que recebo desabilitada temporariamente')
-      return []
+      const { data, error } = await supabase
+        .from('dividas_internas')
+        .select(`
+          id,
+          familia_id,
+          credor_id,
+          credor:credor_id(id, nome),
+          devedor_id,
+          devedor:devedor_id(id, nome),
+          valor,
+          descricao,
+          status,
+          data_criacao,
+          data_vencimento,
+          data_pagamento
+        `)
+        .eq('familia_id', familiaId)
+        .eq('credor_id', user.user.id)
+        .eq('status', 'pendente')
+        .order('data_criacao', { ascending: false })
+
+      if (error) throw error
+
+      return data.map(d => ({
+        ...d,
+        credor_nome: d.credor?.nome,
+        devedor_nome: d.devedor?.nome
+      })) || []
     },
     enabled: !!familiaId,
   })
   const createDivida = useMutation({
     mutationFn: async (divida: Partial<DividaInterna>) => {
-      console.log('Criar dívida desabilitado temporariamente:', divida)
-      throw new Error('Funcionalidade de criar dívida temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('dividas_internas')
+        .insert({
+          ...divida,
+          status: 'pendente',
+          data_criacao: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dividas'] })
@@ -91,8 +200,23 @@ export function useDividas(familiaId?: string) {
   })
   const marcarComoPaga = useMutation({
     mutationFn: async ({ id, comprovanteUrl }: { id: string; comprovanteUrl?: string }) => {
-      console.log('Marcar dívida como paga desabilitado temporariamente:', id)
-      throw new Error('Funcionalidade de marcar dívida como paga temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('dividas_internas')
+        .update({
+          status: 'paga',
+          data_pagamento: new Date().toISOString(),
+          comprovante_url: comprovanteUrl
+        })
+        .eq('id', id)
+        .eq('devedor_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dividas'] })
@@ -107,8 +231,22 @@ export function useDividas(familiaId?: string) {
   })
   const cancelarDivida = useMutation({
     mutationFn: async ({ id, motivo }: { id: string; motivo?: string }) => {
-      console.log('Cancelar dívida desabilitado temporariamente:', id)
-      throw new Error('Funcionalidade de cancelar dívida temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('dividas_internas')
+        .update({
+          status: 'cancelada',
+          observacoes: motivo
+        })
+        .eq('id', id)
+        .or(`credor_id.eq.${user.user.id},devedor_id.eq.${user.user.id}`)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dividas'] })
@@ -127,8 +265,14 @@ export function useDividas(familiaId?: string) {
         acc[userId] = { percentual }
         return acc
       }, {} as Record<string, { percentual: number }>)
-      console.log('Dividir gasto entre membros desabilitado temporariamente:', gastoId)
-      throw new Error('Funcionalidade de dividir gasto entre membros temporariamente desabilitada')
+      const { data, error } = await supabase
+        .rpc('dividir_gasto_entre_membros', {
+          p_gasto_id: gastoId,
+          p_divisao: divisaoFormatada
+        })
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dividas'] })

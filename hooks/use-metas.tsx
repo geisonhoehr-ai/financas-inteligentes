@@ -31,14 +31,40 @@ export function useMetas() {
   const { data: metas = [], isLoading, error } = useQuery({
     queryKey: ['metas'],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
       const { data, error } = await supabase
+        .from('metas')
+        .select()
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
         .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return data || []
     },
   })
   const createMeta = useMutation({
     mutationFn: async (meta: InsertMeta) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('metas')
+        .insert({
+          ...meta,
+          usuario_id: user.user.id,
+          valor_atual: meta.valor_atual || 0,
+          status: meta.status || 'em_andamento',
+          deletado: false,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metas'] })
@@ -46,8 +72,22 @@ export function useMetas() {
   })
   const updateMeta = useMutation({
     mutationFn: async ({ id, ...meta }: Partial<Meta> & { id: number }) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('metas')
+        .update({
+          ...meta,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metas'] })
@@ -55,11 +95,24 @@ export function useMetas() {
   })
   const deleteMeta = useMutation({
     mutationFn: async (id: number) => {
-      console.log('RPC desabilitado temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
-        p_tabela: 'metas',
-        p_id: id,
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('metas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['metas'] })
@@ -87,5 +140,6 @@ export function useMetas() {
     isUpdating: updateMeta.isPending,
     isDeleting: deleteMeta.isPending,
   }
-}
+}
+
 

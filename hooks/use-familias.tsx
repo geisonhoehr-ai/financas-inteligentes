@@ -8,8 +8,27 @@ export function useFamilias() {
   const { data: familias = [], isLoading, error } = useQuery({
     queryKey: ['familias'],
     queryFn: async () => {
-      console.log('Busca de famílias desabilitada temporariamente')
-      return []
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
+      const { data, error } = await supabase
+        .from('familias')
+        .select(`
+          id,
+          nome,
+          admin_id,
+          codigo_convite,
+          created_at,
+          familia_membros (
+            usuario_id,
+            papel,
+            aprovado
+          )
+        `)
+        .or(`admin_id.eq.${user.user.id},familia_membros.usuario_id.eq.${user.user.id},and(familia_membros.aprovado.eq.true)`)
+
+      if (error) throw error
+      return data || []
     },
   })
   const useMembros = (familiaId: string | null) => {
@@ -17,8 +36,25 @@ export function useFamilias() {
       queryKey: ['familia-membros', familiaId],
       queryFn: async () => {
         if (!familiaId) return []
-        console.log('Busca de membros desabilitada temporariamente')
-        return []
+
+        const { data, error } = await supabase
+          .from('familia_membros')
+          .select(`
+            usuario_id,
+            papel,
+            aprovado,
+            created_at,
+            users (
+              id,
+              nome,
+              email
+            )
+          `)
+          .eq('familia_id', familiaId)
+          .eq('aprovado', true)
+
+        if (error) throw error
+        return data || []
       },
       enabled: !!familiaId,
     })
@@ -26,8 +62,52 @@ export function useFamilias() {
   const createFamilia = useMutation({
     mutationFn: async (familia: InsertFamilia) => {
       const codigoConvite = Math.random().toString(36).substring(2, 10).toUpperCase()
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      // Criar família
+      const novaFamilia = {
+        nome: familia.nome,
+        admin_id: user.user.id,
+        codigo_convite: codigoConvite,
+        created_at: new Date().toISOString()
+      }
+
+      const { data, error } = await supabase
+        .from('familias')
+        .insert(novaFamilia)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao criar família:', error)
+        throw error
+      }
+
+      // Adicionar usuário como membro
+      const novoMembro = {
+        familia_id: data.id,
+        usuario_id: user.user.id,
+        papel: 'admin',
+        aprovado: true,
+        created_at: new Date().toISOString()
+      }
+
+      const { error: membroError } = await supabase
+        .from('familia_membros')
+        .insert(novoMembro)
+
+      if (membroError) {
+        console.error('Erro ao adicionar membro:', membroError)
+        // Remover a família criada para manter consistência
+        await supabase
+          .from('familias')
+          .delete()
+          .eq('id', data.id)
+        throw membroError
+      }
+
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['familias'] })

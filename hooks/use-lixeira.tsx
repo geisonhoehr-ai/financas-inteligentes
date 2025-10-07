@@ -28,6 +28,9 @@ export function useLixeira() {
       dataLimite.setDate(dataLimite.getDate() - 30) 
       for (const tabela of TABELAS) {
         const { data } = await supabase
+          .from(tabela.nome)
+          .select()
+          .eq('deletado', true)
           .gte('deletado_em', dataLimite.toISOString())
         if (data && data.length > 0) {
           todosItens.push(
@@ -49,8 +52,24 @@ export function useLixeira() {
   })
   const restoreItem = useMutation({
     mutationFn: async ({ tabela, id }: { tabela: string; id: number }) => {
-      console.log('RPC desabilitado temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from(tabela)
+        .update({
+          deletado: false,
+          deletado_em: null,
+          deletado_por: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
@@ -65,7 +84,16 @@ export function useLixeira() {
   })
   const permanentlyDeleteItem = useMutation({
     mutationFn: async ({ tabela, id }: { tabela: string; id: number }) => {
-      const { error } = await supabase.from(tabela as any).delete().eq('id', id)
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { error } = await supabase
+        .from(tabela)
+        .delete()
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+
+      if (error) throw error
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
@@ -83,5 +111,6 @@ export function useLixeira() {
     isRestoring: restoreItem.isPending,
     isDeleting: permanentlyDeleteItem.isPending,
   }
-}
+}
+
 

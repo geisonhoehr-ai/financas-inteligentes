@@ -34,14 +34,39 @@ export function useAssinaturas() {
   const { data: assinaturas = [], isLoading, error } = useQuery({
     queryKey: ['assinaturas'],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
       const { data, error } = await supabase
+        .from('assinaturas')
+        .select()
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
         .order('dia_vencimento', { ascending: true })
+
+      if (error) throw error
+      return data || []
     },
   })
   const createAssinatura = useMutation({
-    mutationFn: async (assinatura: any) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+    mutationFn: async (assinatura: Database['public']['Tables']['assinaturas']['Insert']) => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('assinaturas')
+        .insert({
+          ...assinatura,
+          usuario_id: user.user.id,
+          status: 'ativa',
+          deletado: false,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assinaturas'] })
@@ -50,9 +75,23 @@ export function useAssinaturas() {
     },
   })
   const updateAssinatura = useMutation({
-    mutationFn: async ({ id, ...assinatura }: any) => {
-      console.log('Update assinatura desabilitado temporariamente:', id)
-      throw new Error('Funcionalidade temporariamente desabilitada')
+    mutationFn: async ({ id, ...assinatura }: Partial<Database['public']['Tables']['assinaturas']['Update']> & { id: number }) => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('assinaturas')
+        .update({
+          ...assinatura,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assinaturas'] })
@@ -62,8 +101,24 @@ export function useAssinaturas() {
   })
   const deleteAssinatura = useMutation({
     mutationFn: async (id: number) => {
-      console.log('Delete assinatura desabilitado temporariamente:', id)
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('assinaturas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assinaturas'] })
@@ -108,5 +163,6 @@ export function useAssinaturas() {
     isUpdating: updateAssinatura.isPending,
     isDeleting: deleteAssinatura.isPending,
   }
-}
+}
+
 

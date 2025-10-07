@@ -8,14 +8,51 @@ export function useGastos() {
   const { data: gastos = [], isLoading, error } = useQuery({
     queryKey: ['gastos'],
     queryFn: async () => {
-      console.log('Busca de gastos desabilitada temporariamente')
-      return []
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
+      const { data, error } = await supabase
+        .from('gastos')
+        .select(`
+          id,
+          descricao,
+          valor,
+          data,
+          categoria,
+          usuario_id,
+          familia_id,
+          created_at,
+          updated_at,
+          deletado,
+          deletado_em
+        `)
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
+        .order('data', { ascending: false })
+
+      if (error) throw error
+      return data || []
     },
   })
   const createGasto = useMutation({
     mutationFn: async (gasto: InsertGasto) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('gastos')
+        .insert({
+          ...gasto,
+          usuario_id: user.user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          deletado: false
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
@@ -29,8 +66,22 @@ export function useGastos() {
   })
   const updateGasto = useMutation({
     mutationFn: async ({ id, ...gasto }: Partial<Gasto> & { id: string }) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('gastos')
+        .update({
+          ...gasto,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
@@ -44,8 +95,23 @@ export function useGastos() {
   })
   const deleteGasto = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Soft delete de gasto desabilitado temporariamente:', id)
-      throw new Error('Funcionalidade de soft delete temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('gastos')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })

@@ -33,14 +33,38 @@ export function useGasolina() {
   const { data: abastecimentos = [], isLoading, error } = useQuery({
     queryKey: ['gasolina'],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
       const { data, error } = await supabase
+        .from('gasolina')
+        .select()
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
         .order('data', { ascending: false })
+
+      if (error) throw error
+      return data || []
     },
   })
   const createGasolina = useMutation({
     mutationFn: async (gasolina: InsertGasolina) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('gasolina')
+        .insert({
+          ...gasolina,
+          usuario_id: user.user.id,
+          deletado: false,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gasolina'] })
@@ -50,8 +74,22 @@ export function useGasolina() {
   })
   const updateGasolina = useMutation({
     mutationFn: async ({ id, ...gasolina }: Partial<Gasolina> & { id: number }) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('gasolina')
+        .update({
+          ...gasolina,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gasolina'] })
@@ -61,11 +99,24 @@ export function useGasolina() {
   })
   const deleteGasolina = useMutation({
     mutationFn: async (id: number) => {
-      console.log('RPC desabilitado temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
-        p_tabela: 'gasolina',
-        p_id: id,
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('gasolina')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gasolina'] })
@@ -97,5 +148,6 @@ export function useGasolina() {
     isUpdating: updateGasolina.isPending,
     isDeleting: deleteGasolina.isPending,
   }
-}
+}
+
 

@@ -37,14 +37,57 @@ export function useParcelas() {
   const { data: parcelas = [], isLoading, error } = useQuery({
     queryKey: ['parcelas'],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) return []
+
       const { data, error } = await supabase
+        .from('compras_parceladas')
+        .select(`
+          id,
+          descricao,
+          valor_total,
+          parcela_atual,
+          total_parcelas,
+          valor_parcela,
+          data_compra,
+          dia_vencimento,
+          usuario_id,
+          categoria,
+          estabelecimento,
+          cartao_id,
+          cartao:cartoes(nome),
+          deletado,
+          deletado_em,
+          deletado_por,
+          created_at
+        `)
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
         .order('data_compra', { ascending: false })
+
+      if (error) throw error
+      return data || []
     },
   })
   const createParcela = useMutation({
     mutationFn: async (parcela: InsertParcela) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('compras_parceladas')
+        .insert({
+          ...parcela,
+          usuario_id: user.user.id,
+          parcela_atual: parcela.parcela_atual || 1,
+          deletado: false,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
@@ -54,8 +97,22 @@ export function useParcelas() {
   })
   const updateParcela = useMutation({
     mutationFn: async ({ id, ...parcela }: Partial<Parcela> & { id: number }) => {
-      console.log('Operação desabilitada temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('compras_parceladas')
+        .update({
+          ...parcela,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
@@ -65,8 +122,24 @@ export function useParcelas() {
   })
   const deleteParcela = useMutation({
     mutationFn: async (id: number) => {
-      console.log('RPC desabilitado temporariamente')
-      throw new Error('Funcionalidade temporariamente desabilitada')
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('compras_parceladas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
@@ -98,5 +171,6 @@ export function useParcelas() {
     isUpdating: updateParcela.isPending,
     isDeleting: deleteParcela.isPending,
   }
-}
+}
+
 
