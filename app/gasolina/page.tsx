@@ -150,7 +150,6 @@ function GasolinaForm({ familiaId, onClose }: { familiaId?: string; onClose: () 
     preco_litro: '',
     km_atual: '',
     data: new Date().toISOString().split('T')[0],
-    posto: '',
     tipo_combustivel: 'gasolina',
     descricao: ''
   })
@@ -258,17 +257,6 @@ function GasolinaForm({ familiaId, onClose }: { familiaId?: string; onClose: () 
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            Posto
-          </label>
-          <Input
-            type="text"
-            placeholder="Ex: Shell, BR..."
-            value={formData.posto}
-            onChange={(e) => setFormData({ ...formData, posto: e.target.value })}
-          />
-        </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium">
