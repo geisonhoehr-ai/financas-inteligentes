@@ -19,7 +19,8 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    acceptTerms: false
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,6 +28,11 @@ export default function RegisterPage() {
     
     if (formData.password !== formData.confirmPassword) {
       showToast.error('As senhas não coincidem')
+      return
+    }
+
+    if (!formData.acceptTerms) {
+      showToast.error('Você deve aceitar os Termos de Uso e Política de Privacidade')
       return
     }
 
@@ -168,6 +174,29 @@ export default function RegisterPage() {
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     placeholder="Digite a senha novamente"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      id="acceptTerms"
+                      type="checkbox"
+                      checked={formData.acceptTerms}
+                      onChange={(e) => setFormData({ ...formData, acceptTerms: e.target.checked })}
+                      className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      required
+                    />
+                    <label htmlFor="acceptTerms" className="text-sm text-muted-foreground">
+                      Eu aceito os{' '}
+                      <Link href="/terms" className="text-primary hover:underline" target="_blank">
+                        Termos de Uso
+                      </Link>
+                      {' '}e a{' '}
+                      <Link href="/privacy" className="text-primary hover:underline" target="_blank">
+                        Política de Privacidade
+                      </Link>
+                    </label>
+                  </div>
                 </div>
 
                 <Button

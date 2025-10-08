@@ -35,6 +35,7 @@ export default function DividasPage() {
     marcarComoPaga,
     cancelarDivida,
     createDivida,
+    refreshData,
     isMarking,
     isCanceling,
     isCreating,
@@ -501,7 +502,7 @@ export default function DividasPage() {
                     setShowUploadComprovante(false)
                     setDividaParaComprovante(null)
                     // Refresh data
-                    window.location.reload()
+                    refreshData()
                   }}
                   onCancel={() => {
                     setShowUploadComprovante(false)

@@ -164,7 +164,7 @@ function InvestimentoForm({ familiaId, onClose }: { familiaId?: string; onClose:
       ...formData,
       valor_investido: parseFloat(formData.valor_inicial.toString()),
       valor_atual: parseFloat(formData.valor_atual.toString()) || parseFloat(formData.valor_inicial.toString()),
-      data_aplicacao: formData.data_aplicacao || new Date().toISOString().split('T')[0],
+      data_aplicacao: formData.data_inicio || new Date().toISOString().split('T')[0],
       familia_id: familiaId
     }
 

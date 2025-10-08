@@ -246,11 +246,8 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
     }
 
     try {
-      // TODO: Implementar edição de gastos quando tipos estiverem corretos
       if (gasto) {
-        console.log('Edição de gasto temporariamente desabilitada')
-        onClose()
-        return
+        await updateGasto({ id: gasto.id, ...gastoData })
       } else {
         await createGasto(gastoData)
       }

@@ -31,7 +31,10 @@ export function useGastos() {
         p_data: gasto.data,
         p_categoria_id: gasto.categoria_id,
         p_familia_id: gasto.familia_id,
-        p_comprovante_url: gasto.comprovante_url
+        p_tipo_pagamento: gasto.tipo_pagamento || 'dinheiro',
+        p_observacoes: gasto.observacoes,
+        p_privado: gasto.privado || false,
+        p_visivel_familia: gasto.visivel_familia !== false
       })
 
       if (error) {

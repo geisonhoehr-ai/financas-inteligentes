@@ -146,7 +146,7 @@ export default function ParcelasPage() {
               Adicione uma nova compra parcelada ao seu controle financeiro
             </DrawerDescription>
           </DrawerHeader>
-          <ParcelaForm onClose={() => setShowAddDrawer(false)} />
+          <ParcelaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
     </div>

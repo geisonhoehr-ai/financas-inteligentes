@@ -180,10 +180,10 @@ export default function AnalyticsPage() {
 
       {/* Gráficos */}
       <AnalyticsDashboard
-        gastosData={data.gastosData}
-        receitasData={data.receitasData}
-        categoriasData={data.categoriasData}
-        investimentosData={data.investimentosData}
+        gastosData={data.gastosData?.map(item => ({ ...item, value: item.valor })) || []}
+        receitasData={data.receitasData?.map(item => ({ ...item, value: item.valor })) || []}
+        categoriasData={data.categoriasData?.map(item => ({ ...item, value: item.valor })) || []}
+        investimentosData={data.investimentosData?.map(item => ({ ...item, value: item.valor })) || []}
       />
     </div>
   )

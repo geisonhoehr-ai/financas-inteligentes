@@ -20,7 +20,7 @@ import { Users, Building, UserPlus, Copy, Settings, Shield, Share2, Check } from
 import { showToast } from '@/lib/toast'
 
 export default function ConfiguracoesPage() {
-  const { familias, isLoading, createFamilia, generateInviteCode, useMembros, deleteFamilia } = useFamilias()
+  const { familias, isLoading, createFamilia, updateFamilia, generateInviteCode, useMembros, deleteFamilia } = useFamilias()
   const { familiaAtivaId, setFamiliaAtivaId } = useFamiliaAtiva()
   const familiaAtualId = familiaAtivaId
   const { data: membros = [] } = useMembros(familiaAtualId)

@@ -1,13 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Server Actions are now stable in Next.js 14
-  typescript: {
-    // Temporariamente ignorar erros de tipo durante o build
-    ignoreBuildErrors: true,
+  // Configurações otimizadas para produção
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
-  eslint: {
-    // Temporariamente ignorar erros de lint durante o build
-    ignoreDuringBuilds: true,
+  images: {
+    domains: ['localhost'],
   },
 }
 

@@ -205,6 +205,13 @@ export function useDividas(familiaId?: string) {
       showToast.error(`Erro ao dividir gasto: ${error.message}`)
     },
   })
+  const refreshData = () => {
+    queryClient.invalidateQueries({ queryKey: ['dividas', familiaId] })
+    queryClient.invalidateQueries({ queryKey: ['dividas-devo', familiaId] })
+    queryClient.invalidateQueries({ queryKey: ['dividas-recebo', familiaId] })
+    queryClient.invalidateQueries({ queryKey: ['resumo-dividas', familiaId] })
+  }
+
   return {
     dividas,
     dividasQueDevo,
@@ -215,6 +222,7 @@ export function useDividas(familiaId?: string) {
     marcarComoPaga: marcarComoPaga.mutate,
     cancelarDivida: cancelarDivida.mutate,
     dividirGasto: dividirGasto.mutate,
+    refreshData,
     isCreating: createDivida.isPending,
     isMarking: marcarComoPaga.isPending,
     isCanceling: cancelarDivida.isPending,
