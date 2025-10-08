@@ -110,7 +110,7 @@ export default function CartoesPage() {
                   <div>
                     <h4 className="font-medium">{cartao.nome}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {cartao.bandeira} • Vence dia {cartao.dia_vencimento}
+                      Vence dia {cartao.dia_vencimento}
                     </p>
                   </div>
                   <div className="text-right">
