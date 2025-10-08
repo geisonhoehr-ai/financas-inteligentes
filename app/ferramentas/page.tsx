@@ -110,7 +110,7 @@ export default function FerramentasPage() {
                   <div>
                     <h4 className="font-medium">{ferramenta.nome}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {ferramenta.tipo || 'Sem tipo'} • {ferramenta.status === 'ativa' ? 'Ativa' : 'Inativa'}
+                      {ferramenta.categoria || 'Sem categoria'} • {ferramenta.status === 'ativa' ? 'Ativa' : 'Inativa'}
                     </p>
                   </div>
                   <div className="text-right">
