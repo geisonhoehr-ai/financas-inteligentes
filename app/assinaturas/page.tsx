@@ -128,7 +128,7 @@ export default function AssinaturasPage() {
                   <div>
                     <h4 className="font-medium">{assinatura.nome}</h4>
                     <p className="text-sm text-muted-foreground">
-                      Vence dia {assinatura.dia_vencimento}
+                      Vence dia {assinatura.dia_cobranca}
                     </p>
                   </div>
                   <div className="text-right">
