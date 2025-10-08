@@ -247,15 +247,16 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
 
     try {
       if (gasto && gasto.id) {
-        await updateGasto({ 
-          id: gasto.id as string,
+        const updateData = { 
+          id: gasto.id,
           descricao: gastoData.descricao,
           valor: gastoData.valor,
           data: gastoData.data,
           categoria_id: gastoData.categoria_id,
           usuario_id: gastoData.usuario_id,
           familia_id: gastoData.familia_id
-        })
+        } as any
+        await updateGasto(updateData)
       } else {
         await createGasto(gastoData)
       }
