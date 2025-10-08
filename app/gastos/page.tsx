@@ -237,7 +237,7 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
     e.preventDefault()
     
     const gastoData = {
-      ...formData,
+      descricao: formData.descricao,
       valor: parseFloat(formData.valor.toString()),
       categoria_id: formData.categoria,
       data: formData.data,
