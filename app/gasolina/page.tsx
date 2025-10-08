@@ -108,7 +108,7 @@ export default function GasolinaPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">{abastecimento.posto || 'Posto não informado'}</h4>
+                    <h4 className="font-medium">Abastecimento</h4>
                     <p className="text-sm text-muted-foreground">
                       {new Date(abastecimento.data).toLocaleDateString()}
                     </p>
