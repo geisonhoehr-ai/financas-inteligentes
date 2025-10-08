@@ -134,7 +134,7 @@ export default function AssinaturasPage() {
                   <div className="text-right">
                     <p className="text-lg font-semibold">{formatCurrency(assinatura.valor)}</p>
                     <p className="text-sm text-muted-foreground">
-                      {assinatura.periodicidade === 'mensal' ? 'Mensal' : 'Anual'}
+                      {assinatura.tipo_periodicidade === 'mensal' ? 'Mensal' : 'Anual'}
                     </p>
                   </div>
                 </div>
