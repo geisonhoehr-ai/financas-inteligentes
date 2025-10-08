@@ -116,7 +116,7 @@ export default function GasolinaPage() {
                   <div className="text-right">
                     <p className="text-lg font-semibold">{formatCurrency(abastecimento.valor)}</p>
                     <p className="text-sm text-muted-foreground">
-                      {abastecimento.litros.toFixed(1)} L ({formatCurrency(abastecimento.preco_litro)}/L)
+                      {abastecimento.litros ? abastecimento.litros.toFixed(1) : '0.0'} L ({formatCurrency(abastecimento.preco_litro || 0)}/L)
                     </p>
                   </div>
                 </div>
