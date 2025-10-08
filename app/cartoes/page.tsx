@@ -116,7 +116,7 @@ export default function CartoesPage() {
                   <div className="text-right">
                     <p className="text-lg font-semibold">{formatCurrency(cartao.limite || 0)}</p>
                     <p className="text-sm text-muted-foreground">
-                      {cartao.tipo === 'credito' ? 'Crédito' : 'Débito'}
+                      Cartão
                     </p>
                   </div>
                 </div>
