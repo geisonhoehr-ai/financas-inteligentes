@@ -182,7 +182,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-green-500">
-                      {formatCurrency(investimento.valor_atual || investimento.valor)}
+                      {formatCurrency(investimento.valor)}
                     </p>
                   </div>
                 </div>
