@@ -68,7 +68,7 @@ export default function TermsPage() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">6. Limitação de Responsabilidade</h2>
               <p>
-                O serviço é fornecido "como está" sem garantias de qualquer tipo. Não nos responsabilizamos 
+                O serviço é fornecido &quot;como está&quot; sem garantias de qualquer tipo. Não nos responsabilizamos 
                 por perdas financeiras resultantes do uso do sistema.
               </p>
             </section>

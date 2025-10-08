@@ -60,7 +60,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
     if (isOpen && familiaAtivaId) {
       fetchNotifications()
     }
-  }, [isOpen, familiaAtivaId])
+  }, [isOpen, familiaAtivaId, fetchNotifications])
 
   const markAsRead = (id: string) => {
     setNotifications(prev => 
@@ -255,7 +255,7 @@ export function NotificationButton({ onClick }: NotificationButtonProps) {
     checkUnreadNotifications()
     const interval = setInterval(checkUnreadNotifications, 30000) // Verificar a cada 30s
     return () => clearInterval(interval)
-  }, [familiaAtivaId])
+  }, [familiaAtivaId, checkUnreadNotifications])
 
   return (
     <Button
