@@ -381,7 +381,7 @@ export default function DividasPage() {
                   <option value="">Selecione...</option>
                   {familiaAtiva?.familia_membros.map((membro) => (
                     <option key={membro.usuario_id} value={membro.usuario_id}>
-                      {membro.nome || membro.usuario_id}
+                      {membro.papel || membro.usuario_id}
                     </option>
                   ))}
                 </select>
@@ -400,7 +400,7 @@ export default function DividasPage() {
                   <option value="">Selecione...</option>
                   {familiaAtiva?.familia_membros.map((membro) => (
                     <option key={membro.usuario_id} value={membro.usuario_id}>
-                      {membro.nome || membro.usuario_id}
+                      {membro.papel || membro.usuario_id}
                     </option>
                   ))}
                 </select>
