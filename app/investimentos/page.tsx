@@ -110,13 +110,13 @@ export default function InvestimentosPage() {
                   <div>
                     <h4 className="font-medium">{investimento.nome}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {investimento.tipo || 'Sem tipo'} • {investimento.status === 'ativo' ? 'Ativo' : 'Resgatado'}
+                      {investimento.tipo || 'Sem tipo'} • {investimento.ativo ? 'Ativo' : 'Resgatado'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(investimento.valor_atual)}</p>
+                    <p className="text-lg font-semibold">{formatCurrency(investimento.valor)}</p>
                     <p className="text-sm text-muted-foreground">
-                      {investimento.rentabilidade >= 0 ? '+' : ''}{investimento.rentabilidade.toFixed(2)}% ({formatCurrency(investimento.valor_investido)})
+                      {investimento.rentabilidade >= 0 ? '+' : ''}{investimento.rentabilidade.toFixed(2)}% ({formatCurrency(investimento.rendimento)})
                     </p>
                   </div>
                 </div>
