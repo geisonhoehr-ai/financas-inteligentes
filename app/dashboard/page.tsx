@@ -40,7 +40,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Investimentos',
-      value: formatCurrency(investimentos.reduce((acc, inv) => acc + inv.valor_atual, 0)),
+      value: formatCurrency(investimentos.reduce((acc, inv) => acc + inv.valor, 0)),
       icon: TrendingUp,
       color: 'text-green-500'
     },
