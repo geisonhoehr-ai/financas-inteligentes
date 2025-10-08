@@ -443,7 +443,7 @@ export default function ConfiguracoesPage() {
                               Nenhum convite ativo
                             </p>
                           ) : (
-                            convites.map((convite) => (
+                            (Array.isArray(convites) ? convites : []).map((convite) => (
                               <div key={convite.id} className="p-3 rounded-lg bg-muted/50 border">
                                 <div className="flex items-center justify-between mb-2">
                                   <code className="text-sm font-mono font-semibold">{convite.codigo}</code>
