@@ -127,7 +127,7 @@ export default function ContasFixasPage() {
                   <div className="text-right">
                     <p className="text-lg font-semibold">{formatCurrency(conta.valor)}</p>
                     <p className="text-sm text-muted-foreground">
-                      {conta.categoria || 'Sem categoria'}
+                      Conta fixa
                     </p>
                   </div>
                 </div>
