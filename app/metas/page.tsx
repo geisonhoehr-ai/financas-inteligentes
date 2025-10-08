@@ -53,7 +53,7 @@ export default function MetasPage() {
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">{formatCurrency(stats.totalEconomizado)}</div>
+            <div className="text-2xl font-bold text-green-500">{formatCurrency(stats.economizado)}</div>
             <p className="text-xs text-muted-foreground">Já guardado</p>
           </CardContent>
         </Card>
