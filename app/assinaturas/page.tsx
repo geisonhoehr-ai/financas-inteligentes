@@ -185,7 +185,7 @@ function AssinaturaForm({ onClose }: { onClose: () => void }) {
       data_inicio: formData.data_inicio,
       data_fim: formData.data_fim || null,
       observacoes: formData.descricao,
-      familia_id: familiaAtivaId
+      familia_id: familiaAtivaId || undefined
     }
 
     try {
