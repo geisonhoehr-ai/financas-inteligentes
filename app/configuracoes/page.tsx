@@ -308,7 +308,7 @@ export default function ConfiguracoesPage() {
                                 updateFamilia({
                                   id: familia.id,
                                   nome: novoNome,
-                                  modo_calculo: familia.modo_calculo
+                                  modo_calculo: familia.modo_calculo || undefined
                                 })
                               }
                             }}
