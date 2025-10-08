@@ -242,7 +242,8 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
       categoria_id: formData.categoria,
       data: formData.data,
       usuario_id: user?.id,
-      familia_id: familiaAtiva?.id
+      familia_id: familiaAtiva?.id,
+      tipo_pagamento: 'dinheiro' as const
     }
 
     try {
