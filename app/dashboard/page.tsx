@@ -147,7 +147,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {gastos.slice(0, 5).map((gasto) => (
+              {gastos.slice(0, 5).map((gasto: any) => (
                 <div key={gasto.id} className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">{gasto.descricao}</p>
