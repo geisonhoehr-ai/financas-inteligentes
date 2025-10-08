@@ -53,7 +53,7 @@ export default function FerramentasPage() {
             <Wrench className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-500">{stats.totalFerramentas}</div>
+            <div className="text-2xl font-bold text-blue-500">{stats.ferramentasAtivas}</div>
             <p className="text-xs text-muted-foreground">Ativas</p>
           </CardContent>
         </Card>
