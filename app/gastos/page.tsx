@@ -127,7 +127,7 @@ export default function GastosPage() {
           </Card>
         ) : (
           <div className="space-y-3">
-            {gastos.map((gasto) => (
+            {gastos.map((gasto: any) => (
               <Card key={gasto.id} className="border-0 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
@@ -314,7 +314,7 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
           required
         >
           <option value="">Selecione uma categoria...</option>
-          {categorias.map((categoria) => (
+          {categorias.map((categoria: any) => (
             <option key={categoria.id} value={categoria.id}>
               {categoria.icone} {categoria.nome}
             </option>
