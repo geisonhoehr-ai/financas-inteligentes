@@ -85,7 +85,7 @@ export default function DividasPage() {
     }
   }
 
-  const resumoAtual = resumo?.[0]
+  const resumoAtual = Array.isArray(resumo) ? resumo[0] : null
   const saldoLiquido = resumoAtual?.saldo_liquido || 0
   const totalDevo = resumoAtual?.total_devo || 0
   const totalRecebo = resumoAtual?.total_recebo || 0
