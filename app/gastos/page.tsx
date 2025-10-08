@@ -236,12 +236,17 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (!user?.id) {
+      console.error('Usuário não autenticado')
+      return
+    }
+
     const gastoData = {
       descricao: formData.descricao,
       valor: parseFloat(formData.valor.toString()),
       categoria_id: formData.categoria,
       data: formData.data,
-      usuario_id: user?.id,
+      usuario_id: user.id,
       familia_id: familiaAtiva?.id,
       tipo_pagamento: 'dinheiro' as const
     }
