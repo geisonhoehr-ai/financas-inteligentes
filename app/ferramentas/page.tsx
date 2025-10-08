@@ -64,7 +64,7 @@ export default function FerramentasPage() {
             <Code className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-500">{stats.totalSoftwares}</div>
+            <div className="text-2xl font-bold text-purple-500">{stats.softwaresLicenciados}</div>
             <p className="text-xs text-muted-foreground">Licenças</p>
           </CardContent>
         </Card>
