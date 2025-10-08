@@ -161,6 +161,7 @@ function FerramentaForm({ familiaId, onClose }: { familiaId?: string; onClose: (
     
     const ferramentaData = {
       ...formData,
+      categoria: formData.tipo, // Mapear tipo para categoria
       valor: parseFloat(formData.valor.toString()),
       data_inicio: formData.data_inicio || new Date().toISOString().split('T')[0],
       data_fim: formData.data_fim || null,
