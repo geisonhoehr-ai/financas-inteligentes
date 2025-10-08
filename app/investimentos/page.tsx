@@ -64,7 +64,7 @@ export default function InvestimentosPage() {
             <PieChart className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-500">{stats.totalInvestimentos}</div>
+            <div className="text-2xl font-bold text-blue-500">{stats.investimentosAtivos}</div>
             <p className="text-xs text-muted-foreground">Ativos</p>
           </CardContent>
         </Card>
