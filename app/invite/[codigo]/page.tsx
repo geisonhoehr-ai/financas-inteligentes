@@ -56,8 +56,17 @@ export default function InvitePage() {
   const handleAcceptInvite = async () => {
     setIsLoading(true)
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        showToast.error('Você precisa estar autenticado para aceitar o convite')
+        router.push('/login')
+        return
+      }
+
       const { error } = await supabase.rpc('aceitar_convite', {
-        p_codigo: codigo
+        p_codigo: codigo,
+        p_usuario_id: user.id
       })
 
       if (error) {
