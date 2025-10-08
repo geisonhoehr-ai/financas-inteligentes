@@ -246,9 +246,9 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
     }
 
     try {
-      if (gasto) {
+      if (gasto && gasto.id) {
         await updateGasto({ 
-          id: gasto.id,
+          id: gasto.id as string,
           descricao: gastoData.descricao,
           valor: gastoData.valor,
           data: gastoData.data,
