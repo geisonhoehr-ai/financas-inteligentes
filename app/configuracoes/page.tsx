@@ -382,7 +382,7 @@ export default function ConfiguracoesPage() {
                       {/* Convites */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <h5 className="text-sm font-medium">Convites ({convites.length})</h5>
+                          <h5 className="text-sm font-medium">Convites ({Array.isArray(convites) ? convites.length : 0})</h5>
                           <Button
                             size="sm"
                             variant="outline"
