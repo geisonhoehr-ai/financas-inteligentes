@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -29,7 +29,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!familiaAtivaId) return
 
     setIsLoading(true)
@@ -54,7 +54,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [familiaAtivaId])
 
   useEffect(() => {
     if (isOpen && familiaAtivaId) {
@@ -227,7 +227,7 @@ export function NotificationButton({ onClick }: NotificationButtonProps) {
   const { familiaAtivaId } = useFamiliaAtiva()
   const [unreadCount, setUnreadCount] = useState(0)
 
-  const checkUnreadNotifications = async () => {
+  const checkUnreadNotifications = useCallback(async () => {
     if (!familiaAtivaId) return
 
     try {
@@ -249,7 +249,7 @@ export function NotificationButton({ onClick }: NotificationButtonProps) {
       console.error('Erro ao verificar notificações:', error)
       setUnreadCount(0)
     }
-  }
+  }, [familiaAtivaId])
 
   useEffect(() => {
     checkUnreadNotifications()

@@ -75,7 +75,14 @@ export default function AssinaturasPage() {
             <Calendar className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-500">{stats.proximoVencimento ? new Date(stats.proximoVencimento).toLocaleDateString() : '--'}</div>
+            <div className="text-2xl font-bold text-purple-500">
+              {stats.proximoVencimento ? 
+                (typeof stats.proximoVencimento === 'string' 
+                  ? new Date(stats.proximoVencimento).toLocaleDateString()
+                  : new Date(stats.proximoVencimento.data_vencimento || stats.proximoVencimento.created_at).toLocaleDateString()
+                ) : '--'
+              }
+            </div>
             <p className="text-xs text-muted-foreground">Data próxima</p>
           </CardContent>
         </Card>
