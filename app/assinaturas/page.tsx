@@ -79,7 +79,7 @@ export default function AssinaturasPage() {
               {stats.proximoVencimento ? 
                 (typeof stats.proximoVencimento === 'string' 
                   ? new Date(stats.proximoVencimento).toLocaleDateString()
-                  : new Date(stats.proximoVencimento.data_vencimento || stats.proximoVencimento.created_at).toLocaleDateString()
+                  : new Date(stats.proximoVencimento.dia_vencimento || stats.proximoVencimento.created_at).toLocaleDateString()
                 ) : '--'
               }
             </div>
