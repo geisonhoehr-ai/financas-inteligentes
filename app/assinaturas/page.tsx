@@ -162,6 +162,7 @@ export default function AssinaturasPage() {
 
 function AssinaturaForm({ onClose }: { onClose: () => void }) {
   const { createAssinatura, isCreating } = useAssinaturas()
+  const { familiaAtivaId } = useFamiliaAtiva()
   const [formData, setFormData] = useState({
     nome: '',
     valor: '',
