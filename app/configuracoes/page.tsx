@@ -438,7 +438,7 @@ export default function ConfiguracoesPage() {
 
                         {/* Lista de Convites */}
                         <div className="space-y-2">
-                          {convites.length === 0 ? (
+                          {(Array.isArray(convites) ? convites.length : 0) === 0 ? (
                             <p className="text-xs text-muted-foreground text-center py-2">
                               Nenhum convite ativo
                             </p>
