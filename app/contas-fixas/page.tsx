@@ -53,7 +53,7 @@ export default function ContasFixasPage() {
             <Zap className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{formatCurrency(stats.totalEnergia)}</div>
+            <div className="text-2xl font-bold text-yellow-600">{formatCurrency(stats.energia)}</div>
             <p className="text-xs text-muted-foreground">Luz</p>
           </CardContent>
         </Card>
@@ -64,7 +64,7 @@ export default function ContasFixasPage() {
             <Droplet className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-500">{formatCurrency(stats.totalAgua)}</div>
+            <div className="text-2xl font-bold text-blue-500">{formatCurrency(stats.agua)}</div>
             <p className="text-xs text-muted-foreground">Saneamento</p>
           </CardContent>
         </Card>
@@ -75,7 +75,7 @@ export default function ContasFixasPage() {
             <Wifi className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-500">{formatCurrency(stats.totalInternet)}</div>
+            <div className="text-2xl font-bold text-purple-500">{formatCurrency(stats.internet)}</div>
             <p className="text-xs text-muted-foreground">Banda larga</p>
           </CardContent>
         </Card>
@@ -86,7 +86,7 @@ export default function ContasFixasPage() {
             <Phone className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-500">{formatCurrency(stats.totalTelefone)}</div>
+            <div className="text-2xl font-bold text-green-500">{formatCurrency(stats.telefone)}</div>
             <p className="text-xs text-muted-foreground">Celular</p>
           </CardContent>
         </Card>
