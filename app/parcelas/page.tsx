@@ -206,7 +206,7 @@ export default function ParcelasPage() {
 function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parcela?: Parcela | null; onClose: () => void }) {
   const { createParcela, updateParcela, isCreating, isUpdating } = useParcelas()
   const [formData, setFormData] = useState({
-    descricao: parcela?.produto || '',
+    produto: parcela?.produto || '',
     valor_total: parcela?.valor_total?.toString() || '',
     total_parcelas: parcela?.total_parcelas?.toString() || '',
     valor_parcela: parcela?.valor_parcela?.toString() || '',
@@ -218,16 +218,19 @@ function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const parcelaData = {
-      ...formData,
+      produto: formData.produto,
+      descricao: formData.produto, // Mapeando produto para descricao no create
       valor_total: parseFloat(formData.valor_total.toString()),
       valor_parcela: parseFloat(formData.valor_parcela.toString()),
       total_parcelas: parseInt(formData.total_parcelas.toString()),
       dia_vencimento: parseInt(formData.dia_vencimento.toString()),
       data_compra: formData.data_compra || new Date().toISOString().split('T')[0],
+      categoria: formData.categoria,
+      estabelecimento: formData.estabelecimento,
       familia_id: familiaId
-    }
+    } as any
 
     try {
       if (parcela) {
@@ -250,8 +253,8 @@ function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parc
         <Input
           type="text"
           placeholder="Ex: TV Samsung, iPhone 15..."
-          value={formData.descricao}
-          onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+          value={formData.produto}
+          onChange={(e) => setFormData({ ...formData, produto: e.target.value })}
           required
         />
       </div>

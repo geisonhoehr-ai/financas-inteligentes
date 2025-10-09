@@ -6,10 +6,12 @@ export interface Assinatura {
   id: string
   nome: string
   valor: number
-  dia_vencimento: number
+  dia_cobranca: number
+  dia_vencimento?: number // Alias para compatibilidade
   usuario_id: string
   categoria?: string
-  status: string
+  status?: string
+  ativa?: boolean | null
   data_inicio: string
   data_fim?: string | null
   observacoes?: string

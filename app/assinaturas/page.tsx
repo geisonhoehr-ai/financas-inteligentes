@@ -215,13 +215,13 @@ function AssinaturaForm({ assinatura, onClose }: { assinatura?: Assinatura | nul
   const [formData, setFormData] = useState({
     nome: assinatura?.nome || '',
     valor: assinatura?.valor?.toString() || '',
-    dia_vencimento: assinatura?.dia_vencimento?.toString() || '',
+    dia_vencimento: (assinatura?.dia_cobranca || assinatura?.dia_vencimento)?.toString() || '',
     periodicidade: 'mensal',
     categoria: assinatura?.categoria || '',
     descricao: assinatura?.observacoes || '',
     data_inicio: assinatura?.data_inicio || new Date().toISOString().split('T')[0],
     data_fim: assinatura?.data_fim || '',
-    status: assinatura?.status || 'ativa'
+    status: (assinatura?.ativa ? 'ativa' : 'inativa')
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
