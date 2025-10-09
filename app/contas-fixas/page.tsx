@@ -283,25 +283,24 @@ function ContaFixaForm({ familiaId, conta, onClose }: { familiaId?: string; cont
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            Categoria
-          </label>
-          <select
-            value={formData.categoria}
-            onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
-          >
-            <option value="">Selecione...</option>
-            <option value="energia">⚡ Energia</option>
-            <option value="agua">💧 Água</option>
-            <option value="internet">📡 Internet</option>
-            <option value="telefone">📱 Telefone</option>
-            <option value="aluguel">🏠 Aluguel</option>
-            <option value="condominio">🏢 Condomínio</option>
-            <option value="iptu">📄 IPTU</option>
-            <option value="outros">📦 Outros</option>
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          Categoria
+        </label>
+        <select
+          value={formData.categoria}
+          onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+        >
+          <option value="">Selecione...</option>
+          <option value="energia">⚡ Energia</option>
+          <option value="agua">💧 Água</option>
+          <option value="internet">📡 Internet</option>
+          <option value="telefone">📱 Telefone</option>
+          <option value="aluguel">🏠 Aluguel</option>
+          <option value="condominio">🏢 Condomínio</option>
+          <option value="iptu">📄 IPTU</option>
+          <option value="outros">📦 Outros</option>
         </select>
       </div>
 
