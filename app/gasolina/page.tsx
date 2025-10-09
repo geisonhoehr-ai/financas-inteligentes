@@ -201,7 +201,7 @@ function GasolinaForm({ familiaId, gasolina, onClose }: { familiaId?: string; ga
     km_atual: gasolina?.km_atual?.toString() || '',
     data: gasolina?.data || new Date().toISOString().split('T')[0],
     tipo_combustivel: 'gasolina',
-    descricao: gasolina?.observacoes || ''
+    descricao: gasolina?.descricao || ''
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
