@@ -30,12 +30,20 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
   const [isLoading, setIsLoading] = useState(false)
 
   const fetchNotifications = useCallback(async () => {
-    if (!familiaAtivaId) return
+    if (!familiaAtivaId) {
+      setNotifications([])
+      return
+    }
 
     setIsLoading(true)
     try {
-      // Primeiro, gerar alertas automáticos
-      await supabase.rpc('gerar_alertas_automaticos')
+      // Tentar gerar alertas automáticos (silenciar erro se falhar)
+      try {
+        await supabase.rpc('gerar_alertas_automaticos')
+      } catch (genError) {
+        // Ignorar erro de geração, continuar com busca
+        console.debug('Aviso ao gerar alertas:', genError)
+      }
 
       // Buscar alertas do banco
       const { data, error } = await supabase.rpc('buscar_alertas_inteligentes', {
@@ -43,13 +51,14 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
       })
 
       if (error) {
-        console.error('Erro ao buscar alertas:', error)
-        throw error
+        console.warn('Erro ao buscar alertas:', error)
+        setNotifications([])
+        return
       }
 
       setNotifications(data || [])
     } catch (error) {
-      console.error('Erro ao buscar notificações:', error)
+      console.debug('Erro ao buscar notificações:', error)
       setNotifications([])
     } finally {
       setIsLoading(false)
@@ -248,23 +257,35 @@ export function NotificationButton({ onClick }: NotificationButtonProps) {
   const [unreadCount, setUnreadCount] = useState(0)
 
   const checkUnreadNotifications = useCallback(async () => {
-    if (!familiaAtivaId) return
+    if (!familiaAtivaId) {
+      setUnreadCount(0)
+      return
+    }
 
     try {
-      // Gerar alertas automáticos
-      await supabase.rpc('gerar_alertas_automaticos')
+      // Tentar gerar alertas automáticos (silenciar erro se falhar)
+      try {
+        await supabase.rpc('gerar_alertas_automaticos')
+      } catch (genError) {
+        // Ignorar erro de geração, continuar com busca
+        console.debug('Aviso ao gerar alertas:', genError)
+      }
 
       // Buscar alertas não lidos
       const { data, error } = await supabase.rpc('buscar_alertas_inteligentes', {
         p_familia_id: familiaAtivaId
       })
 
-      if (error) throw error
+      if (error) {
+        console.warn('Erro ao buscar alertas:', error)
+        setUnreadCount(0)
+        return
+      }
 
       const unread = (data || []).filter((n: any) => !n.lida).length
       setUnreadCount(unread)
     } catch (error) {
-      console.error('Erro ao verificar notificações:', error)
+      console.debug('Erro ao verificar notificações:', error)
       setUnreadCount(0)
     }
   }, [familiaAtivaId])
