@@ -211,8 +211,6 @@ function ContaFixaForm({ familiaId, conta, onClose }: { familiaId?: string; cont
     dia_vencimento: conta?.dia_vencimento?.toString() || '',
     categoria: conta?.categoria || '',
     descricao: conta?.observacoes || '',
-    data_inicio: conta?.data_inicio || new Date().toISOString().split('T')[0],
-    data_fim: conta?.data_fim || '',
     status: conta?.status || 'ativa'
   })
 
