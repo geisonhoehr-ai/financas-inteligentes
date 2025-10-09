@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, CreditCard, TrendingUp, Calendar, DollarSign } from 'lucide-react'
-import { useCartoes } from '@/hooks/use-cartoes'
+import { Plus, CreditCard, TrendingUp, Calendar, DollarSign, Edit } from 'lucide-react'
+import { useCartoes, Cartao } from '@/hooks/use-cartoes'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function CartoesPage() {
   const { familiaAtiva } = useFamiliaAtiva()
-  const { cartoes, stats, isLoading, createCartao, isCreating } = useCartoes()
+  const { cartoes, stats, isLoading, createCartao, updateCartao, isCreating, isUpdating } = useCartoes()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+  const [showEditDrawer, setShowEditDrawer] = useState(false)
+  const [cartaoEditando, setCartaoEditando] = useState<Cartao | null>(null)
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -107,17 +109,30 @@ export default function CartoesPage() {
             <Card key={cartao.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{cartao.nome}</h4>
                     <p className="text-sm text-muted-foreground">
                       Vence dia {cartao.dia_vencimento}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(cartao.limite || 0)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Cartão
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold">{formatCurrency(cartao.limite || 0)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Cartão
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setCartaoEditando(cartao as any)
+                        setShowEditDrawer(true)
+                      }}
+                      className="h-9 w-9"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -138,27 +153,47 @@ export default function CartoesPage() {
           <CartaoForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
+
+      {/* Drawer de Editar */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Editar Cartão</DrawerTitle>
+            <DrawerDescription>
+              Atualize as informações do cartão
+            </DrawerDescription>
+          </DrawerHeader>
+          <CartaoForm
+            familiaId={familiaAtiva?.id}
+            cartao={cartaoEditando}
+            onClose={() => {
+              setShowEditDrawer(false)
+              setCartaoEditando(null)
+            }}
+          />
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
 
-function CartaoForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
-  const { createCartao, isCreating } = useCartoes()
+function CartaoForm({ familiaId, cartao, onClose }: { familiaId?: string; cartao?: Cartao | null; onClose: () => void }) {
+  const { createCartao, updateCartao, isCreating, isUpdating } = useCartoes()
   const [formData, setFormData] = useState({
-    nome: '',
+    nome: cartao?.nome || '',
     tipo: 'credito',
-    bandeira: '',
-    limite: '',
-    dia_vencimento: '',
-    dia_fechamento: '',
-    numero_final: '',
-    status: 'ativo',
-    descricao: ''
+    bandeira: cartao?.bandeira || '',
+    limite: cartao?.limite?.toString() || '',
+    dia_vencimento: cartao?.dia_vencimento?.toString() || '',
+    dia_fechamento: cartao?.dia_fechamento?.toString() || '',
+    numero_final: cartao?.ultimos_digitos || '',
+    status: cartao?.status || 'ativo',
+    descricao: cartao?.observacoes || ''
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const cartaoData = {
       ...formData,
       limite: parseFloat(formData.limite.toString()),
@@ -170,7 +205,11 @@ function CartaoForm({ familiaId, onClose }: { familiaId?: string; onClose: () =>
     }
 
     try {
-      await createCartao(cartaoData)
+      if (cartao) {
+        await updateCartao({ id: cartao.id, ...cartaoData })
+      } else {
+        await createCartao(cartaoData)
+      }
       onClose()
     } catch (error) {
       console.error('Erro ao salvar cartão:', error)
@@ -328,10 +367,10 @@ function CartaoForm({ familiaId, onClose }: { familiaId?: string; onClose: () =>
         </Button>
         <Button
           type="submit"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
           className="flex-1"
         >
-          {isCreating ? 'Salvando...' : 'Adicionar'}
+          {isCreating || isUpdating ? 'Salvando...' : (cartao ? 'Atualizar' : 'Adicionar')}
         </Button>
       </div>
     </form>

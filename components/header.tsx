@@ -58,7 +58,7 @@ export function Header({ onMenuClick }: HeaderProps) {
           <h1 className="text-lg md:text-xl font-semibold text-zinc-900 dark:text-white hidden sm:block">Financeiro</h1>
 
           {/* Seletor de Família */}
-          {familias && familias.length > 1 && (
+          {familias && familias.length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -68,28 +68,30 @@ export function Header({ onMenuClick }: HeaderProps) {
                   <span className="max-w-[120px] truncate">
                     {familiaAtiva?.nome || 'Selecione'}
                   </span>
-                  <ChevronDown className="ml-2 h-4 w-4" />
+                  {familias.length > 1 && <ChevronDown className="ml-2 h-4 w-4" />}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuLabel>Selecionar Família</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {familias.map((familia) => (
-                  <DropdownMenuItem
-                    key={familia.id}
-                    onClick={() => setFamiliaAtivaId(familia.id)}
-                    className={familia.id === familiaAtivaId ? 'bg-primary/10' : ''}
-                  >
-                    <div className="flex items-center gap-2 w-full">
-                      <div className={`w-2 h-2 rounded-full ${familia.id === familiaAtivaId ? 'bg-primary' : 'bg-transparent'}`} />
-                      <span className="flex-1 truncate">{familia.nome}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {familia.modo_calculo === 'familiar' ? '👨‍👩‍👧‍👦' : '🏢'}
-                      </span>
-                    </div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
+              {familias.length > 1 && (
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>Selecionar Família</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {familias.map((familia) => (
+                    <DropdownMenuItem
+                      key={familia.id}
+                      onClick={() => setFamiliaAtivaId(familia.id)}
+                      className={familia.id === familiaAtivaId ? 'bg-primary/10' : ''}
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <div className={`w-2 h-2 rounded-full ${familia.id === familiaAtivaId ? 'bg-primary' : 'bg-transparent'}`} />
+                        <span className="flex-1 truncate">{familia.nome}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {familia.modo_calculo === 'familiar' ? '👨‍👩‍👧‍👦' : '🏢'}
+                        </span>
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              )}
             </DropdownMenu>
           )}
         </div>

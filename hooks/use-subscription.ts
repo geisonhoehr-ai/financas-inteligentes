@@ -7,12 +7,14 @@ export function useSubscription() {
   return useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
-      // Por enquanto, retornamos sempre o plano free
-      // TODO: Implementar sistema de assinaturas real quando necessário
+      // Verificar se o usuário atual é o geisonhoehr@gmail.com
+      const { data: user } = await supabase.auth.getUser()
+      const isPro = user.user?.email === 'geisonhoehr@gmail.com'
+
       return {
         id: 'temp',
-        user_id: 'temp',
-        plan: 'free',
+        user_id: user.user?.id || 'temp',
+        plan: isPro ? 'pro' : 'free',
         status: 'active',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
