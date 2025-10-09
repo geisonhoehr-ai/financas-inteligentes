@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useAssinaturas, Assinatura } from '@/hooks/use-assinaturas'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useFamilias } from '@/hooks/use-familias'
+import { useCategorias } from '@/hooks/use-categorias'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -212,12 +213,14 @@ export default function AssinaturasPage() {
 function AssinaturaForm({ assinatura, onClose }: { assinatura?: Assinatura | null; onClose: () => void }) {
   const { createAssinatura, updateAssinatura, isCreating, isUpdating } = useAssinaturas()
   const { familiaAtivaId } = useFamiliaAtiva()
+  const { categorias } = useCategorias()
   const [formData, setFormData] = useState({
     nome: assinatura?.nome || '',
     valor: assinatura?.valor?.toString() || '',
     dia_vencimento: (assinatura?.dia_cobranca || assinatura?.dia_vencimento)?.toString() || '',
     periodicidade: 'mensal',
-    categoria: assinatura?.categoria || '',
+    categoria_id: (assinatura as any)?.categoria_id || '',
+    categoria_texto: assinatura?.categoria || '', // Para manter o texto livre caso não tenha categoria_id
     descricao: assinatura?.observacoes || '',
     data_inicio: assinatura?.data_inicio || new Date().toISOString().split('T')[0],
     data_fim: assinatura?.data_fim || '',
@@ -234,6 +237,8 @@ function AssinaturaForm({ assinatura, onClose }: { assinatura?: Assinatura | nul
       data_inicio: formData.data_inicio,
       data_fim: formData.data_fim || null,
       observacoes: formData.descricao,
+      categoria: formData.categoria_texto, // Manter compatibilidade com campo de texto
+      categoria_id: formData.categoria_id, // Adicionar categoria_id se disponível
       familia_id: familiaAtivaId || undefined
     }
 
@@ -314,12 +319,18 @@ function AssinaturaForm({ assinatura, onClose }: { assinatura?: Assinatura | nul
           <label className="text-sm font-medium">
             Categoria
           </label>
-          <Input
-            type="text"
-            placeholder="Ex: Streaming, Academia..."
-            value={formData.categoria}
-            onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-          />
+          <select
+            value={formData.categoria_id}
+            onChange={(e) => setFormData({ ...formData, categoria_id: e.target.value })}
+            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+          >
+            <option value="">Selecione uma categoria...</option>
+            {categorias.map((categoria: any) => (
+              <option key={categoria.id} value={categoria.id}>
+                {categoria.icone} {categoria.nome}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

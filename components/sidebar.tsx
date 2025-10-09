@@ -18,7 +18,8 @@ import {
   X,
   Users,
   BarChart3,
-  DollarSign
+  DollarSign,
+  Tag
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +28,11 @@ const navigation = [
     name: 'Dashboard',
     href: '/',
     icon: LayoutDashboard,
+  },
+  {
+    name: 'Salários',
+    href: '/salarios',
+    icon: DollarSign,
   },
   {
     name: 'Gastos',
@@ -92,6 +98,11 @@ const navigation = [
     name: 'Lixeira',
     href: '/lixeira',
     icon: Trash2,
+  },
+  {
+    name: 'Categorias',
+    href: '/categorias',
+    icon: Tag,
   },
   {
     name: 'Configurações',

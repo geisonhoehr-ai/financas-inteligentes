@@ -34,34 +34,23 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
     setIsLoading(true)
     try {
-      // TODO: Implementar função RPC buscar_alertas_inteligentes no banco
-      // Por enquanto, usar dados mock para evitar erros de build
-      const mockAlerts: Notification[] = [
-        {
-          id: 'alert_1',
-          tipo_alerta: 'orcamento',
-          titulo: 'Orçamento Quase Estourado',
-          mensagem: 'Você já gastou 85% do seu orçamento de Alimentação este mês.',
-          prioridade: 'alta',
-          acao_sugerida: 'Revise seus gastos e considere reduzir despesas nesta categoria.',
-          lida: false,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 'alert_2',
-          tipo_alerta: 'conta',
-          titulo: 'Conta a Vencer',
-          mensagem: 'Você tem uma conta de R$ 150,00 vencendo em 3 dias.',
-          prioridade: 'media',
-          acao_sugerida: 'Agende o pagamento para evitar multas.',
-          lida: false,
-          created_at: new Date().toISOString()
-        }
-      ]
+      // Primeiro, gerar alertas automáticos
+      await supabase.rpc('gerar_alertas_automaticos')
 
-      setNotifications(mockAlerts)
+      // Buscar alertas do banco
+      const { data, error } = await supabase.rpc('buscar_alertas_inteligentes', {
+        p_familia_id: familiaAtivaId
+      })
+
+      if (error) {
+        console.error('Erro ao buscar alertas:', error)
+        throw error
+      }
+
+      setNotifications(data || [])
     } catch (error) {
       console.error('Erro ao buscar notificações:', error)
+      setNotifications([])
     } finally {
       setIsLoading(false)
     }
@@ -73,20 +62,40 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
     }
   }, [isOpen, familiaAtivaId, fetchNotifications])
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, lida: true }
-          : notification
+  const markAsRead = async (id: string) => {
+    try {
+      const { error } = await supabase.rpc('marcar_alerta_lido', {
+        p_alerta_id: id
+      })
+
+      if (error) throw error
+
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === id 
+            ? { ...notification, lida: true }
+            : notification
+        )
       )
-    )
+    } catch (error) {
+      console.error('Erro ao marcar como lido:', error)
+    }
   }
 
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, lida: true }))
-    )
+  const markAllAsRead = async () => {
+    try {
+      const { error } = await supabase.rpc('marcar_todos_alertas_lidos', {
+        p_familia_id: familiaAtivaId
+      })
+
+      if (error) throw error
+
+      setNotifications(prev => 
+        prev.map(notification => ({ ...notification, lida: true }))
+      )
+    } catch (error) {
+      console.error('Erro ao marcar todos como lidos:', error)
+    }
   }
 
   const getPriorityColor = (prioridade: string) => {
@@ -242,20 +251,18 @@ export function NotificationButton({ onClick }: NotificationButtonProps) {
     if (!familiaAtivaId) return
 
     try {
-      // TODO: Implementar função RPC para buscar notificações reais
-      // Por enquanto, usar dados mock para evitar erros
-      const mockNotifications = [
-        {
-          id: '1',
-          type: 'warning',
-          title: 'Orçamento Quase Estourado',
-          message: 'Você já gastou 85% do seu orçamento de Alimentação este mês.',
-          read: false,
-          timestamp: new Date().toISOString(),
-        }
-      ]
+      // Gerar alertas automáticos
+      await supabase.rpc('gerar_alertas_automaticos')
 
-      setUnreadCount(mockNotifications.filter(n => !n.read).length)
+      // Buscar alertas não lidos
+      const { data, error } = await supabase.rpc('buscar_alertas_inteligentes', {
+        p_familia_id: familiaAtivaId
+      })
+
+      if (error) throw error
+
+      const unread = (data || []).filter((n: any) => !n.lida).length
+      setUnreadCount(unread)
     } catch (error) {
       console.error('Erro ao verificar notificações:', error)
       setUnreadCount(0)

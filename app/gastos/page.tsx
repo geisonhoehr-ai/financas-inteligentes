@@ -230,7 +230,8 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
     valor: gasto?.valor || '',
     categoria: gasto?.categoria || '',
     data: gasto?.data ? new Date(gasto.data).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-    tipo_pagamento: gasto?.tipo_pagamento || 'dinheiro'
+    tipo_pagamento: gasto?.tipo_pagamento || 'dinheiro',
+    privado: gasto?.privado || false
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -248,7 +249,9 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
       data: formData.data,
       usuario_id: user.id,
       familia_id: familiaAtiva?.id,
-      tipo_pagamento: 'dinheiro' as const
+      tipo_pagamento: 'dinheiro' as const,
+      privado: formData.privado,
+      visivel_familia: !formData.privado
     }
 
     try {
@@ -352,6 +355,20 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
           <option value="pix">📱 PIX</option>
           <option value="transferencia">🏦 Transferência</option>
         </select>
+      </div>
+
+      <div className="flex items-center gap-2 pt-2">
+        <input
+          type="checkbox"
+          id="privado"
+          checked={formData.privado}
+          onChange={(e) => setFormData({ ...formData, privado: e.target.checked })}
+          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+        />
+        <label htmlFor="privado" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer flex items-center gap-2">
+          <Lock className="h-4 w-4" />
+          Gasto privado (visível apenas para você)
+        </label>
       </div>
 
       <div className="flex gap-3 pt-4">

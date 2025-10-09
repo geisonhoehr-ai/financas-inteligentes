@@ -9,6 +9,7 @@ import { useGastos } from '@/hooks/use-gastos'
 import { useCartoes } from '@/hooks/use-cartoes'
 import { useMetas } from '@/hooks/use-metas'
 import { useInvestimentos } from '@/hooks/use-investimentos'
+import { useSalarios } from '@/hooks/use-salarios'
 import { formatCurrency } from '@/lib/utils'
 import {
   TrendingUp,
@@ -16,7 +17,8 @@ import {
   CreditCard,
   Target,
   PiggyBank,
-  Receipt
+  Receipt,
+  Wallet
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -30,8 +32,18 @@ export default function DashboardPage() {
   const { investimentos } = useInvestimentos()
   const { cartoes } = useCartoes()
   const { metas } = useMetas()
+  const { stats: salariosStats } = useSalarios()
+
+  const saldo = salariosStats.receitaFamilia - gastosStats.total_mes
 
   const stats = [
+    {
+      title: 'Saldo do Mês',
+      value: formatCurrency(saldo),
+      icon: Wallet,
+      color: saldo >= 0 ? 'text-green-500' : 'text-red-500',
+      description: `Receita: ${formatCurrency(salariosStats.receitaFamilia)} - Gastos: ${formatCurrency(gastosStats.total_mes)}`
+    },
     {
       title: 'Gastos do Mês',
       value: formatCurrency(gastosStats.total_mes),
@@ -99,7 +111,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -107,7 +119,10 @@ export default function DashboardPage() {
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
+              <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+              {(stat as any).description && (
+                <p className="text-xs text-muted-foreground mt-1">{(stat as any).description}</p>
+              )}
             </CardContent>
           </Card>
         ))}

@@ -1,6 +1,8 @@
 'use client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useFamiliaAtiva } from './use-familia-ativa'
+
 export interface Meta {
   id: string
   nome: string
@@ -26,14 +28,26 @@ export interface InsertMeta {
 }
 export function useMetas() {
   const queryClient = useQueryClient()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  
   const { data: metas = [], isLoading, error } = useQuery({
-    queryKey: ['metas'],
+    queryKey: ['metas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) return []
 
-      const { data, error } = await supabase
-        .rpc('buscar_metas')
+      let query = supabase
+        .from('metas')
+        .select('*')
+        .eq('deletado', false)
+      
+      if (familiaAtivaId) {
+        query = query.eq('familia_id', familiaAtivaId)
+      } else {
+        query = query.is('familia_id', null)
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
       return data || []

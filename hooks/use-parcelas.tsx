@@ -1,6 +1,8 @@
 'use client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useFamiliaAtiva } from './use-familia-ativa'
+
 export interface Parcela {
   id: string
   produto: string
@@ -41,29 +43,41 @@ export interface InsertParcela {
 }
 export function useParcelas() {
   const queryClient = useQueryClient()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  
   const { data: parcelas = [], isLoading, error } = useQuery({
-    queryKey: ['parcelas'],
+    queryKey: ['parcelas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) return []
 
-      const { data, error } = await supabase
-        .rpc('buscar_parcelas')
+      let query = supabase
+        .from('compras_parceladas')
+        .select('*')
+        .eq('deletado', false)
+      
+      if (familiaAtivaId) {
+        query = query.eq('familia_id', familiaAtivaId)
+      } else {
+        query = query.is('familia_id', null)
+      }
 
+      const { data, error } = await query.order('created_at', { ascending: false })
+      
       if (error) throw error
       return data || []
     },
   })
   const createParcela = useMutation({
-    mutationFn: async (parcela: InsertParcela) => {
+    mutationFn: async (parcela: any) => {
       const { data, error } = await supabase.rpc('criar_parcela', {
-        p_descricao: parcela.descricao,
+        p_descricao: parcela.descricao || parcela.produto,
         p_valor_total: parcela.valor_total,
         p_total_parcelas: parcela.total_parcelas,
         p_valor_parcela: parcela.valor_parcela,
         p_data_compra: parcela.data_compra,
         p_dia_vencimento: parcela.dia_vencimento,
-        p_categoria: parcela.categoria,
+        p_categoria_id: parcela.categoria_id,  // ✅ Agora envia UUID
         p_estabelecimento: parcela.estabelecimento,
         p_cartao_id: parcela.cartao_id,
         p_familia_id: parcela.familia_id,

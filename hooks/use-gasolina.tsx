@@ -1,6 +1,7 @@
 'use client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useFamiliaAtiva } from './use-familia-ativa'
 export interface Gasolina {
   id: string
   descricao?: string
@@ -35,14 +36,26 @@ export interface InsertGasolina {
 }
 export function useGasolina() {
   const queryClient = useQueryClient()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  
   const { data: abastecimentos = [], isLoading, error } = useQuery({
-    queryKey: ['gasolina'],
+    queryKey: ['gasolina', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) return []
 
-      const { data, error } = await supabase
-        .rpc('buscar_gasolina')
+      let query = supabase
+        .from('gasolina')
+        .select('*')
+        .eq('deletado', false)
+      
+      if (familiaAtivaId) {
+        query = query.eq('familia_id', familiaAtivaId)
+      } else {
+        query = query.is('familia_id', null)
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
       return data || []

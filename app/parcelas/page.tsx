@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { useParcelas, Parcela } from '@/hooks/use-parcelas'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useFamilias } from '@/hooks/use-familias'
+import { useCategorias } from '@/hooks/use-categorias'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -205,6 +206,7 @@ export default function ParcelasPage() {
 
 function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parcela?: Parcela | null; onClose: () => void }) {
   const { createParcela, updateParcela, isCreating, isUpdating } = useParcelas()
+  const { categorias } = useCategorias()
   const [formData, setFormData] = useState({
     produto: parcela?.produto || '',
     valor_total: parcela?.valor_total?.toString() || '',
@@ -212,7 +214,7 @@ function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parc
     valor_parcela: parcela?.valor_parcela?.toString() || '',
     data_compra: parcela?.data_compra || new Date().toISOString().split('T')[0],
     dia_vencimento: parcela?.dia_vencimento?.toString() || '',
-    categoria: '',
+    categoria_id: (parcela as any)?.categoria_id || '',
     estabelecimento: '',
   })
 
@@ -227,7 +229,7 @@ function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parc
       total_parcelas: parseInt(formData.total_parcelas.toString()),
       dia_vencimento: parseInt(formData.dia_vencimento.toString()),
       data_compra: formData.data_compra || new Date().toISOString().split('T')[0],
-      categoria: formData.categoria,
+      categoria_id: formData.categoria_id,
       estabelecimento: formData.estabelecimento,
       familia_id: familiaId
     } as any
@@ -353,12 +355,18 @@ function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parc
           <label className="text-sm font-medium">
             Categoria
           </label>
-          <Input
-            type="text"
-            placeholder="Ex: Eletrônicos, Móveis..."
-            value={formData.categoria}
-            onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
-          />
+          <select
+            value={formData.categoria_id}
+            onChange={(e) => setFormData({ ...formData, categoria_id: e.target.value })}
+            className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+          >
+            <option value="">Selecione uma categoria...</option>
+            {categorias.filter(c => c.tipo === 'parcela' || c.tipo === 'gasto').map((categoria: any) => (
+              <option key={categoria.id} value={categoria.id}>
+                {categoria.icone} {categoria.nome}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

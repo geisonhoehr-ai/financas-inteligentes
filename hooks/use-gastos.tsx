@@ -3,21 +3,32 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Gasto, InsertGasto } from '@/types'
 import { showToast } from '@/lib/toast'
+import { useFamiliaAtiva } from './use-familia-ativa'
+
 export function useGastos() {
   const queryClient = useQueryClient()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  
   const { data, isLoading, error } = useQuery({
-    queryKey: ['gastos'],
+    queryKey: ['gastos', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) return { gastos: [], stats: { total_mes: 0, total_hoje: 0, total_gastos: 0 } }
 
-      const { data, error } = await supabase.rpc('buscar_gastos_com_stats', {
+      // Usar função RPC que agora funciona com mv_gastos_stats
+      // Passar familiaAtivaId para filtrar por família
+      const { data: result, error: rpcError } = await supabase.rpc('buscar_gastos_com_stats', {
         p_limit: 50,
-        p_offset: 0
+        p_offset: 0,
+        p_familia_id: familiaAtivaId
       })
 
-      if (error) throw error
-      return data || { gastos: [], stats: { total_mes: 0, total_hoje: 0, total_gastos: 0 } }
+      if (rpcError) {
+        console.error('Erro ao buscar gastos:', rpcError)
+        throw rpcError
+      }
+
+      return result || { gastos: [], stats: { total_mes: 0, total_hoje: 0, total_gastos: 0 } }
     },
   })
   const createGasto = useMutation({
@@ -25,13 +36,19 @@ export function useGastos() {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
-      const { data, error } = await supabase.rpc('criar_gasto', {
-        p_descricao: gasto.descricao,
-        p_valor: gasto.valor,
-        p_data: gasto.data,
-        p_categoria_id: gasto.categoria_id,
-        p_familia_id: gasto.familia_id || ''
-      })
+      const { data, error } = await supabase
+        .from('gastos')
+        .insert([{
+          descricao: gasto.descricao,
+          valor: gasto.valor,
+          data: gasto.data,
+          categoria_id: gasto.categoria_id,
+          usuario_id: user.user.id,
+          familia_id: gasto.familia_id || null,
+          deletado: false
+        }])
+        .select()
+        .single()
 
       if (error) {
         console.error('Erro ao criar gasto:', error)
@@ -43,7 +60,6 @@ export function useGastos() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
       showToast.success('Gasto adicionado com sucesso!')
     },
     onError: (error) => {
@@ -55,14 +71,19 @@ export function useGastos() {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
-      const { data, error } = await supabase.rpc('atualizar_gasto', {
-        p_gasto_id: id,
-        p_descricao: gasto.descricao || '',
-        p_valor: gasto.valor || 0,
-        p_data: gasto.data || new Date().toISOString(),
-        p_categoria_id: (gasto as any).categoria_id || (gasto as any).categoria || '',
-        p_comprovante_url: (gasto as any).comprovante_url || ''
-      })
+      const { data, error } = await supabase
+        .from('gastos')
+        .update({
+          descricao: gasto.descricao,
+          valor: gasto.valor,
+          data: gasto.data,
+          categoria_id: (gasto as any).categoria_id || (gasto as any).categoria,
+          comprovante_url: (gasto as any).comprovante_url
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
 
       if (error) {
         console.error('Erro ao atualizar gasto:', error)
@@ -74,7 +95,6 @@ export function useGastos() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
       showToast.success('Gasto atualizado com sucesso!')
     },
     onError: (error) => {
@@ -86,9 +106,17 @@ export function useGastos() {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
-      const { data, error } = await supabase.rpc('deletar_gasto', {
-        p_gasto_id: id
-      })
+      const { data, error } = await supabase
+        .from('gastos')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
 
       if (error) {
         console.error('Erro ao deletar gasto:', error)
@@ -101,24 +129,28 @@ export function useGastos() {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
-      refreshDashboard()
       showToast.success('Gasto movido para lixeira')
     },
     onError: (error) => {
       showToast.error('Erro ao deletar gasto: ' + error.message)
     },
   })
-  const refreshDashboard = async () => {
-    await supabase.rpc('refresh_dashboard_views')
-  }
+
   const restoreGasto = useMutation({
     mutationFn: async (id: string) => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
-      const { data, error } = await supabase.rpc('restaurar_gasto', {
-        p_gasto_id: id
-      })
+      const { data, error } = await supabase
+        .from('gastos')
+        .update({
+          deletado: false,
+          deletado_em: null,
+          deletado_por: null
+        })
+        .eq('id', id)
+        .select()
+        .single()
 
       if (error) {
         console.error('Erro ao restaurar gasto:', error)
@@ -131,7 +163,6 @@ export function useGastos() {
       queryClient.invalidateQueries({ queryKey: ['gastos'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
-      refreshDashboard()
       showToast.success('Gasto restaurado com sucesso!')
     },
     onError: (error) => {

@@ -2,6 +2,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Database } from '@/types/database.types'
+import { showToast } from '@/lib/toast'
+import { useFamiliaAtiva } from './use-familia-ativa'
 export interface Assinatura {
   id: string
   nome: string
@@ -38,88 +40,150 @@ export interface InsertAssinatura {
 }
 export function useAssinaturas() {
   const queryClient = useQueryClient()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  
   const { data: assinaturas = [], isLoading, error } = useQuery({
-    queryKey: ['assinaturas'],
+    queryKey: ['assinaturas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) return []
 
-      const { data, error } = await supabase
-        .rpc('buscar_assinaturas')
+      // Buscar assinaturas filtradas por família
+      let query = supabase
+        .from('assinaturas')
+        .select('*')
+        .eq('deletado', false)
+      
+      if (familiaAtivaId) {
+        query = query.eq('familia_id', familiaAtivaId)
+      } else {
+        query = query.is('familia_id', null)
+      }
 
-      if (error) throw error
+      const { data, error } = await query.order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Erro ao buscar assinaturas:', error)
+        throw error
+      }
+      
       return data || []
     },
   })
   const createAssinatura = useMutation({
     mutationFn: async (assinatura: InsertAssinatura) => {
-      const { data, error } = await supabase.rpc('criar_assinatura', {
-        p_nome: assinatura.nome,
-        p_valor: assinatura.valor,
-        p_dia_vencimento: assinatura.dia_vencimento,
-        p_categoria: assinatura.categoria || '',
-        p_status: assinatura.status || 'ativa',
-        p_data_inicio: assinatura.data_inicio,
-        p_data_fim: assinatura.data_fim || '',
-        p_observacoes: assinatura.observacoes || '',
-        p_familia_id: assinatura.familia_id || '',
-        p_visivel_familia: assinatura.visivel_familia || true,
-        p_privado: assinatura.privado || false
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('assinaturas')
+        .insert([{
+          nome: assinatura.nome,
+          valor: assinatura.valor,
+          dia_vencimento: assinatura.dia_vencimento,
+          categoria: assinatura.categoria || '',
+          ativa: assinatura.status === 'ativa',
+          data_inicio: assinatura.data_inicio,
+          data_cancelamento: assinatura.data_fim || null,
+          observacoes: assinatura.observacoes || '',
+          usuario_id: user.user.id,
+          familia_id: assinatura.familia_id || null,
+          visivel_familia: assinatura.visivel_familia !== false,
+          privado: assinatura.privado || false,
+          deletado: false
+        }])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao criar assinatura:', error)
+        throw error
+      }
+      
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assinaturas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
+      showToast.success('Assinatura criada com sucesso!')
+    },
+    onError: (error: any) => {
+      showToast.error('Erro ao criar assinatura: ' + error.message)
     },
   })
   const updateAssinatura = useMutation({
     mutationFn: async ({ id, ...assinatura }: Partial<Assinatura> & { id: string }) => {
-      const { data, error } = await supabase.rpc('atualizar_assinatura', {
-        p_id: id,
-        p_nome: assinatura.nome || '',
-        p_valor: assinatura.valor || 0,
-        p_dia_vencimento: assinatura.dia_vencimento || 1,
-        p_categoria: assinatura.categoria || '',
-        p_status: assinatura.status || 'ativa',
-        p_data_inicio: assinatura.data_inicio || new Date().toISOString(),
-        p_data_fim: assinatura.data_fim || '',
-        p_observacoes: assinatura.observacoes || '',
-        p_visivel_familia: assinatura.visivel_familia || true,
-        p_privado: assinatura.privado || false
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('assinaturas')
+        .update({
+          nome: assinatura.nome,
+          valor: assinatura.valor,
+          dia_vencimento: assinatura.dia_vencimento,
+          categoria: assinatura.categoria,
+          ativa: assinatura.status === 'ativa' || assinatura.ativa,
+          data_inicio: assinatura.data_inicio,
+          data_cancelamento: assinatura.data_fim || null,
+          observacoes: assinatura.observacoes,
+          visivel_familia: assinatura.visivel_familia,
+          privado: assinatura.privado
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao atualizar assinatura:', error)
+        throw error
+      }
+      
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assinaturas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
+      showToast.success('Assinatura atualizada com sucesso!')
+    },
+    onError: (error: any) => {
+      showToast.error('Erro ao atualizar assinatura: ' + error.message)
     },
   })
   const deleteAssinatura = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase.rpc('deletar_assinatura', {
-        p_id: id
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('assinaturas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao deletar assinatura:', error)
+        throw error
+      }
+      
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assinaturas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
-      refreshDashboard()
+      showToast.success('Assinatura excluída com sucesso!')
+    },
+    onError: (error: any) => {
+      showToast.error('Erro ao excluir assinatura: ' + error.message)
     },
   })
-  const refreshDashboard = async () => {
-    await supabase.rpc('refresh_dashboard_views')
-  }
+
   const assinaturasAtivas = assinaturas.filter(a => (a as any).ativa === true || (a as any).status === 'ativa')
   const stats = {
     gastoMensal: assinaturasAtivas.reduce((sum, a) => sum + a.valor, 0),

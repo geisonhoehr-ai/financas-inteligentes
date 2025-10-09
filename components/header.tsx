@@ -85,7 +85,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                         <div className={`w-2 h-2 rounded-full ${familia.id === familiaAtivaId ? 'bg-primary' : 'bg-transparent'}`} />
                         <span className="flex-1 truncate">{familia.nome}</span>
                         <span className="text-xs text-muted-foreground">
-                          {familia.modo_calculo === 'familiar' ? '👨‍👩‍👧‍👦' : '🏢'}
+                          {familia.modo_calculo === 'familiar' ? '👨‍👩‍👧‍👦' : '🏛️'}
                         </span>
                       </div>
                     </DropdownMenuItem>

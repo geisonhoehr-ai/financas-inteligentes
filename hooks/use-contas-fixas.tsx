@@ -1,6 +1,7 @@
 'use client'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useFamiliaAtiva } from './use-familia-ativa'
 export interface ContaFixa {
   id: string
   nome: string
@@ -31,14 +32,26 @@ export interface InsertContaFixa {
 }
 export function useContasFixas() {
   const queryClient = useQueryClient()
+  const { familiaAtivaId } = useFamiliaAtiva()
+  
   const { data: contas = [], isLoading, error } = useQuery({
-    queryKey: ['contas-fixas'],
+    queryKey: ['contas-fixas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) return []
 
-      const { data, error } = await supabase
-        .rpc('buscar_contas_fixas')
+      let query = supabase
+        .from('contas_fixas')
+        .select('*')
+        .eq('deletado', false)
+      
+      if (familiaAtivaId) {
+        query = query.eq('familia_id', familiaAtivaId)
+      } else {
+        query = query.is('familia_id', null)
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
       return data || []
