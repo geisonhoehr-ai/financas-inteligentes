@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, Building, Zap, Droplet, Wifi, Phone } from 'lucide-react'
-import { useContasFixas } from '@/hooks/use-contas-fixas'
+import { Plus, Building, Zap, Droplet, Wifi, Phone, Edit, Trash2 } from 'lucide-react'
+import { useContasFixas, ContaFixa } from '@/hooks/use-contas-fixas'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function ContasFixasPage() {
   const { familiaAtiva } = useFamiliaAtiva()
-  const { contas, stats, isLoading, createContaFixa, isCreating } = useContasFixas()
+  const { contas, stats, isLoading, createContaFixa, updateContaFixa, deleteContaFixa, isCreating, isUpdating, isDeleting } = useContasFixas()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+  const [showEditDrawer, setShowEditDrawer] = useState(false)
+  const [contaEditando, setContaEditando] = useState<ContaFixa | null>(null)
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -118,17 +120,45 @@ export default function ContasFixasPage() {
             <Card key={conta.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{conta.nome}</h4>
                     <p className="text-sm text-muted-foreground">
                       Vence dia {conta.dia_vencimento}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(conta.valor)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Conta fixa
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold">{formatCurrency(conta.valor)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Conta fixa
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setContaEditando(conta as any)
+                          setShowEditDrawer(true)
+                        }}
+                        className="h-9 w-9"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (confirm('Tem certeza que deseja excluir esta conta?')) {
+                            await deleteContaFixa(conta.id)
+                          }
+                        }}
+                        disabled={isDeleting}
+                        className="h-9 w-9 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -149,21 +179,41 @@ export default function ContasFixasPage() {
           <ContaFixaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
+
+      {/* Drawer de Editar */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Editar Conta Fixa</DrawerTitle>
+            <DrawerDescription>
+              Atualize as informações da conta fixa
+            </DrawerDescription>
+          </DrawerHeader>
+          <ContaFixaForm
+            familiaId={familiaAtiva?.id}
+            conta={contaEditando}
+            onClose={() => {
+              setShowEditDrawer(false)
+              setContaEditando(null)
+            }}
+          />
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
 
-function ContaFixaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
-  const { createContaFixa, isCreating } = useContasFixas()
+function ContaFixaForm({ familiaId, conta, onClose }: { familiaId?: string; conta?: ContaFixa | null; onClose: () => void }) {
+  const { createContaFixa, updateContaFixa, isCreating, isUpdating } = useContasFixas()
   const [formData, setFormData] = useState({
-    nome: '',
-    valor: '',
-    dia_vencimento: '',
-    categoria: '',
-    descricao: '',
-    data_inicio: new Date().toISOString().split('T')[0],
-    data_fim: '',
-    status: 'ativa'
+    nome: conta?.nome || '',
+    valor: conta?.valor?.toString() || '',
+    dia_vencimento: conta?.dia_vencimento?.toString() || '',
+    categoria: conta?.categoria || '',
+    descricao: conta?.observacoes || '',
+    data_inicio: conta?.data_inicio || new Date().toISOString().split('T')[0],
+    data_fim: conta?.data_fim || '',
+    status: conta?.status || 'ativa'
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -178,7 +228,11 @@ function ContaFixaForm({ familiaId, onClose }: { familiaId?: string; onClose: ()
     }
 
     try {
-      await createContaFixa(contaData)
+      if (conta) {
+        await updateContaFixa({ id: conta.id, ...contaData })
+      } else {
+        await createContaFixa(contaData)
+      }
       onClose()
     } catch (error) {
       console.error('Erro ao salvar conta fixa:', error)
@@ -300,10 +354,10 @@ function ContaFixaForm({ familiaId, onClose }: { familiaId?: string; onClose: ()
         </Button>
         <Button
           type="submit"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
           className="flex-1"
         >
-          {isCreating ? 'Salvando...' : 'Adicionar'}
+          {isCreating || isUpdating ? 'Salvando...' : (conta ? 'Atualizar' : 'Adicionar')}
         </Button>
       </div>
     </form>

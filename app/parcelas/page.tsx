@@ -1,22 +1,24 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useParcelas } from '@/hooks/use-parcelas'
+import { useParcelas, Parcela } from '@/hooks/use-parcelas'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useFamilias } from '@/hooks/use-familias'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, CreditCard, TrendingDown, Calendar, DollarSign } from 'lucide-react'
+import { Plus, CreditCard, TrendingDown, Calendar, DollarSign, Edit, Trash2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
 export default function ParcelasPage() {
-  const { parcelas: todasParcelas, stats, isLoading, createParcela, isCreating } = useParcelas()
+  const { parcelas: todasParcelas, stats, isLoading, createParcela, updateParcela, deleteParcela, isCreating, isUpdating, isDeleting } = useParcelas()
   const { familiaAtivaId } = useFamiliaAtiva()
   const { familias } = useFamilias()
   const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+  const [showEditDrawer, setShowEditDrawer] = useState(false)
+  const [parcelaEditando, setParcelaEditando] = useState<Parcela | null>(null)
 
   // Filtrar parcelas pela família ativa (temporariamente desabilitado)
   const parcelas = useMemo(() => {
@@ -118,17 +120,45 @@ export default function ParcelasPage() {
             <Card key={parcela.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{parcela.produto}</h4>
                     <p className="text-sm text-muted-foreground">
                       {parcela.parcelas_pagas || 0}/{parcela.total_parcelas} parcelas pagas
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(parcela.valor_parcela)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Total: {formatCurrency(parcela.valor_total)}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold">{formatCurrency(parcela.valor_parcela)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Total: {formatCurrency(parcela.valor_total)}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setParcelaEditando(parcela as any)
+                          setShowEditDrawer(true)
+                        }}
+                        className="h-9 w-9"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (confirm('Tem certeza que deseja excluir esta parcela?')) {
+                            await deleteParcela(parcela.id)
+                          }
+                        }}
+                        disabled={isDeleting}
+                        className="h-9 w-9 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -149,19 +179,39 @@ export default function ParcelasPage() {
           <ParcelaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
+
+      {/* Drawer de Editar */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Editar Parcela</DrawerTitle>
+            <DrawerDescription>
+              Atualize as informações da compra parcelada
+            </DrawerDescription>
+          </DrawerHeader>
+          <ParcelaForm
+            familiaId={familiaAtiva?.id}
+            parcela={parcelaEditando}
+            onClose={() => {
+              setShowEditDrawer(false)
+              setParcelaEditando(null)
+            }}
+          />
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
 
-function ParcelaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
-  const { createParcela, isCreating } = useParcelas()
+function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parcela?: Parcela | null; onClose: () => void }) {
+  const { createParcela, updateParcela, isCreating, isUpdating } = useParcelas()
   const [formData, setFormData] = useState({
-    descricao: '',
-    valor_total: '',
-    total_parcelas: '',
-    valor_parcela: '',
-    data_compra: new Date().toISOString().split('T')[0],
-    dia_vencimento: '',
+    descricao: parcela?.produto || '',
+    valor_total: parcela?.valor_total?.toString() || '',
+    total_parcelas: parcela?.total_parcelas?.toString() || '',
+    valor_parcela: parcela?.valor_parcela?.toString() || '',
+    data_compra: parcela?.data_compra || new Date().toISOString().split('T')[0],
+    dia_vencimento: parcela?.dia_vencimento?.toString() || '',
     categoria: '',
     estabelecimento: '',
   })
@@ -180,7 +230,11 @@ function ParcelaForm({ familiaId, onClose }: { familiaId?: string; onClose: () =
     }
 
     try {
-      await createParcela(parcelaData)
+      if (parcela) {
+        await updateParcela({ id: parcela.id, ...parcelaData })
+      } else {
+        await createParcela(parcelaData)
+      }
       onClose()
     } catch (error) {
       console.error('Erro ao salvar parcela:', error)
@@ -328,10 +382,10 @@ function ParcelaForm({ familiaId, onClose }: { familiaId?: string; onClose: () =
         </Button>
         <Button
           type="submit"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
           className="flex-1"
         >
-          {isCreating ? 'Salvando...' : 'Adicionar'}
+          {isCreating || isUpdating ? 'Salvando...' : (parcela ? 'Atualizar' : 'Adicionar')}
         </Button>
       </div>
     </form>

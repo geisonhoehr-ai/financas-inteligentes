@@ -1,22 +1,24 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useAssinaturas } from '@/hooks/use-assinaturas'
+import { useAssinaturas, Assinatura } from '@/hooks/use-assinaturas'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useFamilias } from '@/hooks/use-familias'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, Calendar, TrendingDown, CreditCard, Repeat } from 'lucide-react'
+import { Plus, Calendar, TrendingDown, CreditCard, Repeat, Edit, Trash2 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
 
 export default function AssinaturasPage() {
-  const { assinaturas: todasAssinaturas, stats, isLoading, createAssinatura, isCreating } = useAssinaturas()
+  const { assinaturas: todasAssinaturas, stats, isLoading, createAssinatura, updateAssinatura, deleteAssinatura, isCreating, isUpdating, isDeleting } = useAssinaturas()
   const { familiaAtivaId } = useFamiliaAtiva()
   const { familias } = useFamilias()
   const familiaAtiva = familias?.find(f => f.id === familiaAtivaId) || familias?.[0]
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+  const [showEditDrawer, setShowEditDrawer] = useState(false)
+  const [assinaturaEditando, setAssinaturaEditando] = useState<Assinatura | null>(null)
 
   // Filtrar assinaturas pela família ativa (temporariamente desabilitado)
   const assinaturas = useMemo(() => {
@@ -125,17 +127,45 @@ export default function AssinaturasPage() {
             <Card key={assinatura.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{assinatura.nome}</h4>
                     <p className="text-sm text-muted-foreground">
                       Vence dia {assinatura.dia_cobranca}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(assinatura.valor)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {assinatura.ativa ? 'Ativa' : 'Inativa'}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold">{formatCurrency(assinatura.valor)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {assinatura.ativa ? 'Ativa' : 'Inativa'}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setAssinaturaEditando(assinatura as any)
+                          setShowEditDrawer(true)
+                        }}
+                        className="h-9 w-9"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (confirm('Tem certeza que deseja excluir esta assinatura?')) {
+                            await deleteAssinatura(assinatura.id)
+                          }
+                        }}
+                        disabled={isDeleting}
+                        className="h-9 w-9 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -156,23 +186,42 @@ export default function AssinaturasPage() {
           <AssinaturaForm onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
+
+      {/* Drawer de Editar */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Editar Assinatura</DrawerTitle>
+            <DrawerDescription>
+              Atualize as informações da assinatura
+            </DrawerDescription>
+          </DrawerHeader>
+          <AssinaturaForm
+            assinatura={assinaturaEditando}
+            onClose={() => {
+              setShowEditDrawer(false)
+              setAssinaturaEditando(null)
+            }}
+          />
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
 
-function AssinaturaForm({ onClose }: { onClose: () => void }) {
-  const { createAssinatura, isCreating } = useAssinaturas()
+function AssinaturaForm({ assinatura, onClose }: { assinatura?: Assinatura | null; onClose: () => void }) {
+  const { createAssinatura, updateAssinatura, isCreating, isUpdating } = useAssinaturas()
   const { familiaAtivaId } = useFamiliaAtiva()
   const [formData, setFormData] = useState({
-    nome: '',
-    valor: '',
-    dia_vencimento: '',
+    nome: assinatura?.nome || '',
+    valor: assinatura?.valor?.toString() || '',
+    dia_vencimento: assinatura?.dia_vencimento?.toString() || '',
     periodicidade: 'mensal',
-    categoria: '',
-    descricao: '',
-    data_inicio: new Date().toISOString().split('T')[0],
-    data_fim: '',
-    status: 'ativa'
+    categoria: assinatura?.categoria || '',
+    descricao: assinatura?.observacoes || '',
+    data_inicio: assinatura?.data_inicio || new Date().toISOString().split('T')[0],
+    data_fim: assinatura?.data_fim || '',
+    status: assinatura?.status || 'ativa'
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -189,7 +238,11 @@ function AssinaturaForm({ onClose }: { onClose: () => void }) {
     }
 
     try {
-      await createAssinatura(assinaturaData)
+      if (assinatura) {
+        await updateAssinatura({ id: assinatura.id, ...assinaturaData })
+      } else {
+        await createAssinatura(assinaturaData)
+      }
       onClose()
     } catch (error) {
       console.error('Erro ao salvar assinatura:', error)
@@ -318,10 +371,10 @@ function AssinaturaForm({ onClose }: { onClose: () => void }) {
         </Button>
         <Button
           type="submit"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
           className="flex-1"
         >
-          {isCreating ? 'Salvando...' : 'Adicionar'}
+          {isCreating || isUpdating ? 'Salvando...' : (assinatura ? 'Atualizar' : 'Adicionar')}
         </Button>
       </div>
     </form>

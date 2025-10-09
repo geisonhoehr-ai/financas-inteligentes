@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, Wrench, Code, Laptop, TrendingDown } from 'lucide-react'
-import { useFerramentas } from '@/hooks/use-ferramentas'
+import { Plus, Wrench, Code, Laptop, TrendingDown, Edit, Trash2 } from 'lucide-react'
+import { useFerramentas, Ferramenta } from '@/hooks/use-ferramentas'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function FerramentasPage() {
   const { familiaAtiva } = useFamiliaAtiva()
-  const { ferramentas, stats, isLoading, createFerramenta, isCreating } = useFerramentas()
+  const { ferramentas, stats, isLoading, createFerramenta, updateFerramenta, deleteFerramenta, isCreating, isUpdating, isDeleting } = useFerramentas()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+  const [showEditDrawer, setShowEditDrawer] = useState(false)
+  const [ferramentaEditando, setFerramentaEditando] = useState<Ferramenta | null>(null)
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -107,17 +109,45 @@ export default function FerramentasPage() {
             <Card key={ferramenta.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{ferramenta.nome}</h4>
                     <p className="text-sm text-muted-foreground">
                       {ferramenta.categoria || 'Sem categoria'} • {ferramenta.status === 'ativa' ? 'Ativa' : 'Inativa'}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(ferramenta.valor)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {ferramenta.periodicidade === 'mensal' ? 'Mensal' : 'Anual'}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold">{formatCurrency(ferramenta.valor)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {ferramenta.periodicidade === 'mensal' ? 'Mensal' : 'Anual'}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setFerramentaEditando(ferramenta as any)
+                          setShowEditDrawer(true)
+                        }}
+                        className="h-9 w-9"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (confirm('Tem certeza que deseja excluir esta ferramenta?')) {
+                            await deleteFerramenta(ferramenta.id)
+                          }
+                        }}
+                        disabled={isDeleting}
+                        className="h-9 w-9 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -138,21 +168,41 @@ export default function FerramentasPage() {
           <FerramentaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
+
+      {/* Drawer de Editar */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Editar Ferramenta</DrawerTitle>
+            <DrawerDescription>
+              Atualize as informações da ferramenta
+            </DrawerDescription>
+          </DrawerHeader>
+          <FerramentaForm
+            familiaId={familiaAtiva?.id}
+            ferramenta={ferramentaEditando}
+            onClose={() => {
+              setShowEditDrawer(false)
+              setFerramentaEditando(null)
+            }}
+          />
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
 
-function FerramentaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
-  const { createFerramenta, isCreating } = useFerramentas()
+function FerramentaForm({ familiaId, ferramenta, onClose }: { familiaId?: string; ferramenta?: Ferramenta | null; onClose: () => void }) {
+  const { createFerramenta, updateFerramenta, isCreating, isUpdating } = useFerramentas()
   const [formData, setFormData] = useState({
-    nome: '',
-    valor: '',
-    tipo: '',
-    periodicidade: 'mensal',
-    data_inicio: new Date().toISOString().split('T')[0],
-    data_fim: '',
-    status: 'ativa',
-    descricao: '',
+    nome: ferramenta?.nome || '',
+    valor: ferramenta?.valor?.toString() || '',
+    tipo: ferramenta?.categoria || '',
+    periodicidade: ferramenta?.periodicidade || 'mensal',
+    data_inicio: ferramenta?.data_inicio || new Date().toISOString().split('T')[0],
+    data_fim: ferramenta?.data_fim || '',
+    status: ferramenta?.status || 'ativa',
+    descricao: ferramenta?.observacoes || '',
     link: ''
   })
 
@@ -170,7 +220,11 @@ function FerramentaForm({ familiaId, onClose }: { familiaId?: string; onClose: (
     }
 
     try {
-      await createFerramenta(ferramentaData)
+      if (ferramenta) {
+        await updateFerramenta({ id: ferramenta.id, ...ferramentaData })
+      } else {
+        await createFerramenta(ferramentaData)
+      }
       onClose()
     } catch (error) {
       console.error('Erro ao salvar ferramenta:', error)
@@ -318,10 +372,10 @@ function FerramentaForm({ familiaId, onClose }: { familiaId?: string; onClose: (
         </Button>
         <Button
           type="submit"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
           className="flex-1"
         >
-          {isCreating ? 'Salvando...' : 'Adicionar'}
+          {isCreating || isUpdating ? 'Salvando...' : (ferramenta ? 'Atualizar' : 'Adicionar')}
         </Button>
       </div>
     </form>

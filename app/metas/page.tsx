@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, Target, TrendingUp, CheckCircle, Clock } from 'lucide-react'
-import { useMetas } from '@/hooks/use-metas'
+import { Plus, Target, TrendingUp, CheckCircle, Clock, Edit, Trash2 } from 'lucide-react'
+import { useMetas, Meta } from '@/hooks/use-metas'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function MetasPage() {
   const { familiaAtiva } = useFamiliaAtiva()
-  const { metas, stats, isLoading, createMeta, isCreating } = useMetas()
+  const { metas, stats, isLoading, createMeta, updateMeta, deleteMeta, isCreating, isUpdating, isDeleting } = useMetas()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+  const [showEditDrawer, setShowEditDrawer] = useState(false)
+  const [metaEditando, setMetaEditando] = useState<Meta | null>(null)
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -107,18 +109,46 @@ export default function MetasPage() {
             <Card key={meta.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{meta.nome}</h4>
                     <p className="text-sm text-muted-foreground">
                       {meta.concluida ? 'Concluída' : 'Em andamento'}
                       {meta.prazo && ` • Prazo: ${new Date(meta.prazo).toLocaleDateString()}`}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(meta.valor_atual || 0)} / {formatCurrency(meta.valor_objetivo)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {((( meta.valor_atual || 0) / meta.valor_objetivo) * 100).toFixed(1)}% alcançado
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold">{formatCurrency(meta.valor_atual || 0)} / {formatCurrency(meta.valor_objetivo)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {((( meta.valor_atual || 0) / meta.valor_objetivo) * 100).toFixed(1)}% alcançado
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setMetaEditando(meta as any)
+                          setShowEditDrawer(true)
+                        }}
+                        className="h-9 w-9"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (confirm('Tem certeza que deseja excluir esta meta?')) {
+                            await deleteMeta(meta.id)
+                          }
+                        }}
+                        disabled={isDeleting}
+                        className="h-9 w-9 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -139,23 +169,43 @@ export default function MetasPage() {
           <MetaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
+
+      {/* Drawer de Editar */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Editar Meta</DrawerTitle>
+            <DrawerDescription>
+              Atualize as informações da meta
+            </DrawerDescription>
+          </DrawerHeader>
+          <MetaForm
+            familiaId={familiaAtiva?.id}
+            meta={metaEditando}
+            onClose={() => {
+              setShowEditDrawer(false)
+              setMetaEditando(null)
+            }}
+          />
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
 
-function MetaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
-  const { createMeta, isCreating } = useMetas()
+function MetaForm({ familiaId, meta, onClose }: { familiaId?: string; meta?: Meta | null; onClose: () => void }) {
+  const { createMeta, updateMeta, isCreating, isUpdating } = useMetas()
   const [formData, setFormData] = useState({
-    nome: '',
-    valor_objetivo: '',
-    valor_atual: '',
-    prazo: '',
-    observacoes: ''
+    nome: meta?.nome || '',
+    valor_objetivo: meta?.valor_objetivo?.toString() || '',
+    valor_atual: meta?.valor_atual?.toString() || '',
+    prazo: meta?.prazo || '',
+    observacoes: meta?.observacoes || ''
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const metaData = {
       nome: formData.nome,
       valor_objetivo: parseFloat(formData.valor_objetivo.toString()),
@@ -166,7 +216,11 @@ function MetaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => v
     }
 
     try {
-      await createMeta(metaData)
+      if (meta) {
+        await updateMeta({ id: meta.id, ...metaData })
+      } else {
+        await createMeta(metaData)
+      }
       onClose()
     } catch (error) {
       console.error('Erro ao salvar meta:', error)
@@ -251,10 +305,10 @@ function MetaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => v
         </Button>
         <Button
           type="submit"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
           className="flex-1"
         >
-          {isCreating ? 'Salvando...' : 'Adicionar'}
+          {isCreating || isUpdating ? 'Salvando...' : (meta ? 'Atualizar' : 'Adicionar')}
         </Button>
       </div>
     </form>

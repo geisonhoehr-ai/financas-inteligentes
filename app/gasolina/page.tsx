@@ -5,15 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, Car, TrendingUp, Fuel, MapPin } from 'lucide-react'
-import { useGasolina } from '@/hooks/use-gasolina'
+import { Plus, Car, TrendingUp, Fuel, MapPin, Edit, Trash2 } from 'lucide-react'
+import { useGasolina, Gasolina } from '@/hooks/use-gasolina'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function GasolinaPage() {
   const { familiaAtiva } = useFamiliaAtiva()
-  const { abastecimentos, stats, isLoading, createGasolina, isCreating } = useGasolina()
+  const { abastecimentos, stats, isLoading, createGasolina, updateGasolina, deleteGasolina, isCreating, isUpdating, isDeleting } = useGasolina()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+  const [showEditDrawer, setShowEditDrawer] = useState(false)
+  const [abastecimentoEditando, setAbastecimentoEditando] = useState<Gasolina | null>(null)
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -107,17 +109,45 @@ export default function GasolinaPage() {
             <Card key={abastecimento.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">Abastecimento</h4>
                     <p className="text-sm text-muted-foreground">
                       {new Date(abastecimento.data).toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(abastecimento.valor)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {abastecimento.litros ? abastecimento.litros.toFixed(1) : '0.0'} L ({formatCurrency(abastecimento.preco_litro || 0)}/L)
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold">{formatCurrency(abastecimento.valor)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {abastecimento.litros ? abastecimento.litros.toFixed(1) : '0.0'} L ({formatCurrency(abastecimento.preco_litro || 0)}/L)
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setAbastecimentoEditando(abastecimento as any)
+                          setShowEditDrawer(true)
+                        }}
+                        className="h-9 w-9"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={async () => {
+                          if (confirm('Tem certeza que deseja excluir este abastecimento?')) {
+                            await deleteGasolina(abastecimento.id)
+                          }
+                        }}
+                        disabled={isDeleting}
+                        className="h-9 w-9 text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -138,20 +168,40 @@ export default function GasolinaPage() {
           <GasolinaForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
+
+      {/* Drawer de Editar */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Editar Abastecimento</DrawerTitle>
+            <DrawerDescription>
+              Atualize as informações do abastecimento
+            </DrawerDescription>
+          </DrawerHeader>
+          <GasolinaForm
+            familiaId={familiaAtiva?.id}
+            gasolina={abastecimentoEditando}
+            onClose={() => {
+              setShowEditDrawer(false)
+              setAbastecimentoEditando(null)
+            }}
+          />
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
 
-function GasolinaForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
-  const { createGasolina, isCreating } = useGasolina()
+function GasolinaForm({ familiaId, gasolina, onClose }: { familiaId?: string; gasolina?: Gasolina | null; onClose: () => void }) {
+  const { createGasolina, updateGasolina, isCreating, isUpdating } = useGasolina()
   const [formData, setFormData] = useState({
-    valor: '',
-    litros: '',
-    preco_litro: '',
-    km_atual: '',
-    data: new Date().toISOString().split('T')[0],
+    valor: gasolina?.valor?.toString() || '',
+    litros: gasolina?.litros?.toString() || '',
+    preco_litro: gasolina?.preco_litro?.toString() || '',
+    km_atual: gasolina?.km_atual?.toString() || '',
+    data: gasolina?.data || new Date().toISOString().split('T')[0],
     tipo_combustivel: 'gasolina',
-    descricao: ''
+    descricao: gasolina?.observacoes || ''
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -169,7 +219,11 @@ function GasolinaForm({ familiaId, onClose }: { familiaId?: string; onClose: () 
     }
 
     try {
-      await createGasolina(gasolinaData)
+      if (gasolina) {
+        await updateGasolina({ id: gasolina.id, ...gasolinaData })
+      } else {
+        await createGasolina(gasolinaData)
+      }
       onClose()
     } catch (error) {
       console.error('Erro ao salvar abastecimento:', error)
@@ -311,10 +365,10 @@ function GasolinaForm({ familiaId, onClose }: { familiaId?: string; onClose: () 
         </Button>
         <Button
           type="submit"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
           className="flex-1"
         >
-          {isCreating ? 'Salvando...' : 'Adicionar'}
+          {isCreating || isUpdating ? 'Salvando...' : (gasolina ? 'Atualizar' : 'Adicionar')}
         </Button>
       </div>
     </form>
