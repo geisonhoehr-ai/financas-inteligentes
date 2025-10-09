@@ -181,7 +181,7 @@ export default function SalariosPage() {
               Adicione uma receita mensal ou extra
             </DrawerDescription>
           </DrawerHeader>
-          <SalarioForm familiaId={familiaAtivaId} onClose={() => setShowAddDrawer(false)} />
+          <SalarioForm familiaId={familiaAtivaId || undefined} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
 
@@ -195,7 +195,7 @@ export default function SalariosPage() {
             </DrawerDescription>
           </DrawerHeader>
           <SalarioForm
-            familiaId={familiaAtivaId}
+            familiaId={familiaAtivaId || undefined}
             salario={salarioEditando}
             onClose={() => {
               setShowEditDrawer(false)
