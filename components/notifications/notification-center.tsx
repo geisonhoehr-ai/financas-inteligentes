@@ -13,10 +13,10 @@ interface Notification {
   tipo_alerta: string
   titulo: string
   mensagem: string
-  prioridade: 'alta' | 'media' | 'baixa'
-  acao_sugerida: string
-  lida: boolean
-  created_at: string
+  prioridade: string | null
+  acao_sugerida: string | null
+  lida: boolean | null
+  created_at: string | null
 }
 
 interface NotificationCenterProps {
@@ -107,7 +107,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
     }
   }
 
-  const getPriorityColor = (prioridade: string) => {
+  const getPriorityColor = (prioridade: string | null) => {
     switch (prioridade) {
       case 'alta':
         return 'bg-red-100 text-red-800 border-red-200'
@@ -120,7 +120,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
     }
   }
 
-  const getPriorityIcon = (prioridade: string) => {
+  const getPriorityIcon = (prioridade: string | null) => {
     switch (prioridade) {
       case 'alta':
         return <AlertTriangle className="h-4 w-4 text-red-600" />
