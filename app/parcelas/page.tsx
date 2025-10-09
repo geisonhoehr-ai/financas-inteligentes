@@ -361,7 +361,7 @@ function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parc
             className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
           >
             <option value="">Selecione uma categoria...</option>
-            {categorias.filter(c => c.tipo === 'parcela' || c.tipo === 'gasto').map((categoria: any) => (
+            {categorias.filter((c: any) => c.tipo === 'parcela' || c.tipo === 'gasto').map((categoria: any) => (
               <option key={categoria.id} value={categoria.id}>
                 {categoria.icone} {categoria.nome}
               </option>
