@@ -5,17 +5,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, CreditCard, TrendingUp, Calendar, DollarSign, Edit } from 'lucide-react'
+import { Plus, CreditCard, TrendingUp, Calendar, DollarSign, Edit, Trash2 } from 'lucide-react'
 import { useCartoes, Cartao } from '@/hooks/use-cartoes'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function CartoesPage() {
   const { familiaAtiva } = useFamiliaAtiva()
-  const { cartoes, stats, isLoading, createCartao, updateCartao, isCreating, isUpdating } = useCartoes()
+  const { cartoes, stats, isLoading, createCartao, updateCartao, deleteCartao, isCreating, isUpdating, isDeleting } = useCartoes()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
   const [showEditDrawer, setShowEditDrawer] = useState(false)
   const [cartaoEditando, setCartaoEditando] = useState<Cartao | null>(null)
+
+  const handleDelete = async (id: string, nome: string) => {
+    if (window.confirm(`Tem certeza que deseja excluir o cartão "${nome}"? Esta ação enviará o cartão para a lixeira.`)) {
+      try {
+        await deleteCartao(id)
+      } catch (error) {
+        console.error('Erro ao excluir cartão:', error)
+      }
+    }
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -122,17 +132,28 @@ export default function CartoesPage() {
                         Cartão
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setCartaoEditando(cartao as any)
-                        setShowEditDrawer(true)
-                      }}
-                      className="h-9 w-9"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setCartaoEditando(cartao as any)
+                          setShowEditDrawer(true)
+                        }}
+                        className="h-9 w-9"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(cartao.id, cartao.nome)}
+                        disabled={isDeleting}
+                        className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>

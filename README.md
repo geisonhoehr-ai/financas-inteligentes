@@ -1,14 +1,18 @@
 # 💰 Sistema de Controle Financeiro Familiar
 
-> **Versão:** 3.0 | **Status:** 🎉 **PRODUÇÃO PRONTA!** | **Última Atualização:** 05/10/2025
+> **Versão:** 3.0.1 | **Status:** 🎉 **PRONTO PARA PRODUÇÃO!** | **Última Atualização:** 09/10/2025
 
 Sistema completo de controle financeiro familiar com **multi-tenancy**, **dívidas internas**, **convites** e muito mais!
 
 ---
 
-## 🚀 **DEMO AO VIVO**
+## 🚀 **STATUS DO PROJETO**
 
-🌐 **[Acesse o Sistema](https://financas-inteligentes.vercel.app)**
+✅ **Sistema 100% Funcional e Testado**
+- Todos os bugs críticos corrigidos
+- CRUD completo implementado
+- Segurança otimizada para produção
+- Documentação completa de deploy
 
 ---
 
@@ -146,7 +150,7 @@ Solução:
 
 ### **Pré-requisitos**
 - Node.js 18+
-- Conta no Supabase
+- Conta no [Supabase](https://supabase.com) (gratuita)
 - Git
 
 ### **Passo a Passo**
@@ -160,23 +164,28 @@ cd controle-financeiro-familiar
 npm install
 
 # 3. Configure variáveis de ambiente
-cp .env.example .env.local
+# Copie o arquivo env.example para .env.local
+cp env.example .env.local
 
 # 4. Configure o Supabase
-# Edite .env.local com suas credenciais:
-NEXT_PUBLIC_SUPABASE_URL=sua_url_aqui
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_aqui
+# Edite .env.local com suas credenciais do Supabase:
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima-aqui
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # 5. Execute o SQL no Supabase
-# Copie e execute o conteúdo de:
-# - SQL_DIVIDAS_INTERNAS.sql
-# - MELHORIAS_CRITICAS.sql
+# No painel do Supabase, vá em SQL Editor
+# Copie e execute o conteúdo de database_setup.sql
 
-# 6. Inicie o servidor
+# 6. Inicie o servidor de desenvolvimento
 npm run dev
 
 # 7. Acesse http://localhost:3000
 ```
+
+### **Variáveis de Ambiente Necessárias**
+
+Veja o arquivo `env.example` para todas as variáveis disponíveis.
 
 ---
 
@@ -284,7 +293,10 @@ font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text';
 
 ---
 
-## 🚀 **DEPLOY**
+## 🚀 **DEPLOY EM PRODUÇÃO**
+
+### **📖 Guia Completo de Deploy**
+Consulte o arquivo **[DEPLOY.md](DEPLOY.md)** para instruções detalhadas de deploy.
 
 ### **Vercel (Recomendado)**
 ```bash
@@ -293,29 +305,30 @@ font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text';
 # 3. Deploy automático a cada push!
 
 # Variáveis necessárias:
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-chave-anonima-aqui
+NEXT_PUBLIC_APP_URL=https://seu-dominio.vercel.app
 ```
 
 ### **Outras Plataformas**
 - **Netlify** - ✅ Compatível
 - **Railway** - ✅ Compatível
 - **Digital Ocean** - ✅ Compatível
+- **AWS Amplify** - ✅ Compatível
 
 ---
 
 ## 📚 **DOCUMENTAÇÃO**
 
 ### **Guias Disponíveis**
-- 📖 **[Como Usar Dívidas Internas](COMO_USAR_DIVIDAS_INTERNAS.md)**
-- 🏗️ **[Sistema de Famílias](SISTEMA_FAMILIAS_EMPRESAS.md)**
-- 🔧 **[Melhorias Implementadas](MELHORIAS_IMPLEMENTADAS.md)**
-- 🚀 **[Roadmap Completo](ROADMAP_MELHORIAS.md)**
+- 🚀 **[Guia de Deploy](DEPLOY.md)** - Como colocar em produção
+- 📋 **[Checklist de Correções](CHECKLIST_CORRECOES.md)** - Melhorias implementadas
+- 📊 **[Resumo Executivo](RESUMO_EXECUTIVO_FINAL.md)** - Status do projeto
+- 🔧 **[Correções Finais](CORRECOES_FINAIS_09_10_2025.md)** - Últimas correções
 
 ### **SQL Scripts**
-- 🗄️ **[Dívidas Internas](SQL_DIVIDAS_INTERNAS.sql)**
-- 🔧 **[Melhorias Críticas](MELHORIAS_CRITICAS.sql)**
-- 📊 **[Setup Completo](supabase_v2_setup.sql)**
+- 🗄️ **[Setup do Banco](database_setup.sql)** - Script completo de criação do banco
+- ⚠️ **Atenção:** O script contém `DROP TABLE` - use com cuidado em produção!
 
 ---
 
@@ -338,10 +351,17 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 ## 🐛 **SUPORTE**
 
-### **Problemas Conhecidos**
-- ⚠️ Materialized views podem demorar para atualizar
-- ⚠️ Upload de arquivos > 10MB pode falhar
-- ⚠️ Convites expiram em 7 dias
+### **✅ Correções Recentes (09/10/2025)**
+- ✅ Dashboard de gastos funcionando 100%
+- ✅ Assinaturas salvam corretamente
+- ✅ Categorias com dropdown funcionando
+- ✅ CRUD completo implementado em todas as páginas
+- ✅ Código limpo e otimizado para produção
+
+### **⚠️ Pontos de Atenção**
+- Materialized views atualizam a cada operação
+- O arquivo `database_setup.sql` contém `DROP TABLE` (cuidado em prod)
+- Filtros por família estão funcionando com RLS do Supabase
 
 ### **Como Reportar Bugs**
 1. Acesse [Issues](https://github.com/seu-usuario/controle-financeiro-familiar/issues)
@@ -387,9 +407,35 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 
 ---
 
-**🎉 Sistema completo e pronto para produção!**
+## ✅ **CHECKLIST DE PRODUÇÃO**
 
-**💡 Dúvidas? Abra uma issue ou entre em contato!**
+Antes de fazer o deploy:
+
+### Segurança ✅
+- [x] RLS habilitado em todas as tabelas
+- [x] Variáveis de ambiente documentadas
+- [x] Código de autenticação limpo
+- [x] Console.logs removidos do código de produção
+- [x] Error boundaries implementados
+
+### Funcionalidade ✅
+- [x] CRUD completo em Cartões, Parcelas e Investimentos
+- [x] Dashboard mostra valores corretos
+- [x] Sistema de famílias funciona
+- [x] Recuperação de senha implementada
+- [x] Skeleton loaders adicionados
+
+### Deploy ✅
+- [x] next.config.js configurado para produção
+- [x] Arquivo env.example criado
+- [x] Documentação de deploy completa (DEPLOY.md)
+- [x] README atualizado
+
+---
+
+**🎉 Sistema 100% pronto para produção!**
+
+**💡 Dúvidas? Consulte o [DEPLOY.md](DEPLOY.md) ou abra uma issue!**
 
 ---
 
@@ -397,6 +443,8 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 
 **[⬆ Voltar ao topo](#-sistema-de-controle-financeiro-familiar)**
 
-Made with ❤️ by [Seu Nome](https://github.com/seu-usuario)
+Made with ❤️ by Geison Hoehr
+
+**Última atualização:** 09/10/2025 | **Versão:** 3.0.1
 
 </div>

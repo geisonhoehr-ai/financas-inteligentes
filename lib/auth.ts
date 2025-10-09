@@ -49,7 +49,9 @@ export async function signUp(email: string, password: string, name?: string): Pr
           updated_at: new Date().toISOString(),
         })
 
-        if (dbError) console.warn('Aviso ao criar usuário no DB:', dbError)
+        if (dbError && process.env.NODE_ENV === 'development') {
+          console.warn('Aviso ao criar usuário no DB:', dbError)
+        }
       }
     }
 
@@ -74,63 +76,12 @@ export async function signUp(email: string, password: string, name?: string): Pr
 // Login com email e senha
 export async function signIn(email: string, password: string): Promise<AuthResponse> {
   try {
-    // Para usuário demo, usar credenciais especiais
-    if (email === 'demo@financeiro.com' && password === 'demo123') {
-      console.log('🎮 Login com usuário demo...')
-      
-      // Tentar login normal primeiro
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (data.user && !error) {
-        return {
-          user: {
-            id: data.user.id,
-            email: data.user.email!,
-            name: data.user.user_metadata?.name || 'Usuário Demo',
-          },
-          error: null,
-        }
-      }
-
-      // Se não funcionar, tentar criar o usuário demo
-      console.log('🔧 Criando usuário demo...')
-      const signUpResult = await signUp(email, password, 'Usuário Demo')
-      
-      if (signUpResult.user) {
-        console.log('✅ Usuário demo criado!')
-        return signUpResult
-      }
-
-      // Se ainda não funcionar, retornar erro
-      return {
-        user: null,
-        error: new Error('Não foi possível criar o usuário demo. Tente criar uma conta nova.'),
-      }
-    }
-
-    // Login normal para outros usuários
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    if (error) {
-      // Se for erro de email não confirmado, tentar criar o usuário
-      if (error.message.includes('email_not_confirmed')) {
-        console.log('🔧 Email não confirmado, tentando criar usuário...')
-        
-        const signUpResult = await signUp(email, password, email.split('@')[0])
-        
-        if (signUpResult.user) {
-          console.log('✅ Usuário criado com sucesso!')
-          return signUpResult
-        }
-      }
-      throw error
-    }
+    if (error) throw error
 
     return {
       user: data.user
@@ -171,7 +122,9 @@ export async function getCurrentUser(): Promise<User | null> {
       name: user.user_metadata?.name,
     }
   } catch (error) {
-    console.error('Error getting current user:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error getting current user:', error)
+    }
     return null
   }
 }

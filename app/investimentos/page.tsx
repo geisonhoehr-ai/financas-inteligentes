@@ -5,15 +5,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
-import { Plus, TrendingUp, DollarSign, PieChart, LineChart } from 'lucide-react'
+import { Plus, TrendingUp, DollarSign, PieChart, LineChart, Edit, Trash2 } from 'lucide-react'
 import { useInvestimentos } from '@/hooks/use-investimentos'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
 export default function InvestimentosPage() {
   const { familiaAtiva } = useFamiliaAtiva()
-  const { investimentos, stats, isLoading, createInvestimento, isCreating } = useInvestimentos()
+  const { investimentos, stats, isLoading, createInvestimento, updateInvestimento, deleteInvestimento, isCreating, isUpdating, isDeleting } = useInvestimentos()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
+  const [showEditDrawer, setShowEditDrawer] = useState(false)
+  const [investimentoEditando, setInvestimentoEditando] = useState<any>(null)
+
+  const handleDelete = async (id: string, nome: string) => {
+    if (window.confirm(`Tem certeza que deseja excluir o investimento "${nome}"? Esta ação enviará o investimento para a lixeira.`)) {
+      try {
+        await deleteInvestimento(id)
+      } catch (error) {
+        console.error('Erro ao excluir investimento:', error)
+      }
+    }
+  }
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -107,19 +119,43 @@ export default function InvestimentosPage() {
             <Card key={investimento.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className="font-medium">{investimento.nome}</h4>
                     <p className="text-sm text-muted-foreground">
                       {investimento.tipo || 'Sem tipo'} • {investimento.ativo ? 'Ativo' : 'Resgatado'}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold">{formatCurrency(investimento.valor)}</p>
-                    {investimento.data_aplicacao && (
-                      <p className="text-sm text-muted-foreground">
-                        Aplicado em {new Date(investimento.data_aplicacao).toLocaleDateString()}
-                      </p>
-                    )}
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-lg font-semibold">{formatCurrency(investimento.valor)}</p>
+                      {investimento.data_aplicacao && (
+                        <p className="text-sm text-muted-foreground">
+                          Aplicado em {new Date(investimento.data_aplicacao).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setInvestimentoEditando(investimento)
+                          setShowEditDrawer(true)
+                        }}
+                        className="h-9 w-9"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(investimento.id, investimento.nome)}
+                        disabled={isDeleting}
+                        className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -140,22 +176,42 @@ export default function InvestimentosPage() {
           <InvestimentoForm familiaId={familiaAtiva?.id} onClose={() => setShowAddDrawer(false)} />
         </DrawerContent>
       </Drawer>
+
+      {/* Drawer de Editar */}
+      <Drawer open={showEditDrawer} onOpenChange={setShowEditDrawer}>
+        <DrawerContent className="max-h-[85vh] overflow-y-auto">
+          <DrawerHeader>
+            <DrawerTitle>Editar Investimento</DrawerTitle>
+            <DrawerDescription>
+              Atualize as informações do investimento
+            </DrawerDescription>
+          </DrawerHeader>
+          <InvestimentoForm
+            familiaId={familiaAtiva?.id}
+            investimento={investimentoEditando}
+            onClose={() => {
+              setShowEditDrawer(false)
+              setInvestimentoEditando(null)
+            }}
+          />
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
 
-function InvestimentoForm({ familiaId, onClose }: { familiaId?: string; onClose: () => void }) {
-  const { createInvestimento, isCreating } = useInvestimentos()
+function InvestimentoForm({ familiaId, investimento, onClose }: { familiaId?: string; investimento?: any; onClose: () => void }) {
+  const { createInvestimento, updateInvestimento, isCreating, isUpdating } = useInvestimentos()
   const [formData, setFormData] = useState({
-    nome: '',
-    tipo: '',
-    valor_inicial: '',
-    valor_atual: '',
-    rentabilidade: '',
-    data_inicio: new Date().toISOString().split('T')[0],
+    nome: investimento?.nome || '',
+    tipo: investimento?.tipo || '',
+    valor_inicial: investimento?.valor?.toString() || '',
+    valor_atual: investimento?.valor_atual?.toString() || '',
+    rentabilidade: investimento?.rentabilidade?.toString() || '',
+    data_inicio: investimento?.data_aplicacao || new Date().toISOString().split('T')[0],
     data_vencimento: '',
-    status: 'ativo',
-    descricao: '',
+    status: investimento?.ativo ? 'ativo' : 'resgatado',
+    descricao: investimento?.observacoes || '',
     instituicao: ''
   })
 
@@ -168,11 +224,17 @@ function InvestimentoForm({ familiaId, onClose }: { familiaId?: string; onClose:
       valor: parseFloat(formData.valor_inicial.toString()),
       valor_atual: formData.valor_atual ? parseFloat(formData.valor_atual.toString()) : undefined,
       data_aplicacao: formData.data_inicio,
+      observacoes: formData.descricao,
+      ativo: formData.status === 'ativo',
       familia_id: familiaId
     }
 
     try {
-      await createInvestimento(investimentoData)
+      if (investimento) {
+        await updateInvestimento({ id: investimento.id, ...investimentoData })
+      } else {
+        await createInvestimento(investimentoData)
+      }
       onClose()
     } catch (error) {
       console.error('Erro ao salvar investimento:', error)
@@ -355,10 +417,10 @@ function InvestimentoForm({ familiaId, onClose }: { familiaId?: string; onClose:
         </Button>
         <Button
           type="submit"
-          disabled={isCreating}
+          disabled={isCreating || isUpdating}
           className="flex-1"
         >
-          {isCreating ? 'Salvando...' : 'Adicionar'}
+          {isCreating || isUpdating ? 'Salvando...' : (investimento ? 'Atualizar' : 'Adicionar')}
         </Button>
       </div>
     </form>

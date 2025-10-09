@@ -9,12 +9,26 @@ import { FamiliaAtivaProvider } from "@/components/familia-ativa-provider"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 import { LayoutWrapper } from "@/components/layout-wrapper"
+import { PWAInstaller } from "@/components/pwa-installer"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Financeiro v3.0 | Controle Financeiro Familiar",
   description: "Sistema completo de controle financeiro com Supabase, soft delete e muito mais",
+  manifest: "/manifest.json",
+  themeColor: "#007AFF",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Financeiro",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 }
 
 export default function RootLayout({
@@ -36,6 +50,7 @@ export default function RootLayout({
               <ToastProvider />
               <FamiliaAtivaProvider>
                 <LayoutWrapper>{children}</LayoutWrapper>
+                <PWAInstaller />
               </FamiliaAtivaProvider>
             </ThemeProvider>
           </QueryProvider>
