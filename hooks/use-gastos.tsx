@@ -20,7 +20,7 @@ export function useGastos() {
       const { data: result, error: rpcError } = await supabase.rpc('buscar_gastos_com_stats', {
         p_limit: 50,
         p_offset: 0,
-        p_familia_id: familiaAtivaId
+        p_familia_id: familiaAtivaId || undefined
       })
 
       if (rpcError) {
