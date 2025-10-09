@@ -302,31 +302,7 @@ function ContaFixaForm({ familiaId, conta, onClose }: { familiaId?: string; cont
             <option value="condominio">🏢 Condomínio</option>
             <option value="iptu">📄 IPTU</option>
             <option value="outros">📦 Outros</option>
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">
-            Data de Início *
-          </label>
-          <Input
-            type="date"
-            value={formData.data_inicio}
-            onChange={(e) => setFormData({ ...formData, data_inicio: e.target.value })}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">
-          Data de Término
-        </label>
-        <Input
-          type="date"
-          value={formData.data_fim}
-          onChange={(e) => setFormData({ ...formData, data_fim: e.target.value })}
-        />
+        </select>
       </div>
 
       <div className="space-y-2">
