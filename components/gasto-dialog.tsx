@@ -16,10 +16,10 @@ export function GastoDialog({ open, onOpenChange }: GastoDialogProps) {
   const [form, setForm] = useState<Partial<InsertGasto>>({
     descricao: '',
     valor: 0,
-    usuario_id: 1, // TODO: Get from context
+    usuario_id: '', // TODO: Get from context
     data: new Date().toISOString().split('T')[0],
-    categoria: 'Alimentação',
-    tipo_pagamento: 'PIX',
+    categoria_id: '',
+    tipo_pagamento: 'pix',
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -34,10 +34,10 @@ export function GastoDialog({ open, onOpenChange }: GastoDialogProps) {
     setForm({
       descricao: '',
       valor: 0,
-      usuario_id: 1,
+      usuario_id: '',
       data: new Date().toISOString().split('T')[0],
-      categoria: 'Alimentação',
-      tipo_pagamento: 'PIX',
+      categoria_id: '',
+      tipo_pagamento: 'pix',
     })
     onOpenChange(false)
   }
@@ -76,8 +76,8 @@ export function GastoDialog({ open, onOpenChange }: GastoDialogProps) {
             <label className="mb-2 block text-sm font-medium">Categoria</label>
             <select
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              value={form.categoria}
-              onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+              value={form.categoria_id}
+              onChange={(e) => setForm({ ...form, categoria_id: e.target.value })}
             >
               {CATEGORIAS.map((cat) => (
                 <option key={cat} value={cat}>

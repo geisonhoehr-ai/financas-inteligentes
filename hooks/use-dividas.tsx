@@ -70,7 +70,15 @@ export function useDividas(familiaId?: string) {
         })
 
       if (error) throw error
-      return data || []
+
+      // O RPC retorna apenas total_devo, total_recebo e saldo_liquido
+      // Adicionar campos faltantes da interface
+      return (data || []).map((item: any) => ({
+        ...item,
+        familia_id: familiaId,
+        familia_nome: '',
+        qtd_dividas_pendentes: 0
+      })) as ResumoDividas[]
     },
   })
   const { data: dividasQueDevo = [] } = useQuery({
@@ -111,18 +119,21 @@ export function useDividas(familiaId?: string) {
   })
   const createDivida = useMutation({
     mutationFn: async (divida: Partial<DividaInterna>) => {
-      const { data, error } = await supabase.rpc('criar_divida', {
-        p_familia_id: divida.familia_id,
-        p_credor_id: divida.credor_id,
-        p_devedor_id: divida.devedor_id,
-        p_valor: divida.valor,
-        p_descricao: divida.descricao,
-        p_gasto_original_id: divida.gasto_original_id || null,
-        p_parcela_numero: divida.parcela_numero || null,
-        p_parcela_total: divida.parcela_total || null,
-        p_data_vencimento: divida.data_vencimento || null,
-        p_observacoes: divida.observacoes || null
-      })
+      const params: any = {
+        p_familia_id: divida.familia_id || '',
+        p_credor_id: divida.credor_id || '',
+        p_devedor_id: divida.devedor_id || '',
+        p_valor: divida.valor || 0,
+        p_descricao: divida.descricao || ''
+      }
+
+      if (divida.gasto_original_id) params.p_gasto_original_id = divida.gasto_original_id
+      if (divida.parcela_numero) params.p_parcela_numero = divida.parcela_numero
+      if (divida.parcela_total) params.p_parcela_total = divida.parcela_total
+      if (divida.data_vencimento) params.p_data_vencimento = divida.data_vencimento
+      if (divida.observacoes) params.p_observacoes = divida.observacoes
+
+      const { data, error } = await supabase.rpc('criar_divida', params)
 
       if (error) throw error
       return data
@@ -140,10 +151,10 @@ export function useDividas(familiaId?: string) {
   })
   const marcarComoPaga = useMutation({
     mutationFn: async ({ id, comprovanteUrl }: { id: string; comprovanteUrl?: string }) => {
-      const { data, error } = await supabase.rpc('marcar_divida_como_paga', {
-        p_id: id,
-        p_comprovante_url: comprovanteUrl || null
-      })
+      const params: any = { p_id: id }
+      if (comprovanteUrl) params.p_comprovante_url = comprovanteUrl
+
+      const { data, error } = await supabase.rpc('marcar_divida_como_paga', params)
 
       if (error) throw error
       return data
@@ -161,10 +172,10 @@ export function useDividas(familiaId?: string) {
   })
   const cancelarDivida = useMutation({
     mutationFn: async ({ id, motivo }: { id: string; motivo?: string }) => {
-      const { data, error } = await supabase.rpc('cancelar_divida', {
-        p_id: id,
-        p_motivo: motivo || null
-      })
+      const params: any = { p_id: id }
+      if (motivo) params.p_motivo = motivo
+
+      const { data, error } = await supabase.rpc('cancelar_divida', params)
 
       if (error) throw error
       return data
@@ -182,18 +193,8 @@ export function useDividas(familiaId?: string) {
   })
   const dividirGasto = useMutation({
     mutationFn: async ({ gastoId, divisao }: { gastoId: string; divisao: Record<string, number> }) => {
-      const divisaoFormatada = Object.entries(divisao).reduce((acc, [userId, percentual]) => {
-        acc[userId] = { percentual }
-        return acc
-      }, {} as Record<string, { percentual: number }>)
-      const { data, error } = await supabase
-        .rpc('dividir_gasto_entre_membros', {
-          p_gasto_id: gastoId,
-          p_divisao: divisaoFormatada
-        })
-
-      if (error) throw error
-      return data
+      // TODO: Implementar função RPC dividir_gasto_entre_membros no banco
+      throw new Error('Funcionalidade não implementada: dividir_gasto_entre_membros')
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dividas'] })

@@ -56,7 +56,7 @@ export function useLixeira() {
       if (!user.user) throw new Error('Usuário não autenticado')
 
       const { data, error } = await supabase
-        .from(tabela)
+        .from(tabela as any)
         .update({
           deletado: false,
           deletado_em: null,
@@ -88,7 +88,7 @@ export function useLixeira() {
       if (!user.user) throw new Error('Usuário não autenticado')
 
       const { error } = await supabase
-        .from(tabela)
+        .from(tabela as any)
         .delete()
         .eq('id', id)
         .eq('usuario_id', user.user.id)

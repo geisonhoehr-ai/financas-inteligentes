@@ -58,8 +58,8 @@ export function useCartoes() {
         p_dia_vencimento: cartao.dia_vencimento,
         p_dia_fechamento: cartao.dia_fechamento,
         p_status: cartao.status || 'ativo',
-        p_observacoes: cartao.observacoes || null,
-        p_familia_id: cartao.familia_id || null,
+        p_observacoes: cartao.observacoes || '',
+        p_familia_id: cartao.familia_id || '',
         p_visivel_familia: cartao.visivel_familia || true,
         p_privado: cartao.privado || false
       })
@@ -82,7 +82,7 @@ export function useCartoes() {
         p_dia_vencimento: cartao.dia_vencimento || 1,
         p_dia_fechamento: cartao.dia_fechamento || 1,
         p_status: cartao.status || 'ativo',
-        p_observacoes: cartao.observacoes || null,
+        p_observacoes: cartao.observacoes || '',
         p_visivel_familia: cartao.visivel_familia || true,
         p_privado: cartao.privado || false
       })
@@ -108,14 +108,14 @@ export function useCartoes() {
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
     },
   })
-  const cartoesAtivos = cartoes.filter(c => c.status === 'ativo')
+  const cartoesAtivos = cartoes.filter(c => (c as any).ativo === true || (c as any).status === 'ativo')
   const stats = {
-    faturaAtual: 0, 
-    limiteDisponivel: cartoesAtivos.reduce((sum, c) => sum + c.limite, 0),
+    faturaAtual: 0,
+    limiteDisponivel: cartoesAtivos.reduce((sum, c) => sum + (c.limite || 0), 0),
     cartoesAtivos: cartoesAtivos.length,
     proximoVencimento: getProximoVencimento(cartoesAtivos),
   }
-  function getProximoVencimento(cartoes: Cartao[]) {
+  function getProximoVencimento(cartoes: any[]) {
     if (cartoes.length === 0) return null
     const hoje = new Date()
     const diaHoje = hoje.getDate()

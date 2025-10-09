@@ -17,9 +17,9 @@ export function Tabs({ value, onValueChange, children, className }: TabsProps) {
         if (React.isValidElement(child)) {
           return React.cloneElement(child, {
             ...child.props,
-            value,
+            selectedValue: value,
             onValueChange,
-          })
+          } as any)
         }
         return child
       })}
@@ -49,17 +49,17 @@ interface TabsTriggerProps {
   value: string
   children: React.ReactNode
   className?: string
-  value?: string
   onValueChange?: (value: string) => void
 }
 
-export function TabsTrigger({ value, children, className, ...props }: TabsTriggerProps) {
-  const isActive = props.value === value
+export function TabsTrigger(props: TabsTriggerProps & { selectedValue?: string }) {
+  const { value, children, className, onValueChange, selectedValue } = props
+  const isActive = selectedValue === value
 
   return (
     <button
       type="button"
-      onClick={() => props.onValueChange?.(value)}
+      onClick={() => onValueChange?.(value)}
       className={cn(
         'inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
         isActive
@@ -77,11 +77,12 @@ interface TabsContentProps {
   value: string
   children: React.ReactNode
   className?: string
-  value?: string
 }
 
-export function TabsContent({ value, children, className, ...props }: TabsContentProps) {
-  if (props.value !== value) return null
+export function TabsContent(props: TabsContentProps & { selectedValue?: string }) {
+  const { value, children, className, selectedValue } = props
+
+  if (selectedValue !== value) return null
 
   return (
     <div

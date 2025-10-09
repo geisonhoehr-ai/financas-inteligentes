@@ -55,12 +55,12 @@ export function useAssinaturas() {
         p_nome: assinatura.nome,
         p_valor: assinatura.valor,
         p_dia_vencimento: assinatura.dia_vencimento,
-        p_categoria: assinatura.categoria || null,
+        p_categoria: assinatura.categoria || '',
         p_status: assinatura.status || 'ativa',
         p_data_inicio: assinatura.data_inicio,
-        p_data_fim: assinatura.data_fim || null,
-        p_observacoes: assinatura.observacoes || null,
-        p_familia_id: assinatura.familia_id || null,
+        p_data_fim: assinatura.data_fim || '',
+        p_observacoes: assinatura.observacoes || '',
+        p_familia_id: assinatura.familia_id || '',
         p_visivel_familia: assinatura.visivel_familia || true,
         p_privado: assinatura.privado || false
       })
@@ -81,11 +81,11 @@ export function useAssinaturas() {
         p_nome: assinatura.nome || '',
         p_valor: assinatura.valor || 0,
         p_dia_vencimento: assinatura.dia_vencimento || 1,
-        p_categoria: assinatura.categoria || null,
+        p_categoria: assinatura.categoria || '',
         p_status: assinatura.status || 'ativa',
         p_data_inicio: assinatura.data_inicio || new Date().toISOString(),
-        p_data_fim: assinatura.data_fim || null,
-        p_observacoes: assinatura.observacoes || null,
+        p_data_fim: assinatura.data_fim || '',
+        p_observacoes: assinatura.observacoes || '',
         p_visivel_familia: assinatura.visivel_familia || true,
         p_privado: assinatura.privado || false
       })
@@ -118,24 +118,27 @@ export function useAssinaturas() {
   const refreshDashboard = async () => {
     await supabase.rpc('refresh_dashboard_views')
   }
-  const assinaturasAtivas = assinaturas.filter(a => a.status === 'ativa')
+  const assinaturasAtivas = assinaturas.filter(a => (a as any).ativa === true || (a as any).status === 'ativa')
   const stats = {
     gastoMensal: assinaturasAtivas.reduce((sum, a) => sum + a.valor, 0),
     assinaturasAtivas: assinaturasAtivas.length,
     proximoVencimento: getProximoVencimento(assinaturasAtivas),
     gastoAnual: assinaturasAtivas.reduce((sum, a) => sum + a.valor, 0) * 12,
   }
-  function getProximoVencimento(assinaturas: Assinatura[]) {
+  function getProximoVencimento(assinaturas: any[]) {
     if (assinaturas.length === 0) return null
     const hoje = new Date()
     const diaHoje = hoje.getDate()
     const proximas = assinaturas
-      .map(a => ({
-        ...a,
-        diasRestantes: a.dia_vencimento >= diaHoje 
-          ? a.dia_vencimento - diaHoje 
-          : (30 - diaHoje) + a.dia_vencimento
-      }))
+      .map(a => {
+        const diaVenc = a.dia_cobranca || a.dia_vencimento || 1
+        return {
+          ...a,
+          diasRestantes: diaVenc >= diaHoje
+            ? diaVenc - diaHoje
+            : (30 - diaHoje) + diaVenc
+        }
+      })
       .sort((a, b) => a.diasRestantes - b.diasRestantes)
     return proximas[0]
   }

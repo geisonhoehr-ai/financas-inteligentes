@@ -52,8 +52,8 @@ export function useContasFixas() {
         p_dia_vencimento: conta.dia_vencimento,
         p_categoria: conta.categoria,
         p_status: conta.status || 'ativa',
-        p_observacoes: conta.observacoes || null,
-        p_familia_id: conta.familia_id || null,
+        p_observacoes: conta.observacoes || '',
+        p_familia_id: conta.familia_id || '',
         p_visivel_familia: conta.visivel_familia || true,
         p_privado: conta.privado || false
       })
@@ -76,7 +76,7 @@ export function useContasFixas() {
         p_dia_vencimento: conta.dia_vencimento || 1,
         p_categoria: conta.categoria || '',
         p_status: conta.status || 'ativa',
-        p_observacoes: conta.observacoes || null,
+        p_observacoes: conta.observacoes || '',
         p_visivel_familia: conta.visivel_familia || true,
         p_privado: conta.privado || false
       })
@@ -111,10 +111,10 @@ export function useContasFixas() {
   }
   const stats = {
     totalMensal: contas.reduce((sum, c) => sum + c.valor, 0),
-    energia: contas.filter(c => c.categoria === 'energia').reduce((sum, c) => sum + c.valor, 0),
-    agua: contas.filter(c => c.categoria === 'agua').reduce((sum, c) => sum + c.valor, 0),
-    internet: contas.filter(c => c.categoria === 'internet').reduce((sum, c) => sum + c.valor, 0),
-    telefone: contas.filter(c => c.categoria === 'telefone').reduce((sum, c) => sum + c.valor, 0),
+    energia: contas.filter(c => (c as any).categoria === 'energia').reduce((sum, c) => sum + c.valor, 0),
+    agua: contas.filter(c => (c as any).categoria === 'agua').reduce((sum, c) => sum + c.valor, 0),
+    internet: contas.filter(c => (c as any).categoria === 'internet').reduce((sum, c) => sum + c.valor, 0),
+    telefone: contas.filter(c => (c as any).categoria === 'telefone').reduce((sum, c) => sum + c.valor, 0),
   }
   return {
     contas,

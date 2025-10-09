@@ -124,7 +124,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 <User className="h-3 w-3 text-white" />
               </div>
               <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                {user.name || user.email?.split('@')[0]}
+                {user.email?.split('@')[0]}
               </span>
             </div>
           )}

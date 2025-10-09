@@ -4,25 +4,26 @@ import { supabase } from '@/lib/supabase'
 export interface Investimento {
   id: string
   nome: string
-  tipo: string
-  valor_investido: number
-  valor_atual: number
-  usuario_id: string
-  data_aplicacao: string
-  observacoes?: string
-  familia_id?: string
+  tipo: string | null
+  valor: number
+  ativo: boolean | null
+  usuario_id: string | null
+  data_aplicacao: string | null
+  observacoes?: string | null
+  familia_id?: string | null
   visivel_familia?: boolean
   privado?: boolean
-  deletado: boolean
+  deletado: boolean | null
   deletado_em: string | null
   deletado_por: string | null
-  created_at: string
+  created_at: string | null
 }
 export interface InsertInvestimento {
   nome: string
   tipo: string
-  valor_investido: number
-  valor_atual: number
+  valor: number
+  valor_atual?: number
+  ativo?: boolean
   data_aplicacao: string
   observacoes?: string
   familia_id?: string
@@ -49,12 +50,12 @@ export function useInvestimentos() {
       const { data, error } = await supabase.rpc('criar_investimento', {
         p_nome: investimento.nome,
         p_tipo: investimento.tipo,
-        p_valor_investido: investimento.valor_investido,
-        p_valor_atual: investimento.valor_atual,
+        p_valor_investido: investimento.valor,
+        p_valor_atual: investimento.valor_atual || 0,
         p_data_aplicacao: investimento.data_aplicacao,
-        p_observacoes: investimento.observacoes || null,
-        p_familia_id: investimento.familia_id || null,
-        p_visivel_familia: investimento.visivel_familia || true,
+        p_observacoes: investimento.observacoes || "",
+        p_familia_id: investimento.familia_id || "",
+        p_visivel_familia: investimento.visivel_familia !== false,
         p_privado: investimento.privado || false
       })
 
@@ -71,11 +72,11 @@ export function useInvestimentos() {
         p_id: id,
         p_nome: investimento.nome || '',
         p_tipo: investimento.tipo || '',
-        p_valor_investido: investimento.valor_investido || 0,
-        p_valor_atual: investimento.valor_atual || 0,
+        p_valor_investido: investimento.valor || 0,
+        p_valor_atual: (investimento as any).valor_atual || investimento.valor || 0,
         p_data_aplicacao: investimento.data_aplicacao || new Date().toISOString(),
-        p_observacoes: investimento.observacoes || null,
-        p_visivel_familia: investimento.visivel_familia || true,
+        p_observacoes: investimento.observacoes || '',
+        p_visivel_familia: investimento.visivel_familia !== false,
         p_privado: investimento.privado || false
       })
 
@@ -100,27 +101,29 @@ export function useInvestimentos() {
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
     },
   })
-  const totalInvestido = investimentos.reduce((sum, i) => sum + i.valor_investido, 0)
-  const totalAtual = investimentos.reduce((sum, i) => sum + i.valor_atual, 0)
-  const rendimento = totalAtual - totalInvestido
-  const rentabilidade = totalInvestido > 0 ? ((rendimento / totalInvestido) * 100) : 0
-  
+  const totalInvestido = investimentos.reduce((sum, i) => sum + i.valor, 0)
+  const totalAtual = investimentos.reduce((sum, i) => sum + ((i as any).valor_atual || i.valor), 0)
+  const totalRendimento = totalAtual - totalInvestido
+  const rentabilidade = totalInvestido > 0 ? ((totalRendimento / totalInvestido) * 100) : 0
+
   // Adicionar rentabilidade para cada investimento
   const investimentosComRentabilidade = investimentos.map(investimento => {
-    const rendimentoIndividual = investimento.valor_atual - investimento.valor_investido
-    const rentabilidadeIndividual = investimento.valor_investido > 0 ? ((rendimentoIndividual / investimento.valor_investido) * 100) : 0
+    const valorAtual = (investimento as any).valor_atual || investimento.valor
+    const rendimento = valorAtual - investimento.valor
+    const rentabilidadeIndividual = investimento.valor > 0 ? ((rendimento / investimento.valor) * 100) : 0
     return {
       ...investimento,
-      rendimento: rendimentoIndividual,
-      rentabilidade: rentabilidadeIndividual
+      valor_atual: valorAtual,
+      rentabilidade: rentabilidadeIndividual,
+      rendimento: rendimento
     }
   })
-  
+
   const stats = {
     totalInvestido,
     rentabilidade: rentabilidade.toFixed(2),
-    investimentosAtivos: investimentos.length,
-    rendimentoTotal: rendimento,
+    investimentosAtivos: investimentos.filter(i => i.ativo).length,
+    rendimentoTotal: totalRendimento,
   }
   return {
     investimentos: investimentosComRentabilidade,

@@ -115,9 +115,11 @@ export default function InvestimentosPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-semibold">{formatCurrency(investimento.valor)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {investimento.rentabilidade >= 0 ? '+' : ''}{investimento.rentabilidade.toFixed(2)}% ({formatCurrency(investimento.rendimento)})
-                    </p>
+                    {investimento.data_aplicacao && (
+                      <p className="text-sm text-muted-foreground">
+                        Aplicado em {new Date(investimento.data_aplicacao).toLocaleDateString()}
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -159,12 +161,13 @@ function InvestimentoForm({ familiaId, onClose }: { familiaId?: string; onClose:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     const investimentoData = {
-      ...formData,
-      valor_investido: parseFloat(formData.valor_inicial.toString()),
-      valor_atual: parseFloat(formData.valor_atual.toString()) || parseFloat(formData.valor_inicial.toString()),
-      data_aplicacao: formData.data_inicio || new Date().toISOString().split('T')[0],
+      nome: formData.nome,
+      tipo: formData.tipo,
+      valor: parseFloat(formData.valor_inicial.toString()),
+      valor_atual: formData.valor_atual ? parseFloat(formData.valor_atual.toString()) : undefined,
+      data_aplicacao: formData.data_inicio,
       familia_id: familiaId
     }
 

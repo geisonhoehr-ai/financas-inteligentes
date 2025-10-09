@@ -5,31 +5,24 @@ export interface Meta {
   id: string
   nome: string
   valor_objetivo: number
-  valor_atual: number
-  usuario_id: string
-  categoria?: string
+  valor_atual: number | null
+  usuario_id: string | null
   prazo?: string | null
-  status: string
-  observacoes?: string
-  familia_id?: string
-  visivel_familia?: boolean
-  privado?: boolean
-  deletado: boolean
+  observacoes?: string | null
+  familia_id?: string | null
+  concluida: boolean | null
+  deletado: boolean | null
   deletado_em: string | null
   deletado_por: string | null
-  created_at: string
+  created_at: string | null
 }
 export interface InsertMeta {
   nome: string
   valor_objetivo: number
   valor_atual?: number
-  categoria?: string
   prazo?: string | null
-  status?: string
-  observacoes?: string
+  observacoes?: string | null
   familia_id?: string
-  visivel_familia?: boolean
-  privado?: boolean
 }
 export function useMetas() {
   const queryClient = useQueryClient()
@@ -48,18 +41,24 @@ export function useMetas() {
   })
   const createMeta = useMutation({
     mutationFn: async (meta: InsertMeta) => {
-      const { data, error } = await supabase.rpc('criar_meta', {
-        p_nome: meta.nome,
-        p_valor_objetivo: meta.valor_objetivo,
-        p_valor_atual: meta.valor_atual || 0,
-        p_categoria: meta.categoria || null,
-        p_prazo: meta.prazo || null,
-        p_status: meta.status || 'em_andamento',
-        p_observacoes: meta.observacoes || null,
-        p_familia_id: meta.familia_id || null,
-        p_visivel_familia: meta.visivel_familia || true,
-        p_privado: meta.privado || false
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('metas')
+        .insert({
+          nome: meta.nome,
+          valor_objetivo: meta.valor_objetivo,
+          valor_atual: meta.valor_atual || 0,
+          prazo: meta.prazo || "",
+          observacoes: meta.observacoes || "",
+          familia_id: meta.familia_id || "",
+          usuario_id: user.user.id,
+          concluida: false,
+          deletado: false
+        })
+        .select()
+        .single()
 
       if (error) throw error
       return data
@@ -70,18 +69,19 @@ export function useMetas() {
   })
   const updateMeta = useMutation({
     mutationFn: async ({ id, ...meta }: Partial<Meta> & { id: string }) => {
-      const { data, error } = await supabase.rpc('atualizar_meta', {
-        p_id: id,
-        p_nome: meta.nome || '',
-        p_valor_objetivo: meta.valor_objetivo || 0,
-        p_valor_atual: meta.valor_atual || 0,
-        p_categoria: meta.categoria || null,
-        p_prazo: meta.prazo || null,
-        p_status: meta.status || 'em_andamento',
-        p_observacoes: meta.observacoes || null,
-        p_visivel_familia: meta.visivel_familia || true,
-        p_privado: meta.privado || false
-      })
+      const { data, error } = await supabase
+        .from('metas')
+        .update({
+          nome: meta.nome,
+          valor_objetivo: meta.valor_objetivo,
+          valor_atual: meta.valor_atual,
+          prazo: meta.prazo,
+          observacoes: meta.observacoes,
+          concluida: meta.concluida
+        })
+        .eq('id', id)
+        .select()
+        .single()
 
       if (error) throw error
       return data
@@ -92,9 +92,19 @@ export function useMetas() {
   })
   const deleteMeta = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase.rpc('deletar_meta', {
-        p_id: id
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await supabase
+        .from('metas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id
+        })
+        .eq('id', id)
+        .select()
+        .single()
 
       if (error) throw error
       return data
@@ -104,14 +114,14 @@ export function useMetas() {
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
     },
   })
-  const metasAtivas = metas.filter(m => m.status === 'em_andamento')
-  const metasConcluidas = metas.filter(m => m.status === 'concluida')
+  const metasAtivas = metas.filter(m => !m.concluida)
+  const metasConcluidas = metas.filter(m => m.concluida)
   const stats = {
     totalEmMetas: metas.reduce((sum, m) => sum + m.valor_objetivo, 0),
-    economizado: metas.reduce((sum, m) => sum + m.valor_atual, 0),
+    economizado: metas.reduce((sum, m) => sum + (m.valor_atual || 0), 0),
     metasAtivas: metasAtivas.length,
     metasConcluidas: metasConcluidas.length,
-    progresso: metas.reduce((sum, m) => sum + ((m.valor_atual / m.valor_objetivo) * 100), 0) / (metas.length || 1),
+    progresso: metas.reduce((sum, m) => sum + (((m.valor_atual || 0) / m.valor_objetivo) * 100), 0) / (metas.length || 1),
   }
   return {
     metas,

@@ -51,15 +51,15 @@ export function useGasolina() {
   const createGasolina = useMutation({
     mutationFn: async (gasolina: InsertGasolina) => {
       const { data, error } = await supabase.rpc('criar_gasolina', {
-        p_descricao: gasolina.descricao || null,
+        p_descricao: gasolina.descricao || "",
         p_valor: gasolina.valor,
         p_litros: gasolina.litros,
         p_preco_litro: gasolina.preco_litro,
-        p_km_atual: gasolina.km_atual || null,
+        p_km_atual: gasolina.km_atual || 0,
         p_data: gasolina.data,
-        p_posto: gasolina.posto || null,
-        p_tipo_combustivel: gasolina.tipo_combustivel || null,
-        p_familia_id: gasolina.familia_id || null,
+        p_posto: gasolina.posto || "",
+        p_tipo_combustivel: gasolina.tipo_combustivel || "",
+        p_familia_id: gasolina.familia_id || "",
         p_visivel_familia: gasolina.visivel_familia || true,
         p_privado: gasolina.privado || false
       })
@@ -77,14 +77,14 @@ export function useGasolina() {
     mutationFn: async ({ id, ...gasolina }: Partial<Gasolina> & { id: string }) => {
       const { data, error } = await supabase.rpc('atualizar_gasolina', {
         p_id: id,
-        p_descricao: gasolina.descricao || null,
+        p_descricao: gasolina.descricao || "",
         p_valor: gasolina.valor || 0,
         p_litros: gasolina.litros || 0,
         p_preco_litro: gasolina.preco_litro || 0,
-        p_km_atual: gasolina.km_atual || null,
+        p_km_atual: gasolina.km_atual || 0,
         p_data: gasolina.data || new Date().toISOString(),
-        p_posto: gasolina.posto || null,
-        p_tipo_combustivel: gasolina.tipo_combustivel || null,
+        p_posto: gasolina.posto || "",
+        p_tipo_combustivel: gasolina.tipo_combustivel || "",
         p_visivel_familia: gasolina.visivel_familia || true,
         p_privado: gasolina.privado || false
       })
@@ -118,10 +118,10 @@ export function useGasolina() {
     await supabase.rpc('refresh_dashboard_views')
   }
   const stats = {
-    gastoTotal: abastecimentos.reduce((sum, a) => sum + a.valor, 0),
-    litrosTotais: abastecimentos.reduce((sum, a) => sum + a.litros, 0),
-    precoMedio: abastecimentos.length > 0 
-      ? abastecimentos.reduce((sum, a) => sum + a.preco_litro, 0) / abastecimentos.length 
+    gastoTotal: abastecimentos.reduce((sum, a) => sum + (a.valor || 0), 0),
+    litrosTotais: abastecimentos.reduce((sum, a) => sum + (a.litros || 0), 0),
+    precoMedio: abastecimentos.length > 0
+      ? abastecimentos.reduce((sum, a) => sum + (a.preco_litro || 0), 0) / abastecimentos.length
       : 0,
     totalAbastecimentos: abastecimentos.length,
   }

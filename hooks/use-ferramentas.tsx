@@ -54,12 +54,12 @@ export function useFerramentas() {
         p_nome: ferramenta.nome,
         p_valor: ferramenta.valor,
         p_categoria: ferramenta.categoria,
-        p_periodicidade: ferramenta.periodicidade || null,
+        p_periodicidade: ferramenta.periodicidade || '',
         p_status: ferramenta.status || 'ativa',
         p_data_inicio: ferramenta.data_inicio,
-        p_data_fim: ferramenta.data_fim || null,
-        p_observacoes: ferramenta.observacoes || null,
-        p_familia_id: ferramenta.familia_id || null,
+        p_data_fim: ferramenta.data_fim || '',
+        p_observacoes: ferramenta.observacoes || '',
+        p_familia_id: ferramenta.familia_id || '',
         p_visivel_familia: ferramenta.visivel_familia || true,
         p_privado: ferramenta.privado || false
       })
@@ -80,11 +80,11 @@ export function useFerramentas() {
         p_nome: ferramenta.nome || '',
         p_valor: ferramenta.valor || 0,
         p_categoria: ferramenta.categoria || '',
-        p_periodicidade: ferramenta.periodicidade || null,
+        p_periodicidade: ferramenta.periodicidade || '',
         p_status: ferramenta.status || 'ativa',
         p_data_inicio: ferramenta.data_inicio || new Date().toISOString(),
-        p_data_fim: ferramenta.data_fim || null,
-        p_observacoes: ferramenta.observacoes || null,
+        p_data_fim: ferramenta.data_fim || '',
+        p_observacoes: ferramenta.observacoes || '',
         p_visivel_familia: ferramenta.visivel_familia || true,
         p_privado: ferramenta.privado || false
       })

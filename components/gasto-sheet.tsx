@@ -25,9 +25,9 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
   const [form, setForm] = useState<Partial<InsertGasto>>({
     descricao: '',
     valor: 0,
-    usuario_id: 1,
+    usuario_id: '',
     data: new Date().toISOString().split('T')[0],
-    categoria: 'Alimentação',
+    categoria_id: 'Alimentação',
     tipo_pagamento: 'PIX',
     privado: false,
     visivel_familia: true,
@@ -43,9 +43,9 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
     setForm({
       descricao: '',
       valor: 0,
-      usuario_id: 1,
+      usuario_id: '',
       data: new Date().toISOString().split('T')[0],
-      categoria: 'Alimentação',
+      categoria_id: 'Alimentação',
       tipo_pagamento: 'PIX',
     })
     onOpenChange(false)
@@ -102,8 +102,8 @@ export function GastoSheet({ open, onOpenChange }: GastoSheetProps) {
             </label>
             <select
               className="flex h-12 w-full rounded-xl border-2 border-input bg-background px-4 text-base ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:border-primary hover:border-input/80"
-              value={form.categoria}
-              onChange={(e) => setForm({ ...form, categoria: e.target.value })}
+              value={form.categoria_id}
+              onChange={(e) => setForm({ ...form, categoria_id: e.target.value })}
             >
               {CATEGORIAS.map((cat) => (
                 <option key={cat} value={cat}>

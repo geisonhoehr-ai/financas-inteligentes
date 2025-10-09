@@ -119,9 +119,9 @@ export default function ParcelasPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">{parcela.descricao}</h4>
+                    <h4 className="font-medium">{parcela.produto}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {parcela.parcela_atual}/{parcela.total_parcelas} parcelas
+                      {parcela.parcelas_pagas || 0}/{parcela.total_parcelas} parcelas pagas
                     </p>
                   </div>
                   <div className="text-right">

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
@@ -75,7 +76,10 @@ export function ChartContainer({
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              label={(props: any) => {
+                const { name, percent } = props
+                return `${name} ${(percent * 100).toFixed(0)}%`
+              }}
               outerRadius={80}
               fill="#8884d8"
               dataKey={dataKey}
@@ -90,9 +94,12 @@ export function ChartContainer({
         )
       
       default:
-        return null
+        return <></>
     }
   }
+
+  const chart = renderChart()
+  if (!chart) return null
 
   return (
     <Card>
@@ -107,7 +114,7 @@ export function ChartContainer({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={height}>
-          {renderChart()}
+          {chart}
         </ResponsiveContainer>
       </CardContent>
     </Card>
@@ -127,13 +134,15 @@ export function AnalyticsDashboard({
   categoriasData, 
   investimentosData 
 }: AnalyticsDashboardProps) {
+  const [activeTab, setActiveTab] = useState('gastos')
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Análise Financeira</h2>
       </div>
 
-      <Tabs defaultValue="gastos" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="gastos">Gastos</TabsTrigger>
           <TabsTrigger value="receitas">Receitas</TabsTrigger>

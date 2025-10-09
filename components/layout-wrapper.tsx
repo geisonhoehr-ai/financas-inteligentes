@@ -17,7 +17,7 @@ interface LayoutWrapperProps {
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const { user, isLoading: authLoading } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const { familias, isLoading: familiasLoading } = useFamilias()
   const { familiaAtiva } = useFamiliaAtiva()
   

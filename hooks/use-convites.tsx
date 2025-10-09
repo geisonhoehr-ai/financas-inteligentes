@@ -10,14 +10,14 @@ export interface Convite {
   criado_por: string
   criador_nome?: string
   max_usos: number | null
-  usos_atual: number
+  usos_atual: number | null
   validade: string | null
-  ativo: boolean
-  deletado: boolean
+  ativo: boolean | null
+  deletado: boolean | null
   deletado_em: string | null
   deletado_por: string | null
-  created_at: string
-  updated_at: string
+  created_at: string | null
+  updated_at: string | null
 }
 export interface ConviteValidacao {
   valido: boolean
@@ -54,7 +54,6 @@ export function useConvites(familiaId?: string) {
           familia:familias!inner(nome),
           codigo,
           criado_por,
-          criador:users!inner(nome),
           max_usos,
           usos_atual,
           validade,
@@ -73,8 +72,8 @@ export function useConvites(familiaId?: string) {
 
       return data.map(d => ({
         ...d,
-        familia_nome: d.familia?.nome,
-        criador_nome: d.criador?.nome
+        familia_nome: (d.familia as any)?.nome,
+        criador_nome: undefined // A relação com users não está disponível
       })) || []
     },
     enabled: false, 
@@ -86,8 +85,8 @@ export function useConvites(familiaId?: string) {
 
       const { data, error } = await supabase.rpc('gerar_codigo_convite', {
         p_familia_id: novoConvite.familia_id,
-        p_max_usos: novoConvite.max_usos || null,
-        p_validade: novoConvite.validade || null
+        p_max_usos: novoConvite.max_usos || undefined,
+        p_validade: novoConvite.validade || undefined
       })
 
       if (error) throw error
@@ -125,11 +124,12 @@ export function useConvites(familiaId?: string) {
 
       const { data, error } = await supabase
         .rpc('aceitar_convite', {
-          p_codigo: codigo
+          p_codigo: codigo,
+          p_usuario_id: user.user.id
         })
 
       if (error) throw error
-      return data
+      return Array.isArray(data) ? data[0] : data
     },
     onSuccess: (data: ConviteAceite) => {
       queryClient.invalidateQueries({ queryKey: ['familias'] })
