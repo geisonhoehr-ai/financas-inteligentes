@@ -47,7 +47,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
 
       // Buscar alertas do banco
       const { data, error } = await supabase.rpc('buscar_alertas_inteligentes', {
-        p_familia_id: familiaAtivaId
+        p_familia_id: familiaAtivaId || undefined
       })
 
       if (error) {
@@ -94,7 +94,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
   const markAllAsRead = async () => {
     try {
       const { error } = await supabase.rpc('marcar_todos_alertas_lidos', {
-        p_familia_id: familiaAtivaId
+        p_familia_id: familiaAtivaId || undefined
       })
 
       if (error) throw error
@@ -273,7 +273,7 @@ export function NotificationButton({ onClick }: NotificationButtonProps) {
 
       // Buscar alertas não lidos
       const { data, error } = await supabase.rpc('buscar_alertas_inteligentes', {
-        p_familia_id: familiaAtivaId
+        p_familia_id: familiaAtivaId || undefined
       })
 
       if (error) {
