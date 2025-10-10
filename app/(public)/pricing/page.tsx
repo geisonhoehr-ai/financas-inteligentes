@@ -1,12 +1,51 @@
 'use client'
 
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Check, Crown, Star } from 'lucide-react'
+import { Check, Crown, Star, Loader2 } from 'lucide-react'
 import { PLANS } from '@/config/plans'
 import Link from 'next/link'
+import { loadStripe } from '@stripe/stripe-js'
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 export default function PricingPage() {
+  const [loading, setLoading] = useState(false)
+
+  const handleSubscribe = async () => {
+    try {
+      setLoading(true)
+
+      // Criar sessão de checkout
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
+        }),
+      })
+
+      const { sessionId, url, error } = await response.json()
+
+      if (error) {
+        alert('Erro ao iniciar checkout: ' + error)
+        return
+      }
+
+      // Redirecionar para o Stripe Checkout
+      if (url) {
+        window.location.href = url
+      }
+    } catch (error) {
+      console.error('Erro:', error)
+      alert('Erro ao processar pagamento')
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 py-20">
       <div className="container mx-auto px-4">
@@ -67,15 +106,32 @@ export default function PricingPage() {
                 </div>
 
                 <div className="pt-6">
-                  <Button
-                    asChild
-                    className="w-full h-12 text-lg"
-                    variant={plan.id === 'pro' ? 'default' : 'outline'}
-                  >
-                    <Link href="/register">
-                      {plan.id === 'free' ? 'Começar Grátis' : 'Assinar Pro'}
-                    </Link>
-                  </Button>
+                  {plan.id === 'free' ? (
+                    <Button
+                      asChild
+                      className="w-full h-12 text-lg"
+                      variant="outline"
+                    >
+                      <Link href="/register">
+                        Começar Grátis
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleSubscribe}
+                      disabled={loading}
+                      className="w-full h-12 text-lg"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processando...
+                        </>
+                      ) : (
+                        'Assinar Pro'
+                      )}
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

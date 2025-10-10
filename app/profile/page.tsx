@@ -6,23 +6,19 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/components/auth-provider'
-import { usePlanLimits } from '@/hooks/use-subscription'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { showToast } from '@/lib/toast'
+import { SubscriptionManager } from '@/components/subscription-manager'
 import {
   User,
   Mail,
-  Shield,
-  CreditCard,
   Settings,
   LogOut
 } from 'lucide-react'
-import Link from 'next/link'
 
 export default function ProfilePage() {
   const { user, signOut } = useAuth()
-  const { plan, isPro } = usePlanLimits()
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [profile, setProfile] = useState({
@@ -67,6 +63,9 @@ export default function ProfilePage() {
           Gerencie suas informações pessoais e configurações da conta
         </p>
       </div>
+
+      {/* Subscription Manager - Largura Total */}
+      <SubscriptionManager />
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Profile Information */}
@@ -138,23 +137,6 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-medium">Plano Atual</p>
-                    <p className="text-sm text-muted-foreground">
-                      {plan.name} - {plan.description}
-                    </p>
-                  </div>
-                </div>
-                {!isPro && (
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/pricing">Upgrade</Link>
-                  </Button>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-primary" />
                   <div>
                     <p className="font-medium">Notificações</p>
@@ -163,23 +145,8 @@ export default function ProfilePage() {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">
-                  Configurar
-                </Button>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <CreditCard className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-medium">Pagamentos</p>
-                    <p className="text-sm text-muted-foreground">
-                      Gerenciar métodos de pagamento
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm">
-                  Gerenciar
+                <Button variant="outline" size="sm" disabled>
+                  Em breve
                 </Button>
               </div>
             </div>

@@ -7,18 +7,35 @@ export function useSubscription() {
   return useQuery({
     queryKey: ['subscription'],
     queryFn: async () => {
-      // Verificar se o usuário atual é o geisonhoehr@gmail.com
       const { data: user } = await supabase.auth.getUser()
-      const isPro = user.user?.email === 'geisonhoehr@gmail.com'
+      
+      if (!user.user) {
+        throw new Error('Usuário não autenticado')
+      }
 
-      return {
-        id: 'temp',
-        user_id: user.user?.id || 'temp',
-        plan: isPro ? 'pro' : 'free',
-        status: 'active',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as UserSubscription
+      // Buscar assinatura no banco
+      const { data: subscription, error } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', user.user.id)
+        .single()
+
+      if (error || !subscription) {
+        // Criar assinatura free se não existir
+        const { data: newSubscription } = await supabase
+          .from('user_subscriptions')
+          .insert({
+            user_id: user.user.id,
+            plan: 'free',
+            status: 'active'
+          })
+          .select()
+          .single()
+
+        return newSubscription as UserSubscription
+      }
+
+      return subscription as UserSubscription
     },
   })
 }

@@ -1,0 +1,15 @@
+# Comandos para usar após instalar o Stripe CLI
+
+# 1. Verificar instalação
+stripe --version
+
+# 2. Fazer login (vai abrir o navegador)
+stripe login
+
+# 3. Iniciar webhook local (MANTENHA RODANDO)
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+
+# IMPORTANTE: 
+# - Copie o "webhook signing secret" (whsec_...) que aparecer
+# - Adicione ele ao arquivo .env.local na variável STRIPE_WEBHOOK_SECRET
+

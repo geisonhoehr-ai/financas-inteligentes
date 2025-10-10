@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Simples</title>
+</head>
+<body>
+    <h1>Teste Simples</h1>
+    <button onclick="testarAPI()">Testar API Checkout</button>
+    <div id="resultado"></div>
+
+    <script>
+        async function testarAPI() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = 'Testando...';
+            
+            try {
+                const response = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        priceId: 'price_1SGSX7GrUNpW6g9PU29uorzs'
+                    }),
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultado.innerHTML = `<p style="color: red;">Erro: ${data.error}</p>`;
+                } else if (data.url) {
+                    resultado.innerHTML = `<p style="color: green;">Sucesso! Redirecionando para: ${data.url}</p>`;
+                    window.location.href = data.url;
+                } else {
+                    resultado.innerHTML = `<p style="color: orange;">Resposta inesperada: ${JSON.stringify(data)}</p>`;
+                }
+            } catch (error) {
+                resultado.innerHTML = `<p style="color: red;">Erro de rede: ${error.message}</p>`;
+                console.error('Erro:', error);
+            }
+        }
+    </script>
+</body>
+</html>
