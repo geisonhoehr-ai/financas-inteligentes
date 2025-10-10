@@ -46,7 +46,7 @@ export function useModoEconomia() {
         return []
       }
 
-      return data as DesafioFamilia[]
+      return data as unknown as DesafioFamilia[]
     },
     enabled: !!familiaAtivaId,
   })

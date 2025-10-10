@@ -58,7 +58,7 @@ export function useTags() {
         throw error
       }
 
-      return data as Tag[]
+      return data as unknown as Tag[]
     },
   })
 
@@ -88,7 +88,7 @@ export function useTags() {
         return []
       }
 
-      return data as Tag[]
+      return data as unknown as Tag[]
     },
   })
 

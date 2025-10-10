@@ -82,7 +82,7 @@ export function useMesada() {
         return []
       }
 
-      return data as PerfilFilho[]
+      return data as unknown as PerfilFilho[]
     },
     enabled: !!familiaAtivaId,
   })
@@ -103,7 +103,7 @@ export function useMesada() {
         return []
       }
 
-      return data as Mesada[]
+      return data as unknown as Mesada[]
     },
     enabled: filhos.length > 0,
   })
@@ -126,7 +126,7 @@ export function useMesada() {
         return []
       }
 
-      return data as Tarefa[]
+      return data as unknown as Tarefa[]
     },
     enabled: !!familiaAtivaId,
   })
