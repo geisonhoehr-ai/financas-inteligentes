@@ -50,6 +50,10 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/register') &&
     !request.nextUrl.pathname.startsWith('/pricing') &&
     !request.nextUrl.pathname.startsWith('/invite') &&
+    !request.nextUrl.pathname.startsWith('/manifest') &&
+    !request.nextUrl.pathname.startsWith('/sw') &&
+    !request.nextUrl.pathname.startsWith('/icon') &&
+    !request.nextUrl.pathname.startsWith('/screenshot') &&
     request.nextUrl.pathname !== '/'
   ) {
     const url = request.nextUrl.clone()
