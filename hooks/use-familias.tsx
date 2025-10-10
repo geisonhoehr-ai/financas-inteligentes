@@ -22,7 +22,7 @@ export function useFamilias() {
       }
 
       // Buscar membros para cada família
-      const familias = await Promise.all((data || []).map(async (familia) => {
+      const familias = await Promise.all((data || []).map(async (familia: any) => {
         const { data: membros } = await supabase
           .from('familia_membros')
           .select(`
