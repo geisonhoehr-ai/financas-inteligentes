@@ -39,7 +39,7 @@ export function useCartoes() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: cartoes = [], isLoading, error } = useQuery({
+  const { data: cartoes = [], isLoading, error } = useQuery<Cartao[]>({
     queryKey: ['cartoes', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -59,7 +59,7 @@ export function useCartoes() {
       const { data, error } = await query.order('created_at', { ascending: false })
       
       if (error) throw error
-      return data || []
+      return (data as Cartao[]) || []
     },
   })
   const createCartao = useMutation({
