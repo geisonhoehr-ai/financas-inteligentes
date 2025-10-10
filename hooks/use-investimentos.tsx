@@ -36,7 +36,7 @@ export function useInvestimentos() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: investimentos = [], isLoading, error } = useQuery({
+  const { data: investimentos = [], isLoading, error } = useQuery<Investimento[]>({
     queryKey: ['investimentos', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -56,7 +56,7 @@ export function useInvestimentos() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data as Investimento[]) || []
     },
   })
   const createInvestimento = useMutation({

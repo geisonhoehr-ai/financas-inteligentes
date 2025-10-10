@@ -34,7 +34,7 @@ export function useContasFixas() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: contas = [], isLoading, error } = useQuery({
+  const { data: contas = [], isLoading, error } = useQuery<ContaFixa[]>({
     queryKey: ['contas-fixas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -54,7 +54,7 @@ export function useContasFixas() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data as ContaFixa[]) || []
     },
   })
   const createContaFixa = useMutation({

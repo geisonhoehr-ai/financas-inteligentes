@@ -38,7 +38,7 @@ export interface DividaPorPessoa {
 }
 export function useDividas(familiaId?: string) {
   const queryClient = useQueryClient()
-  const { data: dividas = [], isLoading } = useQuery({
+  const { data: dividas = [], isLoading } = useQuery<DividaInterna[]>({
     queryKey: ['dividas', familiaId],
     queryFn: async () => {
       if (!familiaId) return []
@@ -52,7 +52,7 @@ export function useDividas(familiaId?: string) {
         })
 
       if (error) throw error
-      return data || []
+      return (data as DividaInterna[]) || []
     },
     enabled: !!familiaId,
   })
@@ -81,7 +81,7 @@ export function useDividas(familiaId?: string) {
       })) as ResumoDividas[]
     },
   })
-  const { data: dividasQueDevo = [] } = useQuery({
+  const { data: dividasQueDevo = [] } = useQuery<DividaPorPessoa[]>({
     queryKey: ['dividas-devo', familiaId],
     queryFn: async () => {
       if (!familiaId) return []
@@ -95,11 +95,11 @@ export function useDividas(familiaId?: string) {
         })
 
       if (error) throw error
-      return data || []
+      return (data as DividaPorPessoa[]) || []
     },
     enabled: !!familiaId,
   })
-  const { data: dividasQueRecebo = [] } = useQuery({
+  const { data: dividasQueRecebo = [] } = useQuery<DividaPorPessoa[]>({
     queryKey: ['dividas-recebo', familiaId],
     queryFn: async () => {
       if (!familiaId) return []
@@ -113,7 +113,7 @@ export function useDividas(familiaId?: string) {
         })
 
       if (error) throw error
-      return data || []
+      return (data as DividaPorPessoa[]) || []
     },
     enabled: !!familiaId,
   })

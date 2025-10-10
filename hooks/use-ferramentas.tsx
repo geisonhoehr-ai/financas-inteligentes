@@ -38,7 +38,7 @@ export function useFerramentas() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: ferramentas = [], isLoading, error } = useQuery({
+  const { data: ferramentas = [], isLoading, error } = useQuery<Ferramenta[]>({
     queryKey: ['ferramentas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -58,7 +58,7 @@ export function useFerramentas() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data as Ferramenta[]) || []
     },
   })
   const createFerramenta = useMutation({

@@ -42,7 +42,7 @@ export function useAssinaturas() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: assinaturas = [], isLoading, error } = useQuery({
+  const { data: assinaturas = [], isLoading, error } = useQuery<Assinatura[]>({
     queryKey: ['assinaturas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -67,7 +67,7 @@ export function useAssinaturas() {
         throw error
       }
       
-      return data || []
+      return (data as Assinatura[]) || []
     },
   })
   const createAssinatura = useMutation({
