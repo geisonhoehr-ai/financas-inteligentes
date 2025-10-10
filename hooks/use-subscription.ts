@@ -14,7 +14,7 @@ export function useSubscription() {
       }
 
       // Buscar assinatura no banco
-      const { data: subscription, error } = await supabase
+      const { data: subscription, error } = await (supabase as any)
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user.user.id)
@@ -22,7 +22,7 @@ export function useSubscription() {
 
       if (error || !subscription) {
         // Criar assinatura free se não existir
-        const { data: newSubscription } = await supabase
+        const { data: newSubscription } = await (supabase as any)
           .from('user_subscriptions')
           .insert({
             user_id: user.user.id,
