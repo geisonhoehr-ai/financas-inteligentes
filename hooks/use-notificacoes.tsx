@@ -368,8 +368,8 @@ export function useNotificacoes() {
 
       if (!gastosAtual || !gastosAnterior) return
 
-      const totalAtual = gastosAtual.reduce((sum, g) => sum + parseFloat(g.valor.toString()), 0)
-      const totalAnterior = gastosAnterior.reduce((sum, g) => sum + parseFloat(g.valor.toString()), 0)
+      const totalAtual = (gastosAtual as any).reduce((sum: number, g: any) => sum + parseFloat(g.valor.toString()), 0)
+      const totalAnterior = (gastosAnterior as any).reduce((sum: number, g: any) => sum + parseFloat(g.valor.toString()), 0)
 
       const diferenca = totalAtual - totalAnterior
       const percentual = totalAnterior > 0 ? (diferenca / totalAnterior) * 100 : 0
