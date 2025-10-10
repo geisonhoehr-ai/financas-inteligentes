@@ -72,12 +72,12 @@ export function useDashboard(familiaId?: string) {
         .eq('status', 'ativa')
         .eq(familiaId ? 'familia_id' : 'usuario_id', familiaId || user.user.id)
 
-      const gastos_mes = gastos?.reduce((acc, g) => acc + (g.valor || 0), 0) || 0
-      const parcelas_mes = parcelas?.reduce((acc, p) => acc + (p.valor_parcela || 0), 0) || 0
-      const assinaturas_mes = assinaturas?.reduce((acc, a) => acc + (a.valor || 0), 0) || 0
-      const contas_fixas_mes = contas?.reduce((acc, c) => acc + (c.valor || 0), 0) || 0
-      const gasolina_mes = gasolina?.reduce((acc, g) => acc + (g.valor || 0), 0) || 0
-      const ferramentas_mes = ferramentas?.reduce((acc, f) => {
+      const gastos_mes = (gastos as any)?.reduce((acc: number, g: any) => acc + (g.valor || 0), 0) || 0
+      const parcelas_mes = (parcelas as any)?.reduce((acc: number, p: any) => acc + (p.valor_parcela || 0), 0) || 0
+      const assinaturas_mes = (assinaturas as any)?.reduce((acc: number, a: any) => acc + (a.valor || 0), 0) || 0
+      const contas_fixas_mes = (contas as any)?.reduce((acc: number, c: any) => acc + (c.valor || 0), 0) || 0
+      const gasolina_mes = (gasolina as any)?.reduce((acc: number, g: any) => acc + (g.valor || 0), 0) || 0
+      const ferramentas_mes = (ferramentas as any)?.reduce((acc: number, f: any) => {
         // Ferramentas mensais somam direto, anuais dividem por 12
         if (f.periodicidade === 'mensal') return acc + (f.valor || 0)
         if (f.periodicidade === 'anual') return acc + ((f.valor || 0) / 12)
