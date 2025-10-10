@@ -67,7 +67,7 @@ export function useAssinaturas() {
         throw error
       }
       
-      return (data as Assinatura[]) || []
+      return (data as unknown as Assinatura[]) || []
     },
   })
   const createAssinatura = useMutation({

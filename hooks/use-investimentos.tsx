@@ -56,7 +56,7 @@ export function useInvestimentos() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return (data as Investimento[]) || []
+      return (data as unknown as Investimento[]) || []
     },
   })
   const createInvestimento = useMutation({

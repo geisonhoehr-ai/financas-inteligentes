@@ -58,7 +58,7 @@ export function useFerramentas() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return (data as Ferramenta[]) || []
+      return (data as unknown as Ferramenta[]) || []
     },
   })
   const createFerramenta = useMutation({

@@ -54,7 +54,7 @@ export function useContasFixas() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return (data as ContaFixa[]) || []
+      return (data as unknown as ContaFixa[]) || []
     },
   })
   const createContaFixa = useMutation({

@@ -52,7 +52,7 @@ export function useDividas(familiaId?: string) {
         })
 
       if (error) throw error
-      return (data as DividaInterna[]) || []
+      return (data as unknown as DividaInterna[]) || []
     },
     enabled: !!familiaId,
   })
@@ -95,7 +95,7 @@ export function useDividas(familiaId?: string) {
         })
 
       if (error) throw error
-      return (data as DividaPorPessoa[]) || []
+      return (data as unknown as DividaPorPessoa[]) || []
     },
     enabled: !!familiaId,
   })
@@ -113,7 +113,7 @@ export function useDividas(familiaId?: string) {
         })
 
       if (error) throw error
-      return (data as DividaPorPessoa[]) || []
+      return (data as unknown as DividaPorPessoa[]) || []
     },
     enabled: !!familiaId,
   })

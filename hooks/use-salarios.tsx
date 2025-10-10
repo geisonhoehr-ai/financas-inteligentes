@@ -56,7 +56,7 @@ export function useSalarios() {
         throw error
       }
       
-      return (data as Salario[]) || []
+      return (data as unknown as Salario[]) || []
     },
   })
 

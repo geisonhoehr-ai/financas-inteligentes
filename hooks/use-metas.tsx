@@ -50,7 +50,7 @@ export function useMetas() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return (data as Meta[]) || []
+      return (data as unknown as Meta[]) || []
     },
   })
   const createMeta = useMutation({

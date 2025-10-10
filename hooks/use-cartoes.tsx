@@ -59,7 +59,7 @@ export function useCartoes() {
       const { data, error } = await query.order('created_at', { ascending: false })
       
       if (error) throw error
-      return (data as Cartao[]) || []
+      return (data as unknown as Cartao[]) || []
     },
   })
   const createCartao = useMutation({

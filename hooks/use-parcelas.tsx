@@ -65,7 +65,7 @@ export function useParcelas() {
       const { data, error } = await query.order('created_at', { ascending: false })
       
       if (error) throw error
-      return (data as Parcela[]) || []
+      return (data as unknown as Parcela[]) || []
     },
   })
   const createParcela = useMutation({
