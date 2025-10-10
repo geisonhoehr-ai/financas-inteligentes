@@ -124,21 +124,26 @@ export default function AssinaturasPage() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {assinaturas.map((assinatura) => (
+          {assinaturas.map((assinatura: any) => (
             <Card key={assinatura.id}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h4 className="font-medium">{assinatura.nome}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Vence dia {assinatura.dia_cobranca}
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{assinatura.nome}</h4>
+                      <span className={`px-2 py-0.5 text-xs rounded-full ${assinatura.ativa ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'}`}>
+                        {assinatura.ativa ? 'Ativa' : 'Inativa'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Vence todo dia {assinatura.dia_cobranca || assinatura.dia_vencimento}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
                       <p className="text-lg font-semibold">{formatCurrency(assinatura.valor)}</p>
                       <p className="text-sm text-muted-foreground">
-                        {assinatura.ativa ? 'Ativa' : 'Inativa'}
+                        por mês
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -317,21 +322,36 @@ function AssinaturaForm({ assinatura, onClose }: { assinatura?: Assinatura | nul
 
         <div className="space-y-2">
           <label className="text-sm font-medium">
-            Categoria
+            Status *
           </label>
           <select
-            value={formData.categoria_id}
-            onChange={(e) => setFormData({ ...formData, categoria_id: e.target.value })}
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
             className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+            required
           >
-            <option value="">Selecione uma categoria...</option>
-            {categorias.map((categoria: any) => (
-              <option key={categoria.id} value={categoria.id}>
-                {categoria.icone} {categoria.nome}
-              </option>
-            ))}
+            <option value="ativa">✅ Ativa</option>
+            <option value="inativa">❌ Inativa</option>
           </select>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          Categoria
+        </label>
+        <select
+          value={formData.categoria_id}
+          onChange={(e) => setFormData({ ...formData, categoria_id: e.target.value })}
+          className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
+        >
+          <option value="">Selecione uma categoria...</option>
+          {categorias.map((categoria: any) => (
+            <option key={categoria.id} value={categoria.id}>
+              {categoria.icone} {categoria.nome}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

@@ -22,11 +22,7 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
   const { familias } = useFamilias()
   const [isOpen, setIsOpen] = useState(false)
 
-  if (!familiaAtiva || !familias || familias.length === 0) {
-    return null
-  }
-
-  const handleSelectFamilia = (id: string) => {
+  const handleSelectFamilia = (id: string | null) => {
     setFamiliaAtivaId(id)
     setIsOpen(false)
   }
@@ -46,11 +42,14 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
         className="h-8 px-2 gap-2 text-sm font-medium hover:bg-accent"
       >
         {(() => {
+          if (!familiaAtiva) {
+            return <Users className="h-4 w-4" />
+          }
           const Icon = getFamiliaIcon()
           return <Icon className="h-4 w-4" />
         })()}
         <span className="hidden sm:inline max-w-[120px] truncate">
-          {familiaAtiva.nome}
+          {familiaAtiva ? familiaAtiva.nome : 'Perfil Pessoal'}
         </span>
         <ChevronDown className="h-3 w-3 opacity-50" />
       </Button>
@@ -67,10 +66,38 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
           <div className="absolute top-full left-0 mt-1 w-64 bg-popover border border-border rounded-xl shadow-lg z-50">
             <div className="p-2">
               <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Famílias Disponíveis
+                Selecione o Perfil
               </div>
               
-              {familias.map((familia) => {
+              {/* Perfil Pessoal */}
+              <button
+                onClick={() => handleSelectFamilia(null)}
+                className={cn(
+                  'w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors',
+                  !familiaAtivaId 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'hover:bg-accent'
+                )}
+              >
+                <Users className="h-4 w-4 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">Perfil Pessoal</div>
+                  <div className="text-xs text-muted-foreground">
+                    Somente seus gastos
+                  </div>
+                </div>
+                {!familiaAtivaId && (
+                  <Check className="h-4 w-4 text-primary" />
+                )}
+              </button>
+
+              {/* Separador */}
+              {familias && familias.length > 0 && (
+                <div className="border-t border-border my-2"></div>
+              )}
+              
+              {/* Famílias */}
+              {familias && familias.map((familia) => {
                 const Icon = getFamiliaIcon()
                 const isSelected = familia.id === familiaAtivaId
                 

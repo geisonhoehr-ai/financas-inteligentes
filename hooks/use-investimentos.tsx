@@ -61,19 +61,29 @@ export function useInvestimentos() {
   })
   const createInvestimento = useMutation({
     mutationFn: async (investimento: InsertInvestimento) => {
-      const { data, error } = await supabase.rpc('criar_investimento', {
-        p_nome: investimento.nome,
-        p_tipo: investimento.tipo,
-        p_valor_investido: investimento.valor,
-        p_valor_atual: investimento.valor_atual || 0,
-        p_data_aplicacao: investimento.data_aplicacao,
-        p_observacoes: investimento.observacoes || "",
-        p_familia_id: investimento.familia_id || "",
-        p_visivel_familia: investimento.visivel_familia !== false,
-        p_privado: investimento.privado || false
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('investimentos')
+        .insert([{
+          nome: investimento.nome,
+          tipo: investimento.tipo,
+          valor: investimento.valor,
+          ativo: investimento.ativo !== false,
+          data_aplicacao: investimento.data_aplicacao,
+          observacoes: investimento.observacoes || '',
+          usuario_id: user.user.id,
+          familia_id: investimento.familia_id || null,
+          deletado: false
+        }])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao criar investimento:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
@@ -82,19 +92,24 @@ export function useInvestimentos() {
   })
   const updateInvestimento = useMutation({
     mutationFn: async ({ id, ...investimento }: Partial<Investimento> & { id: string }) => {
-      const { data, error } = await supabase.rpc('atualizar_investimento', {
-        p_id: id,
-        p_nome: investimento.nome || '',
-        p_tipo: investimento.tipo || '',
-        p_valor_investido: investimento.valor || 0,
-        p_valor_atual: (investimento as any).valor_atual || investimento.valor || 0,
-        p_data_aplicacao: investimento.data_aplicacao || new Date().toISOString(),
-        p_observacoes: investimento.observacoes || '',
-        p_visivel_familia: investimento.visivel_familia !== false,
-        p_privado: investimento.privado || false
-      })
+      const { data, error } = await supabase
+        .from('investimentos')
+        .update({
+          nome: investimento.nome,
+          tipo: investimento.tipo,
+          valor: investimento.valor,
+          ativo: investimento.ativo,
+          data_aplicacao: investimento.data_aplicacao,
+          observacoes: investimento.observacoes
+        })
+        .eq('id', id)
+        .select()
+        .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao atualizar investimento:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
@@ -103,11 +118,24 @@ export function useInvestimentos() {
   })
   const deleteInvestimento = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase.rpc('deletar_investimento', {
-        p_id: id
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('investimentos')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao deletar investimento:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {

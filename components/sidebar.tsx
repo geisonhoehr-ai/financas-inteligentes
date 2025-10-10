@@ -15,11 +15,14 @@ import {
   Building,
   Wrench,
   TrendingUp,
+  TrendingDown,
   X,
   Users,
   BarChart3,
   DollarSign,
-  Tag
+  Tag,
+  UserPlus,
+  Wallet
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -103,6 +106,41 @@ const navigation = [
     name: 'Categorias',
     href: '/categorias',
     icon: Tag,
+  },
+  {
+    name: 'Tags',
+    href: '/tags',
+    icon: Tag,
+  },
+  {
+    name: 'Análise por Tags',
+    href: '/analise-tags',
+    icon: BarChart3,
+  },
+  {
+    name: 'Orçamento',
+    href: '/orcamento',
+    icon: PieChart,
+  },
+  {
+    name: 'Calendário',
+    href: '/calendario',
+    icon: Calendar,
+  },
+  {
+    name: 'Mesada Digital',
+    href: '/mesada',
+    icon: Wallet,
+  },
+  {
+    name: 'Modo Economia',
+    href: '/modo-economia',
+    icon: TrendingDown,
+  },
+  {
+    name: 'Aceitar Convite',
+    href: '/aceitar-convite',
+    icon: UserPlus,
   },
   {
     name: 'Configurações',

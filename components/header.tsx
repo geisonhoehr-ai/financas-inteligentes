@@ -18,6 +18,7 @@ import {
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { NotificationCenter, NotificationButton } from '@/components/notifications/notification-center'
+import { NotificacaoCenter } from '@/components/notifications/notificacao-center'
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -99,7 +100,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         <div className="flex items-center gap-1 md:gap-2">
           {/* Notificações Inteligentes */}
           {user && (
-            <NotificationButton onClick={() => setShowNotifications(true)} />
+            <NotificacaoCenter />
           )}
           
           {/* Notificações de Dívidas */}

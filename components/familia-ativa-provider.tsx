@@ -26,19 +26,26 @@ export function FamiliaAtivaProvider({ children }: FamiliaAtivaProviderProps) {
   useEffect(() => {
     if (user && !isLoading && familias) {
       const saved = localStorage.getItem(`familia-ativa-${user.id}`)
-      if (saved && familias.some(f => f.id === saved)) {
+      if (saved === 'null' || saved === null) {
+        // Usuário selecionou "Perfil Pessoal"
+        setFamiliaAtivaIdState(null)
+      } else if (saved && familias.some(f => f.id === saved)) {
+        // Usuário tem uma família salva válida
         setFamiliaAtivaIdState(saved)
-      } else if (familias.length > 0) {
-        // Auto-selecionar primeira família se não há seleção salva
-        setFamiliaAtivaIdState(familias[0].id)
       }
+      // Não auto-seleciona mais a primeira família
+      // O usuário deve escolher manualmente entre Perfil Pessoal ou Família
     }
   }, [user, familias, isLoading])
 
   // Salvar no localStorage quando mudar
   useEffect(() => {
-    if (user && familiaAtivaId) {
-      localStorage.setItem(`familia-ativa-${user.id}`, familiaAtivaId)
+    if (user) {
+      if (familiaAtivaId === null) {
+        localStorage.setItem(`familia-ativa-${user.id}`, 'null')
+      } else if (familiaAtivaId) {
+        localStorage.setItem(`familia-ativa-${user.id}`, familiaAtivaId)
+      }
     }
   }, [user, familiaAtivaId])
 

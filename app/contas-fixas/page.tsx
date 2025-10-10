@@ -117,18 +117,25 @@ export default function ContasFixasPage() {
       ) : (
         <div className="space-y-3">
           {contas.map((conta) => (
-            <Card key={conta.id}>
+            <Card key={conta.id} className={`${(conta as any).pago ? 'bg-green-50 dark:bg-green-950/20' : ''}`}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h4 className="font-medium">{conta.nome}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{conta.nome}</h4>
+                      {(conta as any).pago && (
+                        <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          ✓ Pago
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       Vence dia {conta.dia_vencimento}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <p className="text-lg font-semibold">{formatCurrency(conta.valor)}</p>
+                      <p className={`text-lg font-semibold ${(conta as any).pago ? 'text-green-600 dark:text-green-400 line-through' : ''}`}>{formatCurrency(conta.valor)}</p>
                       <p className="text-sm text-muted-foreground">
                         Conta fixa
                       </p>

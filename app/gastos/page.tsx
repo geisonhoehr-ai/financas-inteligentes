@@ -11,7 +11,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { formatCurrency, formatDateTime } from '@/lib/utils'
-import { Plus, Receipt, Trash2, Edit3, Lock } from 'lucide-react'
+import { Plus, Receipt, Trash2, Edit3, Lock, Tag as TagIcon } from 'lucide-react'
+import { TagSelector } from '@/components/tag-selector'
+import { useTags } from '@/hooks/use-tags'
 
 export default function GastosPage() {
   const { gastos: todosGastos = [], stats = { total_mes: 0, total_hoje: 0, total_gastos: 0 }, isLoading, deleteGasto, isDeleting } = useGastos()
@@ -128,7 +130,7 @@ export default function GastosPage() {
         ) : (
           <div className="space-y-3">
             {gastos.map((gasto: any) => (
-              <Card key={gasto.id} className="border-0 bg-white dark:bg-zinc-900 shadow-sm hover:shadow-md transition-shadow">
+              <Card key={gasto.id} className={`border-0 shadow-sm hover:shadow-md transition-shadow ${gasto.pago ? 'bg-green-50 dark:bg-green-950/20' : 'bg-white dark:bg-zinc-900'}`}>
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
                     <div className="flex-1 min-w-0">
@@ -146,6 +148,11 @@ export default function GastosPage() {
                                 <Lock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                               </div>
                             )}
+                            {gasto.pago && (
+                              <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                ✓ Pago
+                              </span>
+                            )}
                           </div>
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
                             {formatDateTime(gasto.data)}
@@ -160,7 +167,7 @@ export default function GastosPage() {
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-3">
                       <div className="text-left sm:text-right">
-                        <p className="text-lg font-semibold text-red-600 dark:text-red-400">
+                        <p className={`text-lg font-semibold ${gasto.pago ? 'text-green-600 dark:text-green-400 line-through' : 'text-red-600 dark:text-red-400'}`}>
                           -{formatCurrency(parseFloat(gasto.valor.toString()))}
                         </p>
                       </div>
@@ -225,13 +232,16 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
   const { familiaAtiva } = useFamiliaAtiva()
   const { categorias } = useCategorias()
   const { createGasto, updateGasto, isCreating, isUpdating } = useGastos()
+  const { addTagToGasto, removeTagFromGasto } = useTags()
   const [formData, setFormData] = useState({
     descricao: gasto?.descricao || '',
     valor: gasto?.valor || '',
     categoria: gasto?.categoria || '',
     data: gasto?.data ? new Date(gasto.data).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
     tipo_pagamento: gasto?.tipo_pagamento || 'dinheiro',
-    privado: gasto?.privado || false
+    privado: gasto?.privado || false,
+    pago: gasto?.pago || false,
+    tags: [] as string[]
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -251,10 +261,14 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
       familia_id: familiaAtiva?.id,
       tipo_pagamento: 'dinheiro' as const,
       privado: formData.privado,
-      visivel_familia: !formData.privado
+      visivel_familia: !formData.privado,
+      pago: formData.pago,
+      data_pagamento: formData.pago ? new Date().toISOString() : null
     }
 
     try {
+      let gastoId: string | undefined
+
       if (gasto && gasto.id) {
         const updateData = { 
           id: gasto.id,
@@ -266,9 +280,23 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
           familia_id: gastoData.familia_id
         } as any
         await updateGasto(updateData)
+        gastoId = gasto.id
       } else {
-        await createGasto(gastoData)
+        const novoGasto = await createGasto(gastoData)
+        gastoId = (novoGasto as any)?.id
       }
+
+      // Adicionar tags ao gasto
+      if (gastoId && formData.tags.length > 0) {
+        for (const tagId of formData.tags) {
+          try {
+            await addTagToGasto({ gastoId, tagId })
+          } catch (error) {
+            console.error('Erro ao adicionar tag:', error)
+          }
+        }
+      }
+
       onClose()
     } catch (error) {
       console.error('Erro ao salvar gasto:', error)
@@ -357,19 +385,41 @@ function GastoForm({ gasto, onClose }: { gasto?: any; onClose: () => void }) {
         </select>
       </div>
 
-      <div className="flex items-center gap-2 pt-2">
-        <input
-          type="checkbox"
-          id="privado"
-          checked={formData.privado}
-          onChange={(e) => setFormData({ ...formData, privado: e.target.checked })}
-          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-        />
-        <label htmlFor="privado" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer flex items-center gap-2">
-          <Lock className="h-4 w-4" />
-          Gasto privado (visível apenas para você)
-        </label>
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="privado"
+            checked={formData.privado}
+            onChange={(e) => setFormData({ ...formData, privado: e.target.checked })}
+            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+          />
+          <label htmlFor="privado" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            Gasto privado (visível apenas para você)
+          </label>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="pago"
+            checked={formData.pago}
+            onChange={(e) => setFormData({ ...formData, pago: e.target.checked })}
+            className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+          />
+          <label htmlFor="pago" className="text-sm font-medium text-zinc-700 dark:text-zinc-300 cursor-pointer flex items-center gap-2">
+            <span className="text-green-600">✓</span>
+            Marcar como pago
+          </label>
+        </div>
       </div>
+
+      {/* Seletor de Tags */}
+      <TagSelector
+        selectedTags={formData.tags}
+        onChange={(tags) => setFormData({ ...formData, tags })}
+      />
 
       <div className="flex gap-3 pt-4">
         <Button

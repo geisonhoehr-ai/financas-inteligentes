@@ -22,9 +22,9 @@ export default function FerramentasPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Ferramentas</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dev</h2>
           <p className="text-sm text-muted-foreground">
-            Controle gastos com ferramentas e softwares profissionais
+            Controle gastos com ferramentas e softwares de desenvolvimento
           </p>
         </div>
         <Button 

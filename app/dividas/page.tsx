@@ -51,6 +51,8 @@ export default function DividasPage() {
     data_vencimento: '',
     credor_id: '',
     devedor_id: '',
+    credor_nome_livre: '',
+    devedor_nome_livre: '',
     parcela_total: '1',
     parcela_numero: '1',
     valor_parcela: ''
@@ -59,8 +61,21 @@ export default function DividasPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // Se não tiver credor_id nem devedor_id, não permite salvar
+    if (!formData.credor_id && !formData.credor_nome_livre) {
+      alert('Por favor, selecione ou digite o nome de quem vai receber')
+      return
+    }
+    if (!formData.devedor_id && !formData.devedor_nome_livre) {
+      alert('Por favor, selecione ou digite o nome de quem vai pagar')
+      return
+    }
+    
     const dividaData = {
       ...formData,
+      // Se tiver nome livre, usa ele como ID temporário ou cria lógica adequada
+      credor_id: formData.credor_id || `nome_livre_${formData.credor_nome_livre}`,
+      devedor_id: formData.devedor_id || `nome_livre_${formData.devedor_nome_livre}`,
       valor: parseFloat(formData.valor.toString()),
       parcela_total: parseInt(formData.parcela_total.toString()),
       parcela_numero: parseInt(formData.parcela_numero.toString()),
@@ -76,6 +91,8 @@ export default function DividasPage() {
         data_vencimento: '',
         credor_id: '',
         devedor_id: '',
+        credor_nome_livre: '',
+        devedor_nome_livre: '',
         parcela_total: '1',
         parcela_numero: '1',
         valor_parcela: ''
@@ -367,43 +384,77 @@ export default function DividasPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Credor (Quem vai receber) *
+              </label>
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Credor *
-                </label>
                 <select
                   value={formData.credor_id}
-                  onChange={(e) => setFormData({ ...formData, credor_id: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value === 'outro') {
+                      setFormData({ ...formData, credor_id: '', credor_nome_livre: '' })
+                    } else {
+                      setFormData({ ...formData, credor_id: value, credor_nome_livre: '' })
+                    }
+                  }}
                   className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
-                  required
                 >
-                  <option value="">Selecione...</option>
-                  {familiaAtiva?.familia_membros.map((membro) => (
+                  <option value="">Selecione um membro da família...</option>
+                  {familiaAtiva?.familia_membros?.map((membro) => (
                     <option key={membro.usuario_id} value={membro.usuario_id}>
                       {membro.papel || membro.usuario_id}
                     </option>
                   ))}
+                  <option value="outro">📝 Digitar outro nome...</option>
                 </select>
+                {!formData.credor_id && (
+                  <Input
+                    type="text"
+                    placeholder="Digite o nome de quem vai receber..."
+                    value={formData.credor_nome_livre || ''}
+                    onChange={(e) => setFormData({ ...formData, credor_nome_livre: e.target.value })}
+                    required
+                  />
+                )}
               </div>
+            </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Devedor (Quem vai pagar) *
+              </label>
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Devedor *
-                </label>
                 <select
                   value={formData.devedor_id}
-                  onChange={(e) => setFormData({ ...formData, devedor_id: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    if (value === 'outro') {
+                      setFormData({ ...formData, devedor_id: '', devedor_nome_livre: '' })
+                    } else {
+                      setFormData({ ...formData, devedor_id: value, devedor_nome_livre: '' })
+                    }
+                  }}
                   className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
-                  required
                 >
-                  <option value="">Selecione...</option>
-                  {familiaAtiva?.familia_membros.map((membro) => (
+                  <option value="">Selecione um membro da família...</option>
+                  {familiaAtiva?.familia_membros?.map((membro) => (
                     <option key={membro.usuario_id} value={membro.usuario_id}>
                       {membro.papel || membro.usuario_id}
                     </option>
                   ))}
+                  <option value="outro">📝 Digitar outro nome...</option>
                 </select>
+                {!formData.devedor_id && (
+                  <Input
+                    type="text"
+                    placeholder="Digite o nome de quem vai pagar..."
+                    value={formData.devedor_nome_livre || ''}
+                    onChange={(e) => setFormData({ ...formData, devedor_nome_livre: e.target.value })}
+                    required
+                  />
+                )}
               </div>
             </div>
 

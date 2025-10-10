@@ -63,73 +63,99 @@ export function useFerramentas() {
   })
   const createFerramenta = useMutation({
     mutationFn: async (ferramenta: InsertFerramenta) => {
-      const { data, error } = await supabase.rpc('criar_ferramenta', {
-        p_nome: ferramenta.nome,
-        p_valor: ferramenta.valor,
-        p_categoria: ferramenta.categoria,
-        p_periodicidade: ferramenta.periodicidade || '',
-        p_status: ferramenta.status || 'ativa',
-        p_data_inicio: ferramenta.data_inicio,
-        p_data_fim: ferramenta.data_fim || '',
-        p_observacoes: ferramenta.observacoes || '',
-        p_familia_id: ferramenta.familia_id || '',
-        p_visivel_familia: ferramenta.visivel_familia || true,
-        p_privado: ferramenta.privado || false
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .insert([{
+          nome: ferramenta.nome,
+          valor: ferramenta.valor,
+          categoria: ferramenta.categoria,
+          periodicidade: ferramenta.periodicidade || 'mensal',
+          status: ferramenta.status || 'ativa',
+          data_inicio: ferramenta.data_inicio,
+          data_fim: ferramenta.data_fim || null,
+          observacoes: ferramenta.observacoes || '',
+          usuario_id: user.user.id,
+          familia_id: ferramenta.familia_id || null,
+          visivel_familia: ferramenta.visivel_familia !== false,
+          privado: ferramenta.privado || false,
+          deletado: false
+        }])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao criar ferramenta:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
     },
   })
   const updateFerramenta = useMutation({
     mutationFn: async ({ id, ...ferramenta }: Partial<Ferramenta> & { id: string }) => {
-      const { data, error } = await supabase.rpc('atualizar_ferramenta', {
-        p_id: id,
-        p_nome: ferramenta.nome || '',
-        p_valor: ferramenta.valor || 0,
-        p_categoria: ferramenta.categoria || '',
-        p_periodicidade: ferramenta.periodicidade || '',
-        p_status: ferramenta.status || 'ativa',
-        p_data_inicio: ferramenta.data_inicio || new Date().toISOString(),
-        p_data_fim: ferramenta.data_fim || '',
-        p_observacoes: ferramenta.observacoes || '',
-        p_visivel_familia: ferramenta.visivel_familia || true,
-        p_privado: ferramenta.privado || false
-      })
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .update({
+          nome: ferramenta.nome,
+          valor: ferramenta.valor,
+          categoria: ferramenta.categoria,
+          periodicidade: ferramenta.periodicidade,
+          status: ferramenta.status,
+          data_inicio: ferramenta.data_inicio,
+          data_fim: ferramenta.data_fim,
+          observacoes: ferramenta.observacoes,
+          visivel_familia: ferramenta.visivel_familia,
+          privado: ferramenta.privado
+        })
+        .eq('id', id)
+        .select()
+        .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao atualizar ferramenta:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
     },
   })
   const deleteFerramenta = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase.rpc('deletar_ferramenta', {
-        p_id: id
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('ferramentas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id
+        })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao deletar ferramenta:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ferramentas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
-      refreshDashboard()
     },
   })
-  const refreshDashboard = async () => {
-    await supabase.rpc('refresh_dashboard_views')
-  }
   const ferramentasAtivas = ferramentas.filter(f => f.status === 'ativa')
   const stats = {
     gastoMensal: ferramentasAtivas

@@ -21,6 +21,7 @@ import {
   Wallet
 } from 'lucide-react'
 import Link from 'next/link'
+import { InsightsWidget } from '@/components/analytics/insights-widget'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -128,31 +129,41 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {quickActions.map((action) => (
-              <Button
-                key={action.title}
-                asChild
-                variant="outline"
-                className="h-auto p-4 flex flex-col items-center gap-2"
-              >
-                <Link href={action.href}>
-                  <div className={`w-8 h-8 rounded-full ${action.color} flex items-center justify-center`}>
-                    <action.icon className="w-4 h-4 text-white" />
-                  </div>
-                  {action.title}
-                </Link>
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Insights Inteligentes */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="md:col-span-2">
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Ações Rápidas</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {quickActions.map((action) => (
+                  <Button
+                    key={action.title}
+                    asChild
+                    variant="outline"
+                    className="h-auto p-4 flex flex-col items-center gap-2"
+                  >
+                    <Link href={action.href}>
+                      <div className={`w-8 h-8 rounded-full ${action.color} flex items-center justify-center`}>
+                        <action.icon className="w-4 h-4 text-white" />
+                      </div>
+                      {action.title}
+                    </Link>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Widget de Insights */}
+        <div>
+          <InsightsWidget />
+        </div>
+      </div>
 
       {/* Recent Activity */}
       <div className="grid gap-6 md:grid-cols-2">
