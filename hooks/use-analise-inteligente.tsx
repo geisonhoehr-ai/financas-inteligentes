@@ -40,6 +40,14 @@ export interface PrevisaoGastos {
   tendencia: 'acima' | 'abaixo' | 'normal'
 }
 
+interface GastoComCategoria {
+  valor: number
+  categoria_id: string
+  categorias?: {
+    nome: string
+  } | null
+}
+
 export function useAnaliseInteligente() {
   const { familiaAtivaId } = useFamiliaAtiva()
   const [insights, setInsights] = useState<InsightFinanceiro[]>([])
@@ -108,17 +116,17 @@ export function useAnaliseInteligente() {
       const { data: gastosAnterior } = await queryAnterior
 
       // Processar dados
-      const totalAtual = gastosAtual?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
-      const totalAnterior = gastosAnterior?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
+      const totalAtual = (gastosAtual as GastoComCategoria[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
+      const totalAnterior = (gastosAnterior as GastoComCategoria[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
 
       const categoriasAtual: Record<string, number> = {}
-      gastosAtual?.forEach((g: any) => {
+      ;(gastosAtual as GastoComCategoria[])?.forEach((g) => {
         const catNome = g.categorias?.nome || 'Sem categoria'
         categoriasAtual[catNome] = (categoriasAtual[catNome] || 0) + Number(g.valor)
       })
 
       const categoriasAnterior: Record<string, number> = {}
-      gastosAnterior?.forEach((g: any) => {
+      ;(gastosAnterior as GastoComCategoria[])?.forEach((g) => {
         const catNome = g.categorias?.nome || 'Sem categoria'
         categoriasAnterior[catNome] = (categoriasAnterior[catNome] || 0) + Number(g.valor)
       })
@@ -167,7 +175,7 @@ export function useAnaliseInteligente() {
 
       const { data: gastos } = await query
 
-      const totalGasto = gastos?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
+      const totalGasto = (gastos as { valor: number }[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
       const mediaDiaria = totalGasto / diaAtual
       const previstoFimMes = mediaDiaria * ultimoDiaMes
 
