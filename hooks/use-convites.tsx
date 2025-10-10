@@ -70,7 +70,7 @@ export function useConvites(familiaId?: string) {
 
       if (error) throw error
 
-      return data.map(d => ({
+      return (data as any[])?.map(d => ({
         ...d,
         familia_nome: (d.familia as any)?.nome,
         criador_nome: undefined // A relação com users não está disponível
