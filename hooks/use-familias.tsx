@@ -168,7 +168,7 @@ export function useFamilias() {
         .eq('id', familiaId)
         .single()
 
-      if (!familia || familia.admin_id !== user.user.id) {
+      if (!familia || (familia as any).admin_id !== user.user.id) {
         throw new Error('Apenas o admin pode remover membros')
       }
 
