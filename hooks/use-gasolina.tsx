@@ -38,7 +38,7 @@ export function useGasolina() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: abastecimentos = [], isLoading, error } = useQuery({
+  const { data: abastecimentos = [], isLoading, error } = useQuery<Gasolina[]>({
     queryKey: ['gasolina', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -58,7 +58,7 @@ export function useGasolina() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data as Gasolina[]) || []
     },
   })
   const createGasolina = useMutation({

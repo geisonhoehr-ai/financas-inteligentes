@@ -45,7 +45,7 @@ export function useParcelas() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: parcelas = [], isLoading, error } = useQuery({
+  const { data: parcelas = [], isLoading, error } = useQuery<Parcela[]>({
     queryKey: ['parcelas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -65,7 +65,7 @@ export function useParcelas() {
       const { data, error } = await query.order('created_at', { ascending: false })
       
       if (error) throw error
-      return data || []
+      return (data as Parcela[]) || []
     },
   })
   const createParcela = useMutation({

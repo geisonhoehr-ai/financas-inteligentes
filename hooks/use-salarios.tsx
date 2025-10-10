@@ -30,7 +30,7 @@ export function useSalarios() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: salarios = [], isLoading, error } = useQuery({
+  const { data: salarios = [], isLoading, error } = useQuery<Salario[]>({
     queryKey: ['salarios', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -56,7 +56,7 @@ export function useSalarios() {
         throw error
       }
       
-      return data || []
+      return (data as Salario[]) || []
     },
   })
 

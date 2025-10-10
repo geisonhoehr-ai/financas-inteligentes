@@ -30,7 +30,7 @@ export function useMetas() {
   const queryClient = useQueryClient()
   const { familiaAtivaId } = useFamiliaAtiva()
   
-  const { data: metas = [], isLoading, error } = useQuery({
+  const { data: metas = [], isLoading, error } = useQuery<Meta[]>({
     queryKey: ['metas', familiaAtivaId],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser()
@@ -50,7 +50,7 @@ export function useMetas() {
       const { data, error } = await query.order('created_at', { ascending: false })
 
       if (error) throw error
-      return data || []
+      return (data as Meta[]) || []
     },
   })
   const createMeta = useMutation({
