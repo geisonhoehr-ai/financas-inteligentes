@@ -48,6 +48,12 @@ interface GastoComCategoria {
   } | null
 }
 
+interface AssinaturaSimples {
+  nome: string
+  valor: number
+  ativa: boolean
+}
+
 export function useAnaliseInteligente() {
   const { familiaAtivaId } = useFamiliaAtiva()
   const [insights, setInsights] = useState<InsightFinanceiro[]>([])
@@ -305,7 +311,7 @@ export function useAnaliseInteligente() {
         .eq('familia_id', familiaAtivaId || '')
 
       if (assinaturas && assinaturas.length > 3) {
-        const totalAssinaturas = assinaturas.reduce((sum, a) => sum + Number(a.valor), 0)
+        const totalAssinaturas = (assinaturas as unknown as AssinaturaSimples[]).reduce((sum, a) => sum + Number(a.valor), 0)
         insights.push({
           id: 'sugestao-assinaturas',
           tipo: 'sugestao',
