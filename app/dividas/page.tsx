@@ -402,7 +402,7 @@ export default function DividasPage() {
                   className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
                 >
                   <option value="">Selecione um membro da família...</option>
-                  {familiaAtiva?.familia_membros?.map((membro) => (
+                  {familiaAtiva?.familia_membros?.map((membro: any) => (
                     <option key={membro.usuario_id} value={membro.usuario_id}>
                       {membro.papel || membro.usuario_id}
                     </option>
@@ -439,7 +439,7 @@ export default function DividasPage() {
                   className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm"
                 >
                   <option value="">Selecione um membro da família...</option>
-                  {familiaAtiva?.familia_membros?.map((membro) => (
+                  {familiaAtiva?.familia_membros?.map((membro: any) => (
                     <option key={membro.usuario_id} value={membro.usuario_id}>
                       {membro.papel || membro.usuario_id}
                     </option>
