@@ -116,17 +116,17 @@ export function useAnaliseInteligente() {
       const { data: gastosAnterior } = await queryAnterior
 
       // Processar dados
-      const totalAtual = (gastosAtual as GastoComCategoria[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
-      const totalAnterior = (gastosAnterior as GastoComCategoria[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
+      const totalAtual = (gastosAtual as unknown as GastoComCategoria[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
+      const totalAnterior = (gastosAnterior as unknown as GastoComCategoria[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
 
       const categoriasAtual: Record<string, number> = {}
-      ;(gastosAtual as GastoComCategoria[])?.forEach((g) => {
+      ;(gastosAtual as unknown as GastoComCategoria[])?.forEach((g) => {
         const catNome = g.categorias?.nome || 'Sem categoria'
         categoriasAtual[catNome] = (categoriasAtual[catNome] || 0) + Number(g.valor)
       })
 
       const categoriasAnterior: Record<string, number> = {}
-      ;(gastosAnterior as GastoComCategoria[])?.forEach((g) => {
+      ;(gastosAnterior as unknown as GastoComCategoria[])?.forEach((g) => {
         const catNome = g.categorias?.nome || 'Sem categoria'
         categoriasAnterior[catNome] = (categoriasAnterior[catNome] || 0) + Number(g.valor)
       })
@@ -175,7 +175,7 @@ export function useAnaliseInteligente() {
 
       const { data: gastos } = await query
 
-      const totalGasto = (gastos as { valor: number }[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
+      const totalGasto = (gastos as unknown as { valor: number }[])?.reduce((sum, g) => sum + Number(g.valor), 0) || 0
       const mediaDiaria = totalGasto / diaAtual
       const previstoFimMes = mediaDiaria * ultimoDiaMes
 
