@@ -138,6 +138,8 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  if (!invoice.subscription) return
+  
   const subscription = await stripe.subscriptions.retrieve(
     invoice.subscription as string
   )
