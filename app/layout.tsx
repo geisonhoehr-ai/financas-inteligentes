@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -17,18 +17,19 @@ export const metadata: Metadata = {
   title: "Financeiro v3.0 | Controle Financeiro Familiar",
   description: "Sistema completo de controle financeiro com Supabase, soft delete e muito mais",
   manifest: "/manifest.json",
-  themeColor: "#007AFF",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Financeiro",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+}
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#007AFF",
 }
 
 export default function RootLayout({
