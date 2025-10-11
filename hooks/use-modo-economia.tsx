@@ -54,33 +54,27 @@ export function useModoEconomia() {
   // Criar desafio
   const createDesafio = useMutation({
     mutationFn: async (desafio: Omit<DesafioFamilia, 'id' | 'criado_por' | 'created_at'>) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
+      const { data, error } = await supabase.rpc('criar_desafio', {
+        p_familia_id: desafio.familia_id,
+        p_titulo: desafio.nome, // nome do form → titulo na RPC
+        p_descricao: desafio.descricao || '',
+        p_meta_economia: desafio.meta_economia,
+        p_data_inicio: desafio.data_inicio,
+        p_data_fim: desafio.data_fim
+      })
 
-      const { data, error } = await (supabase as any)
-        .from('desafios_familia')
-        .insert([{
-          familia_id: desafio.familia_id,
-          nome: desafio.nome,
-          descricao: desafio.descricao,
-          tipo: desafio.tipo,
-          meta_economia: desafio.meta_economia,
-          data_inicio: desafio.data_inicio,
-          data_fim: desafio.data_fim,
-          premio: desafio.premio,
-          criado_por: user.user.id,
-          ativo: true,
-          concluido: false
-        }])
-        .select()
-        .single()
-
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar desafio:', error)
+        throw new Error(error.message || 'Erro ao criar desafio')
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['desafios-ativos'] })
       showToast.success('Desafio criado! Boa sorte! 🎯')
+    },
+    onError: (error: any) => {
+      showToast.error(`Erro: ${error.message}`)
     },
   })
 
