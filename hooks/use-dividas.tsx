@@ -119,12 +119,13 @@ export function useDividas(familiaId?: string) {
   })
   const createDivida = useMutation({
     mutationFn: async (divida: Partial<DividaInterna>) => {
+      // Tentar primeiro com a função v2 (mais flexível)
       const params: any = {
-        p_familia_id: divida.familia_id || '',
-        p_credor_id: divida.credor_id || '',
-        p_devedor_id: divida.devedor_id || '',
-        p_valor: divida.valor || 0,
-        p_descricao: divida.descricao || ''
+        p_familia_id: divida.familia_id,
+        p_credor_id: divida.credor_id,
+        p_devedor_id: divida.devedor_id,
+        p_valor: divida.valor,
+        p_descricao: divida.descricao
       }
 
       if (divida.gasto_original_id) params.p_gasto_original_id = divida.gasto_original_id
@@ -133,9 +134,12 @@ export function useDividas(familiaId?: string) {
       if (divida.data_vencimento) params.p_data_vencimento = divida.data_vencimento
       if (divida.observacoes) params.p_observacoes = divida.observacoes
 
-      const { data, error } = await supabase.rpc('criar_divida', params)
+      const { data, error } = await supabase.rpc('criar_divida_v2', params)
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro detalhado ao criar dívida:', error)
+        throw new Error(error.message || 'Erro ao criar dívida')
+      }
       return data
     },
     onSuccess: () => {

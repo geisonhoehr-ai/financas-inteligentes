@@ -134,58 +134,53 @@ export function useMesada() {
   // Criar filho
   const createFilho = useMutation({
     mutationFn: async (filho: Omit<PerfilFilho, 'id' | 'responsavel_id' | 'created_at' | 'updated_at'>) => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
+      const { data, error } = await supabase.rpc('criar_perfil_filho', {
+        p_nome: filho.nome,
+        p_familia_id: filho.familia_id,
+        p_data_nascimento: filho.data_nascimento || null,
+        p_idade: filho.idade || null,
+        p_avatar: filho.avatar || '👦'
+      })
 
-      const { data, error } = await (supabase as any)
-        .from('perfis_filhos')
-        .insert([{
-          nome: filho.nome,
-          data_nascimento: filho.data_nascimento,
-          idade: filho.idade,
-          avatar: filho.avatar,
-          familia_id: filho.familia_id,
-          responsavel_id: user.user.id,
-          ativo: true
-        }])
-        .select()
-        .single()
-
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar perfil:', error)
+        throw new Error(error.message || 'Erro ao criar perfil de filho')
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['filhos'] })
       showToast.success('Perfil criado com sucesso!')
     },
+    onError: (error: any) => {
+      showToast.error(`Erro: ${error.message}`)
+    },
   })
 
   // Criar mesada
   const createMesada = useMutation({
     mutationFn: async (mesada: Omit<Mesada, 'id' | 'saldo_atual' | 'pontos_acumulados' | 'nivel' | 'experiencia'>) => {
-      const { data, error } = await (supabase as any)
-        .from('mesadas')
-        .insert([{
-          filho_id: mesada.filho_id,
-          valor_base: mesada.valor_base,
-          periodicidade: mesada.periodicidade,
-          dia_pagamento: mesada.dia_pagamento,
-          familia_id: mesada.familia_id,
-          saldo_atual: 0,
-          pontos_acumulados: 0,
-          nivel: 1,
-          experiencia: 0,
-          ativo: true
-        }])
-        .select()
-        .single()
+      const { data, error } = await supabase.rpc('criar_mesada', {
+        p_filho_id: mesada.filho_id,
+        p_valor_base: mesada.valor_base,
+        p_periodicidade: mesada.periodicidade,
+        p_dia_pagamento: mesada.dia_pagamento,
+        p_familia_id: mesada.familia_id,
+        p_meta_economia: mesada.meta_economia || null
+      })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar mesada:', error)
+        throw new Error(error.message || 'Erro ao configurar mesada')
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['mesadas'] })
       showToast.success('Mesada configurada!')
+    },
+    onError: (error: any) => {
+      showToast.error(`Erro: ${error.message}`)
     },
   })
 
