@@ -24,15 +24,55 @@ export function HeroSection() {
       
       <div className="relative container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full mb-6 animate-bounce">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+            </span>
+            <span className="text-sm font-semibold text-primary">
+              Novidades: Mesada Digital, IA, Tags e muito mais!
+            </span>
+          </div>
+
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-            Controle Financeiro para
-            <span className="text-primary"> Toda Família</span>
+            Controle Financeiro
+            <span className="text-primary"> Inteligente</span>
+            <br />
+            para Toda Família
           </h1>
           
-          <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 md:mb-12 px-4">
-            Organize gastos, investimentos e metas em um só lugar.
-            Simples, completo e compartilhado.
+          <p className="text-lg md:text-xl lg:text-2xl text-muted-foreground mb-4 px-4">
+            Organize gastos, investimentos e metas com inteligência artificial.
+            <br className="hidden md:block" />
+            <span className="font-semibold text-foreground">Simples, completo e revolucionário.</span>
           </p>
+
+          <div className="flex flex-wrap justify-center gap-4 mb-8 px-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>9 novas funcionalidades</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>100% gratuito</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <span>Sem cartão de crédito</span>
+            </div>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center px-4">
             <Button
