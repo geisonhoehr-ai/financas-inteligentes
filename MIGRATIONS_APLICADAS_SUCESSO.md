@@ -139,3 +139,7 @@ O sistema está **100% FUNCIONAL** e pronto para:
 **PARABÉNS! VOCÊ TEM O MELHOR SISTEMA DE CONTROLE FINANCEIRO FAMILIAR DO BRASIL! 🎉🚀**
 
 
+
+
+
+

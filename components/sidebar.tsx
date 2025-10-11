@@ -3,12 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  LayoutDashboard, 
-  Receipt, 
-  Trash2, 
-  CreditCard, 
-  Car, 
+import {
+  LayoutDashboard,
+  Receipt,
+  Trash2,
+  CreditCard,
+  Car,
   Calendar,
   Settings,
   Target,
@@ -24,8 +24,7 @@ import {
   Tag,
   UserPlus,
   Wallet,
-  ChevronDown,
-  Home
+  ChevronDown
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -34,7 +33,7 @@ const navigation = [
   {
     type: 'link' as const,
     name: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
