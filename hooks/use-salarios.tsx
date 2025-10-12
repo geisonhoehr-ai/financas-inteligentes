@@ -7,14 +7,18 @@ import { useFamiliaAtiva } from './use-familia-ativa'
 export interface Salario {
   id: string
   usuario_id: string
+  nome_pessoa: string
   valor: number
-  descricao: string
-  mes_referencia: string
-  tipo: 'principal' | 'extra' | 'bonus' | '13_salario'
-  familia_id?: string
-  visivel_familia: boolean
-  deletado: boolean
+  dia_recebimento: number
+  ativo: boolean
   created_at: string
+  // Campos compatíveis com a interface antiga
+  descricao?: string
+  mes_referencia?: string
+  tipo?: 'principal' | 'extra' | 'bonus' | '13_salario'
+  familia_id?: string
+  visivel_familia?: boolean
+  deletado?: boolean
 }
 
 export interface InsertSalario {
@@ -36,27 +40,30 @@ export function useSalarios() {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) return []
 
-      let query = supabase
-        .from('salaries')
+      const { data, error } = await supabase
+        .from('salarios')
         .select('*')
-        .eq('deletado', false)
-      
-      // Filtrar por família ativa se houver
-      if (familiaAtivaId) {
-        query = query.eq('familia_id', familiaAtivaId)
-      } else {
-        // Se não há família, mostrar apenas pessoais (sem família)
-        query = query.is('familia_id', null)
-      }
-      
-      const { data, error } = await query.order('created_at', { ascending: false })
+        .eq('usuario_id', user.user.id)
+        .eq('ativo', true)
+        .order('created_at', { ascending: false })
 
       if (error) {
-        console.error('Erro ao buscar salários:', error)
+        console.error('Erro ao buscar salários:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         throw error
       }
-      
-      return (data as unknown as Salario[]) || []
+
+      // Mapear nome_pessoa para descricao para compatibilidade
+      const mappedData = (data || []).map(s => ({
+        ...s,
+        descricao: s.nome_pessoa // Adiciona descricao como alias
+      }))
+
+      return mappedData as unknown as Salario[]
     },
   })
 
@@ -66,22 +73,24 @@ export function useSalarios() {
       if (!user.user) throw new Error('Usuário não autenticado')
 
       const { data, error } = await supabase
-        .from('salaries')
+        .from('salarios')
         .insert([{
           valor: salario.valor,
-          descricao: salario.descricao,
-          tipo: salario.tipo,
-          mes_referencia: salario.mes_referencia,
+          nome_pessoa: salario.descricao,
+          dia_recebimento: new Date(salario.mes_referencia).getDate(),
           usuario_id: user.user.id,
-          familia_id: salario.familia_id || null,
-          visivel_familia: salario.visivel_familia,
-          deletado: false
+          ativo: true
         }])
         .select()
         .single()
 
       if (error) {
-        console.error('Erro ao criar salário:', error)
+        console.error('Erro ao criar salário:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         throw error
       }
 
@@ -103,13 +112,11 @@ export function useSalarios() {
       if (!user.user) throw new Error('Usuário não autenticado')
 
       const { data, error } = await supabase
-        .from('salaries')
+        .from('salarios')
         .update({
           valor: salario.valor,
-          descricao: salario.descricao,
-          tipo: salario.tipo,
-          mes_referencia: salario.mes_referencia,
-          visivel_familia: salario.visivel_familia
+          nome_pessoa: salario.descricao,
+          dia_recebimento: salario.mes_referencia ? new Date(salario.mes_referencia).getDate() : undefined
         })
         .eq('id', id)
         .eq('usuario_id', user.user.id)
@@ -117,7 +124,12 @@ export function useSalarios() {
         .single()
 
       if (error) {
-        console.error('Erro ao atualizar salário:', error)
+        console.error('Erro ao atualizar salário:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         throw error
       }
 
@@ -139,19 +151,18 @@ export function useSalarios() {
       if (!user.user) throw new Error('Usuário não autenticado')
 
       const { data, error } = await supabase
-        .from('salaries')
-        .update({
-          deletado: true,
-          deletado_em: new Date().toISOString(),
-          deletado_por: user.user.id
-        })
+        .from('salarios')
+        .delete()
         .eq('id', id)
         .eq('usuario_id', user.user.id)
-        .select()
-        .single()
 
       if (error) {
-        console.error('Erro ao deletar salário:', error)
+        console.error('Erro ao deletar salário:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         throw error
       }
 
@@ -169,16 +180,9 @@ export function useSalarios() {
 
   const stats = {
     receitaTotal: salarios.reduce((sum, s) => sum + parseFloat(s.valor.toString()), 0),
-    receitaFamilia: salarios.filter(s => s.visivel_familia).reduce((sum, s) => sum + parseFloat(s.valor.toString()), 0),
-    salariosAtivos: salarios.length,
-    receitaMesAtual: salarios
-      .filter(s => {
-        if (!s.mes_referencia) return true
-        const mes = new Date(s.mes_referencia)
-        const hoje = new Date()
-        return mes.getMonth() === hoje.getMonth() && mes.getFullYear() === hoje.getFullYear()
-      })
-      .reduce((sum, s) => sum + parseFloat(s.valor.toString()), 0)
+    receitaFamilia: salarios.reduce((sum, s) => sum + parseFloat(s.valor.toString()), 0), // Todos são visíveis
+    salariosAtivos: salarios.filter(s => s.ativo).length,
+    receitaMesAtual: salarios.reduce((sum, s) => sum + parseFloat(s.valor.toString()), 0) // Todos os salários ativos
   }
 
   return {

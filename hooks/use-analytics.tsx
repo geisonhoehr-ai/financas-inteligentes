@@ -26,8 +26,17 @@ export function useAnalytics() {
   const { data, isLoading, error } = useQuery<AnalyticsData>({
     queryKey: ['analytics', familiaAtivaId],
     queryFn: async () => {
-      const { data: user } = await supabase.auth.getUser()
-      if (!user.user) throw new Error('Usuário não autenticado')
+      try {
+        const { data: user, error: authError } = await supabase.auth.getUser()
+        if (authError) {
+          console.error('Erro de autenticação:', {
+            message: authError.message,
+            name: authError.name,
+            status: authError.status
+          })
+          throw authError
+        }
+        if (!user.user) throw new Error('Usuário não autenticado')
 
       const hoje = new Date()
       const inicioMesAtual = startOfMonth(hoje)
@@ -35,40 +44,70 @@ export function useAnalytics() {
       const inicioMesAnterior = startOfMonth(subMonths(hoje, 1))
       const fimMesAnterior = endOfMonth(subMonths(hoje, 1))
 
-      // Buscar gastos do mês atual
-      const { data: gastosAtual } = await supabase
-        .from('gastos')
-        .select('valor, categoria_id, categorias(nome)')
-        .eq('deletado', false)
-        .gte('data', inicioMesAtual.toISOString())
-        .lte('data', fimMesAtual.toISOString())
-        .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
+        // Buscar gastos do mês atual
+        const { data: gastosAtual, error: erroGastos } = await supabase
+          .from('gastos')
+          .select('valor, categoria_id, categorias(nome)')
+          .eq('deletado', false)
+          .gte('data', inicioMesAtual.toISOString())
+          .lte('data', fimMesAtual.toISOString())
+          .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
 
-      // Buscar gastos do mês anterior
-      const { data: gastosAnterior } = await supabase
-        .from('gastos')
-        .select('valor')
-        .eq('deletado', false)
-        .gte('data', inicioMesAnterior.toISOString())
-        .lte('data', fimMesAnterior.toISOString())
-        .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
+        if (erroGastos) {
+          console.error('Erro ao buscar gastos do mês:', {
+            message: erroGastos.message,
+            details: erroGastos.details,
+            hint: erroGastos.hint,
+            code: erroGastos.code
+          })
+        }
 
-      // Buscar receitas (salários)
-      const { data: salarios } = await supabase
-        .from('salaries')
-        .select('valor')
-        .eq('deletado', false)
-        .gte('mes_referencia', inicioMesAtual.toISOString().slice(0, 7))
-        .lte('mes_referencia', fimMesAtual.toISOString().slice(0, 7))
-        .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
+        // Buscar gastos do mês anterior
+        const { data: gastosAnterior, error: erroGastosAnt } = await supabase
+          .from('gastos')
+          .select('valor')
+          .eq('deletado', false)
+          .gte('data', inicioMesAnterior.toISOString())
+          .lte('data', fimMesAnterior.toISOString())
+          .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
 
-      // Buscar investimentos
-      const { data: investimentos } = await supabase
-        .from('investimentos')
-        .select('tipo, valor')
-        .eq('deletado', false)
-        .eq('ativo', true)
-        .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
+        if (erroGastosAnt) {
+          console.error('Erro ao buscar gastos do mês anterior:', {
+            message: erroGastosAnt.message,
+            details: erroGastosAnt.details
+          })
+        }
+
+        // Buscar receitas (salários)
+        const { data: salarios, error: erroSalarios } = await supabase
+          .from('salarios')
+          .select('valor')
+          .eq('ativo', true)
+          .eq('usuario_id', user.user.id)
+
+        if (erroSalarios) {
+          console.error('Erro ao buscar salários:', {
+            message: erroSalarios.message,
+            details: erroSalarios.details,
+            hint: erroSalarios.hint,
+            code: erroSalarios.code
+          })
+        }
+
+        // Buscar investimentos
+        const { data: investimentos, error: erroInvest } = await supabase
+          .from('investimentos')
+          .select('tipo, valor')
+          .eq('deletado', false)
+          .eq('ativo', true)
+          .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
+
+        if (erroInvest) {
+          console.error('Erro ao buscar investimentos:', {
+            message: erroInvest.message,
+            details: erroInvest.details
+          })
+        }
 
       // Calcular totais
       const totalGastosAtual = (gastosAtual as any)?.reduce((sum: number, g: any) => sum + Number(g.valor), 0) || 0
@@ -111,43 +150,58 @@ export function useAnalytics() {
         return acc
       }, []) || []
 
-      // Dados mensais (últimos 6 meses)
-      const mesesData = []
-      for (let i = 5; i >= 0; i--) {
-        const mesData = subMonths(hoje, i)
-        const inicio = startOfMonth(mesData)
-        const fim = endOfMonth(mesData)
+        // Dados mensais (últimos 6 meses)
+        const mesesData = []
+        for (let i = 5; i >= 0; i--) {
+          const mesData = subMonths(hoje, i)
+          const inicio = startOfMonth(mesData)
+          const fim = endOfMonth(mesData)
 
-        const { data: gastosMes } = await supabase
-          .from('gastos')
-          .select('valor')
-          .eq('deletado', false)
-          .gte('data', inicio.toISOString())
-          .lte('data', fim.toISOString())
-          .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
+          const { data: gastosMes, error: erroMes } = await supabase
+            .from('gastos')
+            .select('valor')
+            .eq('deletado', false)
+            .gte('data', inicio.toISOString())
+            .lte('data', fim.toISOString())
+            .eq(familiaAtivaId ? 'familia_id' : 'usuario_id', familiaAtivaId || user.user.id)
 
-        const totalMes = (gastosMes as any)?.reduce((sum: number, g: any) => sum + Number(g.valor), 0) || 0
+          if (erroMes) {
+            console.error(`Erro ao buscar gastos do mês ${i}:`, {
+              message: erroMes.message,
+              details: erroMes.details
+            })
+          }
 
-        mesesData.push({
-          mes: mesData.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
-          valor: totalMes
+          const totalMes = (gastosMes as any)?.reduce((sum: number, g: any) => sum + Number(g.valor), 0) || 0
+
+          mesesData.push({
+            mes: mesData.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
+            valor: totalMes
+          })
+        }
+
+        return {
+          insights: {
+            saldo: totalReceitas - totalGastosAtual,
+            economiaMensal: totalReceitas - totalGastosAtual,
+            tendenciaGastos,
+            metaProgresso: totalReceitas > 0 ? ((totalReceitas - totalGastosAtual) / totalReceitas) * 100 : 0,
+            totalReceitas,
+            totalGastos: totalGastosAtual,
+            categoriaMaiorGasto
+          },
+          gastosData: mesesData,
+          receitasData: mesesData.map(m => ({ ...m, valor: totalReceitas })),
+          categoriasData,
+          investimentosData
+        }
+      } catch (error: any) {
+        console.error('Erro geral ao buscar analytics:', {
+          message: error?.message,
+          name: error?.name,
+          stack: error?.stack
         })
-      }
-
-      return {
-        insights: {
-          saldo: totalReceitas - totalGastosAtual,
-          economiaMensal: totalReceitas - totalGastosAtual,
-          tendenciaGastos,
-          metaProgresso: totalReceitas > 0 ? ((totalReceitas - totalGastosAtual) / totalReceitas) * 100 : 0,
-          totalReceitas,
-          totalGastos: totalGastosAtual,
-          categoriaMaiorGasto
-        },
-        gastosData: mesesData,
-        receitasData: mesesData.map(m => ({ ...m, valor: totalReceitas })),
-        categoriasData,
-        investimentosData
+        throw error
       }
     },
     staleTime: 30000, // 30 segundos

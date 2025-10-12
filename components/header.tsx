@@ -1,24 +1,16 @@
 'use client'
 
-import { Moon, Sun, LogOut, User, Menu, ChevronDown } from 'lucide-react'
+import { Moon, Sun, LogOut, User, Menu } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useAuth } from '@/components/auth-provider'
 import { useDividas } from '@/hooks/use-dividas'
-import { useFamilias } from '@/hooks/use-familias'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { NotificationCenter, NotificationButton } from '@/components/notifications/notification-center'
+import { NotificationCenter } from '@/components/notifications/notification-center'
 import { NotificacaoCenter } from '@/components/notifications/notificacao-center'
+import { FamiliaSelector } from '@/components/familia-selector'
 
 interface HeaderProps {
   onMenuClick?: () => void
@@ -29,8 +21,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const { user, signOut } = useAuth()
   const [mounted, setMounted] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
-  const { familias } = useFamilias()
-  const { familiaAtivaId, setFamiliaAtivaId, familiaAtiva } = useFamiliaAtiva()
+  const { familiaAtiva } = useFamiliaAtiva()
   const { dividasQueDevo } = useDividas(familiaAtiva?.id)
 
   useEffect(() => {
@@ -58,43 +49,8 @@ export function Header({ onMenuClick }: HeaderProps) {
           </div>
           <h1 className="text-lg md:text-xl font-semibold text-zinc-900 dark:text-white hidden sm:block">Financeiro</h1>
 
-          {/* Seletor de Família */}
-          {familias && familias.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="ml-2 md:ml-4 h-9 px-3 text-sm border-primary/20 hover:border-primary/50"
-                >
-                  <span className="max-w-[120px] truncate">
-                    {familiaAtiva?.nome || 'Selecione'}
-                  </span>
-                  {familias.length > 1 && <ChevronDown className="ml-2 h-4 w-4" />}
-                </Button>
-              </DropdownMenuTrigger>
-              {familias.length > 1 && (
-                <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuLabel>Selecionar Família</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {familias.map((familia) => (
-                    <DropdownMenuItem
-                      key={familia.id}
-                      onClick={() => setFamiliaAtivaId(familia.id)}
-                      className={familia.id === familiaAtivaId ? 'bg-primary/10' : ''}
-                    >
-                      <div className="flex items-center gap-2 w-full">
-                        <div className={`w-2 h-2 rounded-full ${familia.id === familiaAtivaId ? 'bg-primary' : 'bg-transparent'}`} />
-                        <span className="flex-1 truncate">{familia.nome}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {familia.modo_calculo === 'familiar' ? '👨‍👩‍👧‍👦' : '🏛️'}
-                        </span>
-                      </div>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              )}
-            </DropdownMenu>
-          )}
+          {/* Seletor de Família/Perfil */}
+          <FamiliaSelector className="ml-2 md:ml-4" />
         </div>
 
         <div className="flex items-center gap-1 md:gap-2">

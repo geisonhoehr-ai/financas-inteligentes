@@ -15,7 +15,7 @@ export function useAIAssistant() {
   // Buscar contexto financeiro
   const { gastos = [], stats } = useGastos()
   const { metas = [] } = useMetas()
-  const { orcamento } = useOrcamento()
+  const { orcamentoAtual } = useOrcamento()
 
   // Preparar contexto
   const getContext = useCallback(() => {
@@ -32,13 +32,13 @@ export function useAIAssistant() {
         valor_objetivo: m.valor_objetivo,
         valor_atual: m.valor_atual || 0
       })),
-      orcamento: orcamento ? {
-        total: orcamento.valor_total || 0,
+      orcamento: orcamentoAtual ? {
+        total: orcamentoAtual.valor_total || 0,
         gastoAtual: stats?.total_mes || 0
       } : undefined,
       periodo: 'Mês atual'
     }
-  }, [gastos, metas, orcamento, stats])
+  }, [gastos, metas, orcamentoAtual, stats])
 
   // Enviar mensagem
   const sendMessage = useCallback(async (userMessage: string) => {

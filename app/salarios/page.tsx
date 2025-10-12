@@ -121,11 +121,9 @@ export default function SalariosPage() {
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <h4 className="font-medium">{salario.descricao || 'Salário'}</h4>
+                    <h4 className="font-medium">{salario.nome_pessoa || salario.descricao || 'Salário'}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {salario.tipo === 'principal' ? '💼 Salário Principal' : 
-                       salario.tipo === 'extra' ? '💰 Renda Extra' :
-                       salario.tipo === 'bonus' ? '🎁 Bônus' : '📅 13º Salário'}
+                      Dia {salario.dia_recebimento || 1} • Recebimento mensal
                       {salario.visivel_familia && ' • Compartilhado com família'}
                     </p>
                   </div>
@@ -135,7 +133,7 @@ export default function SalariosPage() {
                         {formatCurrency(salario.valor)}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {salario.mes_referencia ? new Date(salario.mes_referencia).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) : 'Mensal'}
+                        Mensal
                       </p>
                     </div>
                     <div className="flex gap-2">

@@ -99,8 +99,8 @@ export default function AssistenteIAPage() {
 
             <div className="pt-4 border-t">
               <p className="text-xs text-muted-foreground">
-                <strong>Dica:</strong> Experimente perguntas como "Por que gastei tanto esse mês?",
-                "Como alcançar minha meta mais rápido?" ou "Onde posso economizar?"
+                <strong>Dica:</strong> Experimente perguntas como &quot;Por que gastei tanto esse mês?&quot;,
+                &quot;Como alcançar minha meta mais rápido?&quot; ou &quot;Onde posso economizar?&quot;
               </p>
             </div>
           </div>

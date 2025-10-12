@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { useFamilias } from '@/hooks/use-familias'
+import { useAuth } from '@/components/auth-provider'
 import { Button } from '@/components/ui/button'
-import { 
-  ChevronDown, 
-  Users, 
-  Building2, 
+import {
+  ChevronDown,
+  Users,
   Check,
-  Plus
+  Plus,
+  User
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -20,36 +21,32 @@ interface FamiliaSelectorProps {
 export function FamiliaSelector({ className }: FamiliaSelectorProps) {
   const { familiaAtivaId, setFamiliaAtivaId, familiaAtiva } = useFamiliaAtiva()
   const { familias } = useFamilias()
+  const { user } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
+
+  // Pegar o nome do usuário
+  const userName = user?.email?.split('@')[0] || 'Meu Perfil'
 
   const handleSelectFamilia = (id: string | null) => {
     setFamiliaAtivaId(id)
     setIsOpen(false)
   }
 
-  const getFamiliaIcon = () => {
-    // Por enquanto, sempre usar ícone de família
-    // TODO: Implementar tipos de família quando necessário
-    return Users
-  }
-
   return (
     <div className={cn('relative', className)}>
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
-        className="h-8 px-2 gap-2 text-sm font-medium hover:bg-accent"
+        className="h-9 px-3 gap-2 text-sm font-medium border-primary/20 hover:border-primary/50"
       >
-        {(() => {
-          if (!familiaAtiva) {
-            return <Users className="h-4 w-4" />
-          }
-          const Icon = getFamiliaIcon()
-          return <Icon className="h-4 w-4" />
-        })()}
-        <span className="hidden sm:inline max-w-[120px] truncate">
-          {familiaAtiva ? familiaAtiva.nome : 'Perfil Pessoal'}
+        {!familiaAtiva ? (
+          <User className="h-4 w-4 text-primary" />
+        ) : (
+          <Users className="h-4 w-4 text-primary" />
+        )}
+        <span className="max-w-[140px] truncate">
+          {familiaAtiva ? familiaAtiva.nome : userName}
         </span>
         <ChevronDown className="h-3 w-3 opacity-50" />
       </Button>
@@ -74,16 +71,18 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
                 onClick={() => handleSelectFamilia(null)}
                 className={cn(
                   'w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors',
-                  !familiaAtivaId 
-                    ? 'bg-primary/10 text-primary' 
+                  !familiaAtivaId
+                    ? 'bg-primary/10 text-primary'
                     : 'hover:bg-accent'
                 )}
               >
-                <Users className="h-4 w-4 flex-shrink-0" />
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">Perfil Pessoal</div>
+                  <div className="font-medium truncate">{userName}</div>
                   <div className="text-xs text-muted-foreground">
-                    Somente seus gastos
+                    Perfil Pessoal
                   </div>
                 </div>
                 {!familiaAtivaId && (
@@ -98,25 +97,26 @@ export function FamiliaSelector({ className }: FamiliaSelectorProps) {
               
               {/* Famílias */}
               {familias && familias.map((familia) => {
-                const Icon = getFamiliaIcon()
                 const isSelected = familia.id === familiaAtivaId
-                
+
                 return (
                   <button
                     key={familia.id}
                     onClick={() => handleSelectFamilia(familia.id)}
                     className={cn(
                       'w-full flex items-center gap-3 px-2 py-2 rounded-lg text-left transition-colors',
-                      isSelected 
-                        ? 'bg-primary/10 text-primary' 
+                      isSelected
+                        ? 'bg-primary/10 text-primary'
                         : 'hover:bg-accent'
                     )}
                   >
-                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center flex-shrink-0">
+                      <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{familia.nome}</div>
                       <div className="text-xs text-muted-foreground">
-                        Família
+                        {familia.modo_calculo === 'familiar' ? 'Família' : 'Empresa'}
                       </div>
                     </div>
                     {isSelected && (

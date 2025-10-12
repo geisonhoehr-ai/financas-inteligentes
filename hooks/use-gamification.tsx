@@ -35,7 +35,7 @@ export function useGamification() {
       if (!user.user) return null
 
       // Buscar ou criar perfil de gamificação
-      let { data: profile, error } = await supabase
+      let { data: profile, error } = await (supabase as any)
         .from('user_gamification')
         .select('*')
         .eq('user_id', user.user.id)
@@ -43,7 +43,7 @@ export function useGamification() {
 
       if (error || !profile) {
         // Criar perfil se não existir
-        const { data: newProfile } = await supabase
+        const { data: newProfile } = await (supabase as any)
           .from('user_gamification')
           .insert([{
             user_id: user.user.id,
@@ -120,7 +120,7 @@ export function useGamification() {
       const xpGanho = novasConquistas.reduce((sum, b) => sum + b.xp, 0)
       const novasConquistaIds = novasConquistas.map(b => b.id)
 
-      await supabase
+      await (supabase as any)
         .from('user_gamification')
         .update({
           xp_total: userData.xp_total + xpGanho,
@@ -181,7 +181,7 @@ export function useGamification() {
     mutationFn: async (xp: number) => {
       if (!userData) return
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('user_gamification')
         .update({
           xp_total: userData.xp_total + xp
