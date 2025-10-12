@@ -58,12 +58,12 @@ export function useSalarios() {
       }
 
       // Mapear nome_pessoa para descricao para compatibilidade
-      const mappedData = (data || []).map(s => ({
+      const mappedData = (data || []).map((s: any) => ({
         ...s,
         descricao: s.nome_pessoa // Adiciona descricao como alias
       }))
 
-      return mappedData as unknown as Salario[]
+      return mappedData as Salario[]
     },
   })
 
