@@ -134,13 +134,23 @@ export function useMesada() {
   // Criar filho
   const createFilho = useMutation({
     mutationFn: async (filho: Omit<PerfilFilho, 'id' | 'responsavel_id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase.rpc('criar_perfil_filho', {
-        p_nome: filho.nome,
-        p_familia_id: filho.familia_id,
-        p_data_nascimento: filho.data_nascimento || null,
-        p_idade: filho.idade || null,
-        p_avatar: filho.avatar || '👦'
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      const { data, error } = await (supabase as any)
+        .from('perfis_filhos')
+        .insert([{
+          nome: filho.nome,
+          familia_id: filho.familia_id,
+          responsavel_id: user.user.id,
+          usuario_id: user.user.id,
+          data_nascimento: filho.data_nascimento || null,
+          idade: filho.idade || null,
+          avatar: filho.avatar || '👦',
+          ativo: true
+        }])
+        .select()
+        .single()
 
       if (error) {
         console.error('Erro ao criar perfil:', error)
@@ -160,14 +170,34 @@ export function useMesada() {
   // Criar mesada
   const createMesada = useMutation({
     mutationFn: async (mesada: Omit<Mesada, 'id' | 'saldo_atual' | 'pontos_acumulados' | 'nivel' | 'experiencia'>) => {
-      const { data, error } = await supabase.rpc('criar_mesada', {
-        p_filho_id: mesada.filho_id,
-        p_valor_base: mesada.valor_base,
-        p_periodicidade: mesada.periodicidade,
-        p_dia_pagamento: mesada.dia_pagamento,
-        p_familia_id: mesada.familia_id,
-        p_meta_economia: mesada.meta_economia || null
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
+
+      // Calcular próximo pagamento
+      const hoje = new Date()
+      const proximoPagamento = new Date(hoje.getFullYear(), hoje.getMonth(), mesada.dia_pagamento)
+      if (proximoPagamento < hoje) {
+        proximoPagamento.setMonth(proximoPagamento.getMonth() + 1)
+      }
+
+      const { data, error } = await (supabase as any)
+        .from('mesadas')
+        .insert([{
+          filho_id: mesada.filho_id,
+          valor_base: mesada.valor_base,
+          periodicidade: mesada.periodicidade,
+          dia_pagamento: mesada.dia_pagamento,
+          proximo_pagamento: proximoPagamento.toISOString().split('T')[0],
+          familia_id: mesada.familia_id,
+          meta_economia: mesada.meta_economia || null,
+          saldo_atual: 0,
+          pontos_acumulados: 0,
+          nivel: 1,
+          experiencia: 0,
+          ativo: true
+        }])
+        .select()
+        .single()
 
       if (error) {
         console.error('Erro ao criar mesada:', error)

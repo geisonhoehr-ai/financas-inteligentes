@@ -70,76 +70,116 @@ export function useParcelas() {
   })
   const createParcela = useMutation({
     mutationFn: async (parcela: any) => {
-      const { data, error } = await supabase.rpc('criar_parcela', {
-        p_descricao: parcela.descricao || parcela.produto,
-        p_valor_total: parcela.valor_total,
-        p_total_parcelas: parcela.total_parcelas,
-        p_valor_parcela: parcela.valor_parcela,
-        p_data_compra: parcela.data_compra,
-        p_dia_vencimento: parcela.dia_vencimento,
-        p_categoria_id: parcela.categoria_id,  // ✅ Agora envia UUID
-        p_estabelecimento: parcela.estabelecimento,
-        p_cartao_id: parcela.cartao_id,
-        p_familia_id: parcela.familia_id,
-        p_visivel_familia: parcela.visivel_familia,
-        p_privado: parcela.privado
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('compras_parceladas')
+        .insert([{
+          produto: parcela.descricao || parcela.produto,
+          valor_total: parcela.valor_total,
+          total_parcelas: parcela.total_parcelas,
+          valor_parcela: parcela.valor_parcela,
+          parcelas_pagas: 0,
+          data_compra: parcela.data_compra,
+          dia_vencimento: parcela.dia_vencimento,
+          primeira_parcela: parcela.data_compra,
+          categoria_id: parcela.categoria_id || null,
+          observacoes: parcela.estabelecimento || '',
+          tipo_pagamento: 'cartao_credito',
+          finalizada: false,
+          usuario_id: user.user.id,
+          familia_id: parcela.familia_id || null,
+          visivel_familia: parcela.visivel_familia !== false,
+          privado: parcela.privado || false,
+          deletado: false
+        }])
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao criar parcela:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
     },
   })
   const updateParcela = useMutation({
     mutationFn: async ({ id, ...parcela }: Partial<Parcela> & { id: string }) => {
-      const { data, error } = await supabase.rpc('atualizar_parcela', {
-        p_id: id,
-        p_produto: parcela.produto,
-        p_valor_total: parcela.valor_total,
-        p_parcelas_pagas: parcela.parcelas_pagas,
-        p_total_parcelas: parcela.total_parcelas,
-        p_valor_parcela: parcela.valor_parcela,
-        p_data_compra: parcela.data_compra,
-        p_dia_vencimento: parcela.dia_vencimento,
-        p_categoria_id: parcela.categoria_id,
-        p_observacoes: parcela.observacoes,
-        p_tipo_pagamento: parcela.tipo_pagamento,
-        p_visivel_familia: parcela.visivel_familia,
-        p_privado: parcela.privado
-      } as any)
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      // Calcular se está finalizada
+      const finalizada = (parcela.parcelas_pagas || 0) >= (parcela.total_parcelas || 0)
+
+      const { data, error } = await supabase
+        .from('compras_parceladas')
+        .update({
+          produto: parcela.produto,
+          valor_total: parcela.valor_total,
+          parcelas_pagas: parcela.parcelas_pagas,
+          total_parcelas: parcela.total_parcelas,
+          valor_parcela: parcela.valor_parcela,
+          data_compra: parcela.data_compra,
+          dia_vencimento: parcela.dia_vencimento,
+          categoria_id: parcela.categoria_id,
+          observacoes: parcela.observacoes,
+          tipo_pagamento: parcela.tipo_pagamento,
+          finalizada: finalizada,
+          visivel_familia: parcela.visivel_familia,
+          privado: parcela.privado,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .eq('deletado', false)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao atualizar parcela:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
     },
   })
   const deleteParcela = useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase.rpc('deletar_parcela', {
-        p_id: id
-      })
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Usuário não autenticado')
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from('compras_parceladas')
+        .update({
+          deletado: true,
+          deletado_em: new Date().toISOString(),
+          deletado_por: user.user.id
+        })
+        .eq('id', id)
+        .eq('usuario_id', user.user.id)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Erro ao deletar parcela:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['parcelas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
-      refreshDashboard()
     },
   })
-  const refreshDashboard = async () => {
-    await supabase.rpc('refresh_dashboard_views')
-  }
   const stats = {
     totalParcelado: parcelas.reduce((sum, p) => sum + p.valor_total, 0),
     parcelaAtual: parcelas.reduce((sum, p) => sum + p.valor_parcela, 0),
