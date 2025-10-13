@@ -1,5 +1,6 @@
 // Service Worker para PWA
-const CACHE_NAME = 'financeiro-v3.0.1';
+// IMPORTANTE: Incrementar versão após mudanças no código para forçar atualização do cache
+const CACHE_NAME = 'financeiro-v3.0.2';
 const urlsToCache = [
   '/',
   '/dashboard',
@@ -36,39 +37,57 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Interceptar requisições
+// Interceptar requisições com estratégia Network First para páginas HTML/JS
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - retorna a resposta
+  const url = new URL(event.request.url);
+
+  // Estratégia: Network First para HTML, JS, CSS (sempre buscar versão atualizada primeiro)
+  // Cache First para imagens e assets estáticos
+  const isNavigationOrScript = event.request.mode === 'navigate' ||
+                                event.request.destination === 'script' ||
+                                event.request.destination === 'style' ||
+                                url.pathname.startsWith('/_next/');
+
+  if (isNavigationOrScript) {
+    // Network First: Tenta buscar da rede primeiro, fallback para cache
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Se recebeu resposta válida, atualiza o cache
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Se falhar, tenta buscar do cache
+          return caches.match(event.request).then((cachedResponse) => {
+            return cachedResponse || caches.match('/offline');
+          });
+        })
+    );
+  } else {
+    // Cache First: Para imagens e outros assets
+    event.respondWith(
+      caches.match(event.request).then((response) => {
         if (response) {
           return response;
         }
-
-        return fetch(event.request).then(
-          (response) => {
-            // Verifica se recebeu uma resposta válida
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clona a resposta
+        return fetch(event.request).then((response) => {
+          if (response && response.status === 200) {
             const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
           }
-        ).catch(() => {
-          // Se falhar, retorna página offline
-          return caches.match('/offline');
+          return response;
         });
       })
-  );
+    );
+  }
 });
 
 // Push Notifications (para futuro)
