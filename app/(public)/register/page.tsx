@@ -49,7 +49,8 @@ export default function RegisterPage() {
       })
 
       if (error) {
-        showToast.error('Erro ao criar conta: ' + error.message)
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+        showToast.error('Erro ao criar conta: ' + errorMessage)
         return
       }
 

@@ -10,7 +10,7 @@ import { useGasolina, Gasolina } from '@/hooks/use-gasolina'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { formatCurrency } from '@/lib/utils'
 
-export default function GasolinaPage() {
+export default function CombustivelPage() {
   const { familiaAtiva } = useFamiliaAtiva()
   const { abastecimentos, stats, isLoading, createGasolina, updateGasolina, deleteGasolina, isCreating, isUpdating, isDeleting } = useGasolina()
   const [showAddDrawer, setShowAddDrawer] = useState(false)
@@ -22,9 +22,9 @@ export default function GasolinaPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Gasolina</h2>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Combustível</h2>
           <p className="text-sm text-muted-foreground">
-            Controle seus abastecimentos e consumo
+            Controle seus abastecimentos de combustível (gasolina, diesel, etanol)
           </p>
         </div>
         <Button 
@@ -257,7 +257,7 @@ function GasolinaForm({ familiaId, gasolina, onClose }: { familiaId?: string; ga
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">
-            Valor Total *
+            Valor Total
           </label>
           <Input
             type="number"
@@ -265,13 +265,12 @@ function GasolinaForm({ familiaId, gasolina, onClose }: { familiaId?: string; ga
             placeholder="0,00"
             value={formData.valor}
             onChange={handleValorChange}
-            required
           />
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium">
-            Litros *
+            Litros
           </label>
           <Input
             type="number"
@@ -279,7 +278,6 @@ function GasolinaForm({ familiaId, gasolina, onClose }: { familiaId?: string; ga
             placeholder="0,00"
             value={formData.litros}
             onChange={handleLitrosChange}
-            required
           />
         </div>
       </div>
@@ -287,7 +285,7 @@ function GasolinaForm({ familiaId, gasolina, onClose }: { familiaId?: string; ga
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">
-            Preço por Litro *
+            Preço por Litro
           </label>
           <Input
             type="number"
@@ -295,7 +293,6 @@ function GasolinaForm({ familiaId, gasolina, onClose }: { familiaId?: string; ga
             placeholder="0,000"
             value={formData.preco_litro}
             onChange={(e) => setFormData({ ...formData, preco_litro: e.target.value })}
-            required
           />
         </div>
 

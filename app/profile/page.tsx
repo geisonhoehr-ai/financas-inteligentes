@@ -40,7 +40,8 @@ export default function ProfilePage() {
 
       if (error) {
         console.error('Erro ao atualizar perfil:', error)
-        showToast.error('Erro ao atualizar perfil: ' + error.message)
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+        showToast.error('Erro ao atualizar perfil: ' + errorMessage)
         return
       }
 

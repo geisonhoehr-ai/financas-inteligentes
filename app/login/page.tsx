@@ -33,7 +33,8 @@ export default function LoginPage() {
       })
 
       if (error) {
-        showToast.error('Erro ao fazer login: ' + error.message)
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+        showToast.error('Erro ao fazer login: ' + errorMessage)
         return
       }
 
@@ -64,7 +65,8 @@ export default function LoginPage() {
       })
 
       if (error) {
-        showToast.error('Erro ao enviar email: ' + error.message)
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+        showToast.error('Erro ao enviar email: ' + errorMessage)
         return
       }
 

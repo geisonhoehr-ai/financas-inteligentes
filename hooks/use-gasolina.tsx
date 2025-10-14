@@ -5,9 +5,9 @@ import { useFamiliaAtiva } from './use-familia-ativa'
 export interface Gasolina {
   id: string
   descricao?: string
-  valor: number
-  litros: number
-  preco_litro: number
+  valor?: number
+  litros?: number
+  preco_litro?: number
   km_atual?: number
   usuario_id: string
   data: string
@@ -23,9 +23,9 @@ export interface Gasolina {
 }
 export interface InsertGasolina {
   descricao?: string
-  valor: number
-  litros: number
-  preco_litro: number
+  valor?: number
+  litros?: number
+  preco_litro?: number
   km_atual?: number
   data: string
   posto?: string
@@ -65,9 +65,9 @@ export function useGasolina() {
     mutationFn: async (gasolina: InsertGasolina) => {
       const { data, error } = await supabase.rpc('criar_gasolina', {
         p_descricao: gasolina.descricao || "",
-        p_valor: gasolina.valor,
-        p_litros: gasolina.litros,
-        p_preco_litro: gasolina.preco_litro,
+        p_valor: gasolina.valor || 0,
+        p_litros: gasolina.litros || 0,
+        p_preco_litro: gasolina.preco_litro || 0,
         p_km_atual: gasolina.km_atual || 0,
         p_data: gasolina.data,
         p_posto: gasolina.posto || "",

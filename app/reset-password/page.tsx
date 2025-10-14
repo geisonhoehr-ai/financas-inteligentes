@@ -51,7 +51,8 @@ export default function ResetPasswordPage() {
       })
 
       if (error) {
-        showToast.error('Erro ao atualizar senha: ' + error.message)
+        const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+        showToast.error('Erro ao atualizar senha: ' + errorMessage)
         return
       }
 

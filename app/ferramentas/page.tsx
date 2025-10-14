@@ -24,7 +24,7 @@ export default function FerramentasPage() {
         <div>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Dev</h2>
           <p className="text-sm text-muted-foreground">
-            Controle gastos com ferramentas e softwares de desenvolvimento
+            Controle gastos com ferramentas, softwares e serviços de desenvolvimento
           </p>
         </div>
         <Button 

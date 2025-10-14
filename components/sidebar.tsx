@@ -55,8 +55,8 @@ const navigation = [
       { name: 'Parcelas', href: '/parcelas', icon: CreditCard },
       { name: 'Assinaturas', href: '/assinaturas', icon: Calendar },
       { name: 'Contas Fixas', href: '/contas-fixas', icon: Building },
-      { name: 'Gasolina', href: '/gasolina', icon: Car },
-      { name: 'Ferramentas', href: '/ferramentas', icon: Wrench },
+      { name: 'Combustível', href: '/gasolina', icon: Car },
+      { name: 'Dev', href: '/ferramentas', icon: Wrench },
       { name: 'Cartões', href: '/cartoes', icon: CreditCard },
     ]
   },

@@ -435,7 +435,8 @@ function AddFilhoForm({ onClose }: { onClose: () => void }) {
       onClose()
     } catch (error) {
       console.error('Erro ao criar filho:', error)
-      alert(`Erro ao criar filho: ${error.message || 'Erro desconhecido'}`)
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+      alert(`Erro ao criar filho: ${errorMessage}`)
     }
   }
 
@@ -746,7 +747,8 @@ function AjusteForm({ filhoId, mesadaId, onClose }: { filhoId: string | null; me
       onClose()
     } catch (error) {
       console.error('Erro ao aplicar ajuste:', error)
-      alert(`Erro ao aplicar ajuste: ${error.message || 'Erro desconhecido'}`)
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido'
+      alert(`Erro ao aplicar ajuste: ${errorMessage}`)
     }
   }
 
