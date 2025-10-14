@@ -14,13 +14,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -151,19 +144,18 @@ export default function AdminUsuariosPage() {
                 </div>
               </div>
               <div className="w-full md:w-48">
-                <Select value={roleFilter} onValueChange={setRoleFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Filtrar por role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os roles</SelectItem>
-                    <SelectItem value="user">Usuários</SelectItem>
-                    <SelectItem value="admin">Administradores</SelectItem>
-                    {isSuperAdmin && (
-                      <SelectItem value="super_admin">Super Admins</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
+                <select
+                  value={roleFilter}
+                  onChange={(e) => setRoleFilter(e.target.value)}
+                  className="w-full p-2 border border-zinc-300 dark:border-zinc-700 rounded-md bg-white dark:bg-zinc-800 text-sm"
+                >
+                  <option value="all">Todos os roles</option>
+                  <option value="user">Usuários</option>
+                  <option value="admin">Administradores</option>
+                  {isSuperAdmin && (
+                    <option value="super_admin">Super Admins</option>
+                  )}
+                </select>
               </div>
             </div>
           </CardContent>
