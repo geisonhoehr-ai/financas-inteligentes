@@ -147,7 +147,7 @@ export default function AdminConfiguracoesPage() {
                 <Switch
                   id="maintenanceMode"
                   checked={configs.maintenanceMode}
-                  onCheckedChange={(checked) => handleConfigChange('maintenanceMode', checked)}
+                  onChange={(e) => handleConfigChange('maintenanceMode', e.target.checked)}
                 />
               </div>
             </CardContent>
@@ -233,7 +233,7 @@ export default function AdminConfiguracoesPage() {
                 <Switch
                   id="enableEmailNotifications"
                   checked={configs.enableEmailNotifications}
-                  onCheckedChange={(checked) => handleConfigChange('enableEmailNotifications', checked)}
+                  onChange={(e) => handleConfigChange('enableEmailNotifications', e.target.checked)}
                 />
               </div>
 
@@ -247,7 +247,7 @@ export default function AdminConfiguracoesPage() {
                 <Switch
                   id="enablePushNotifications"
                   checked={configs.enablePushNotifications}
-                  onCheckedChange={(checked) => handleConfigChange('enablePushNotifications', checked)}
+                  onChange={(e) => handleConfigChange('enablePushNotifications', e.target.checked)}
                 />
               </div>
 
@@ -261,7 +261,7 @@ export default function AdminConfiguracoesPage() {
                 <Switch
                   id="enableSmsNotifications"
                   checked={configs.enableSmsNotifications}
-                  onCheckedChange={(checked) => handleConfigChange('enableSmsNotifications', checked)}
+                  onChange={(e) => handleConfigChange('enableSmsNotifications', e.target.checked)}
                 />
               </div>
             </CardContent>
@@ -308,7 +308,7 @@ export default function AdminConfiguracoesPage() {
                 <Switch
                   id="passwordRequireSpecialChars"
                   checked={configs.passwordRequireSpecialChars}
-                  onCheckedChange={(checked) => handleConfigChange('passwordRequireSpecialChars', checked)}
+                  onChange={(e) => handleConfigChange('passwordRequireSpecialChars', e.target.checked)}
                 />
               </div>
 
@@ -343,7 +343,7 @@ export default function AdminConfiguracoesPage() {
                 <Switch
                   id="autoBackupEnabled"
                   checked={configs.autoBackupEnabled}
-                  onCheckedChange={(checked) => handleConfigChange('autoBackupEnabled', checked)}
+                  onChange={(e) => handleConfigChange('autoBackupEnabled', e.target.checked)}
                 />
               </div>
 
@@ -394,7 +394,7 @@ export default function AdminConfiguracoesPage() {
                 <Switch
                   id="enableAnalytics"
                   checked={configs.enableAnalytics}
-                  onCheckedChange={(checked) => handleConfigChange('enableAnalytics', checked)}
+                  onChange={(e) => handleConfigChange('enableAnalytics', e.target.checked)}
                 />
               </div>
 
@@ -408,7 +408,7 @@ export default function AdminConfiguracoesPage() {
                 <Switch
                   id="enableErrorTracking"
                   checked={configs.enableErrorTracking}
-                  onCheckedChange={(checked) => handleConfigChange('enableErrorTracking', checked)}
+                  onChange={(e) => handleConfigChange('enableErrorTracking', e.target.checked)}
                 />
               </div>
 
