@@ -134,33 +134,47 @@ export function useMesada() {
   // Criar filho
   const createFilho = useMutation({
     mutationFn: async (filho: Omit<PerfilFilho, 'id' | 'responsavel_id' | 'created_at' | 'updated_at'>) => {
+      console.log('=== DEBUG CREATE FILHO MUTATION ===')
       const { data: user } = await supabase.auth.getUser()
+      console.log('User data:', user)
+      
       if (!user.user) throw new Error('Usuário não autenticado')
+
+      const insertData = {
+        nome: filho.nome,
+        familia_id: filho.familia_id,
+        responsavel_id: user.user.id,
+        usuario_id: user.user.id,
+        data_nascimento: filho.data_nascimento || null,
+        idade: filho.idade || null,
+        avatar: filho.avatar || '👦',
+        ativo: true
+      }
+
+      console.log('Dados para inserir:', insertData)
 
       const { data, error } = await (supabase as any)
         .from('perfis_filhos')
-        .insert([{
-          nome: filho.nome,
-          familia_id: filho.familia_id,
-          responsavel_id: user.user.id,
-          usuario_id: user.user.id,
-          data_nascimento: filho.data_nascimento || null,
-          idade: filho.idade || null,
-          avatar: filho.avatar || '👦',
-          ativo: true
-        }])
+        .insert([insertData])
         .select()
         .single()
 
       if (error) {
         console.error('Erro ao criar perfil:', error)
         console.error('Dados enviados:', filho)
+        console.error('Detalhes do erro:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         throw new Error(error.message || 'Erro ao criar perfil de filho')
       }
+      console.log('Filho criado com sucesso:', data)
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['filhos'] })
+      queryClient.invalidateQueries({ queryKey: ['filhos', familiaAtivaId] })
       showToast.success('Perfil criado com sucesso!')
     },
     onError: (error: any) => {
@@ -207,7 +221,7 @@ export function useMesada() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mesadas'] })
+      queryClient.invalidateQueries({ queryKey: ['mesadas', familiaAtivaId] })
       showToast.success('Mesada configurada!')
     },
     onError: (error: any) => {
@@ -218,28 +232,46 @@ export function useMesada() {
   // Aplicar ajuste (bônus ou penalidade)
   const aplicarAjuste = useMutation({
     mutationFn: async (ajuste: AjusteMesada) => {
+      console.log('=== DEBUG APLICAR AJUSTE MUTATION ===')
+      console.log('Ajuste recebido:', ajuste)
+      
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) throw new Error('Usuário não autenticado')
 
+      const insertData = {
+        mesada_id: ajuste.mesada_id,
+        filho_id: ajuste.filho_id,
+        tipo: ajuste.tipo,
+        motivo: ajuste.motivo,
+        valor: ajuste.valor,
+        pontos: ajuste.pontos || 0,
+        aplicado_por: user.user.id
+      }
+
+      console.log('Dados a serem inseridos:', insertData)
+
       const { data, error } = await (supabase as any)
         .from('mesada_ajustes')
-        .insert([{
-          mesada_id: ajuste.mesada_id,
-          filho_id: ajuste.filho_id,
-          tipo: ajuste.tipo,
-          motivo: ajuste.motivo,
-          valor: ajuste.valor,
-          pontos: ajuste.pontos || 0,
-          aplicado_por: user.user.id
-        }])
+        .insert([insertData])
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao aplicar ajuste:', error)
+        console.error('Detalhes do erro:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
+        throw error
+      }
+      
+      console.log('Ajuste inserido com sucesso:', data)
       return data
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['mesadas'] })
+      queryClient.invalidateQueries({ queryKey: ['mesadas', familiaAtivaId] })
       const tipo = variables.tipo
       if (tipo === 'bonus') {
         showToast.success('Bônus aplicado! 🎉')
@@ -268,7 +300,7 @@ export function useMesada() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tarefas'] })
+      queryClient.invalidateQueries({ queryKey: ['tarefas', familiaAtivaId] })
       showToast.success('Tarefa criada!')
     },
   })
@@ -293,7 +325,7 @@ export function useMesada() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mesadas'] })
+      queryClient.invalidateQueries({ queryKey: ['mesadas', familiaAtivaId] })
       showToast.success('Mesada atualizada com sucesso!')
     },
     onError: (error: any) => {
@@ -329,7 +361,7 @@ export function useMesada() {
       return data
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['mesadas'] })
+      queryClient.invalidateQueries({ queryKey: ['mesadas', familiaAtivaId] })
       showToast.success('Mesada paga! 💰')
     },
   })

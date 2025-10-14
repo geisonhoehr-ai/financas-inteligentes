@@ -34,9 +34,36 @@ export default function MesadaPage() {
   const [filhoSelecionado, setFilhoSelecionado] = useState<string | null>(null)
   const [mesadaEditando, setMesadaEditando] = useState<any>(null)
   const [showGuia, setShowGuia] = useState(false)
+  const [mesadasPagas, setMesadasPagas] = useState<Set<string>>(new Set())
 
   const getMesadaDoFilho = (filhoId: string) => {
     return mesadas.find(m => m.filho_id === filhoId)
+  }
+
+  const isMesadaPaga = (mesadaId: string) => {
+    return mesadasPagas.has(mesadaId)
+  }
+
+  const handlePagarMesada = async (filhoId: string) => {
+    const mesada = getMesadaDoFilho(filhoId)
+    if (!mesada) return
+
+    try {
+      await pagarMesada(filhoId)
+      // Marcar como paga visualmente
+      setMesadasPagas(prev => new Set([...prev, mesada.id]))
+      
+      // Remover da lista após 3 segundos
+      setTimeout(() => {
+        setMesadasPagas(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(mesada.id)
+          return newSet
+        })
+      }, 3000)
+    } catch (error) {
+      console.error('Erro ao pagar mesada:', error)
+    }
   }
 
   return (
@@ -126,8 +153,16 @@ export default function MesadaPage() {
               const progressoNivel = (xpAtual % xpProximoNivel) / xpProximoNivel * 100
 
               return (
-                <Card key={filho.id} className="overflow-hidden">
-                  <CardHeader className="pb-3 bg-gradient-to-br from-primary/10 to-primary/5">
+                <Card key={filho.id} className={`overflow-hidden transition-all duration-500 ${
+                  mesada && isMesadaPaga(mesada.id) 
+                    ? 'border-green-500 bg-green-50 dark:bg-green-950 shadow-lg shadow-green-500/20' 
+                    : ''
+                }`}>
+                  <CardHeader className={`pb-3 transition-all duration-500 ${
+                    mesada && isMesadaPaga(mesada.id)
+                      ? 'bg-gradient-to-br from-green-500/20 to-green-400/10'
+                      : 'bg-gradient-to-br from-primary/10 to-primary/5'
+                  }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <span className="text-4xl">{filho.avatar}</span>
@@ -144,6 +179,12 @@ export default function MesadaPage() {
                             <Star className="h-4 w-4 fill-yellow-600" />
                             <span className="font-bold">Nv {nivel}</span>
                           </div>
+                          {isMesadaPaga(mesada.id) && (
+                            <div className="flex items-center gap-1 text-green-600 mt-1">
+                              <Star className="h-3 w-3 fill-green-600" />
+                              <span className="text-xs font-medium">Pago!</span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -233,11 +274,25 @@ export default function MesadaPage() {
                           </Button>
                           <Button
                             size="sm"
-                            onClick={() => pagarMesada(filho.id)}
-                            className="text-xs bg-green-600 hover:bg-green-700"
+                            onClick={() => handlePagarMesada(filho.id)}
+                            disabled={mesada && isMesadaPaga(mesada.id)}
+                            className={`text-xs transition-all ${
+                              mesada && isMesadaPaga(mesada.id)
+                                ? 'bg-green-500 text-white cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700'
+                            }`}
                           >
-                            <Wallet className="h-3 w-3 mr-1" />
-                            Pagar
+                            {mesada && isMesadaPaga(mesada.id) ? (
+                              <>
+                                <Star className="h-3 w-3 mr-1 fill-current" />
+                                Pago!
+                              </>
+                            ) : (
+                              <>
+                                <Wallet className="h-3 w-3 mr-1" />
+                                Pagar
+                              </>
+                            )}
                           </Button>
                         </div>
                       </>
@@ -352,7 +407,16 @@ function AddFilhoForm({ onClose }: { onClose: () => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!familiaAtivaId) return
+    
+    console.log('=== DEBUG ADD FILHO ===')
+    console.log('familiaAtivaId:', familiaAtivaId)
+    console.log('formData:', formData)
+    
+    if (!familiaAtivaId) {
+      console.error('Família ativa não selecionada!')
+      alert('Por favor, selecione uma família primeiro.')
+      return
+    }
 
     const filhoData = {
       nome: formData.nome,
@@ -366,10 +430,12 @@ function AddFilhoForm({ onClose }: { onClose: () => void }) {
     console.log('Dados a serem enviados (criar filho):', filhoData)
 
     try {
-      await createFilho(filhoData as any)
+      const result = await createFilho(filhoData as any)
+      console.log('Filho criado com sucesso:', result)
       onClose()
     } catch (error) {
       console.error('Erro ao criar filho:', error)
+      alert(`Erro ao criar filho: ${error.message || 'Erro desconhecido'}`)
     }
   }
 
@@ -647,23 +713,40 @@ function AjusteForm({ filhoId, mesadaId, onClose }: { filhoId: string | null; me
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!filhoId || !mesadaId) return
+    
+    console.log('=== DEBUG AJUSTE ===')
+    console.log('filhoId:', filhoId)
+    console.log('mesadaId:', mesadaId)
+    console.log('formData:', formData)
+    console.log('tipo:', tipo)
+    
+    if (!filhoId || !mesadaId) {
+      console.error('Filho ou mesada não identificados!')
+      alert('Erro: Filho ou mesada não identificados. Por favor, configure a mesada do filho primeiro.')
+      return
+    }
 
     try {
       const valorFinal = tipo === 'penalidade' ? -Math.abs(parseFloat(formData.valor)) : Math.abs(parseFloat(formData.valor))
       const pontosFinal = tipo === 'penalidade' ? -Math.abs(parseInt(formData.pontos || '0')) : Math.abs(parseInt(formData.pontos || '0'))
 
-      await aplicarAjuste({
+      const ajusteData = {
         mesada_id: mesadaId,
         filho_id: filhoId,
         tipo,
         motivo: formData.motivo,
         valor: valorFinal,
         pontos: pontosFinal
-      })
+      }
+
+      console.log('Dados do ajuste a serem enviados:', ajusteData)
+
+      await aplicarAjuste(ajusteData)
+      console.log('Ajuste aplicado com sucesso!')
       onClose()
     } catch (error) {
       console.error('Erro ao aplicar ajuste:', error)
+      alert(`Erro ao aplicar ajuste: ${error.message || 'Erro desconhecido'}`)
     }
   }
 
