@@ -225,6 +225,8 @@ function CartaoForm({ familiaId, cartao, onClose }: { familiaId?: string; cartao
       familia_id: familiaId
     }
 
+    console.log('Dados a serem enviados (cartões):', cartaoData)
+
     try {
       if (cartao) {
         await updateCartao({ id: cartao.id, ...cartaoData })

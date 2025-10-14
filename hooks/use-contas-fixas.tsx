@@ -8,8 +8,9 @@ export interface ContaFixa {
   valor: number
   dia_vencimento: number
   usuario_id: string
-  categoria: string
-  status: string
+  categoria?: string
+  status?: string
+  ativa?: boolean
   observacoes?: string
   familia_id?: string
   visivel_familia?: boolean
@@ -23,7 +24,7 @@ export interface InsertContaFixa {
   nome: string
   valor: number
   dia_vencimento: number
-  categoria: string
+  categoria?: string
   status?: string
   observacoes?: string
   familia_id?: string
@@ -63,21 +64,24 @@ export function useContasFixas() {
         p_nome: conta.nome,
         p_valor: conta.valor,
         p_dia_vencimento: conta.dia_vencimento,
-        p_categoria: conta.categoria,
+        p_categoria: conta.categoria || 'outros',
         p_status: conta.status || 'ativa',
         p_observacoes: conta.observacoes || '',
         p_familia_id: conta.familia_id || '',
-        p_visivel_familia: conta.visivel_familia || true,
+        p_visivel_familia: conta.visivel_familia !== false,
         p_privado: conta.privado || false
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar conta fixa:', error)
+        console.error('Dados enviados:', conta)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contas-fixas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
     },
   })
   const updateContaFixa = useMutation({
@@ -87,20 +91,22 @@ export function useContasFixas() {
         p_nome: conta.nome || '',
         p_valor: conta.valor || 0,
         p_dia_vencimento: conta.dia_vencimento || 1,
-        p_categoria: conta.categoria || '',
+        p_categoria: conta.categoria || 'outros',
         p_status: conta.status || 'ativa',
         p_observacoes: conta.observacoes || '',
-        p_visivel_familia: conta.visivel_familia || true,
+        p_visivel_familia: conta.visivel_familia !== false,
         p_privado: conta.privado || false
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao atualizar conta fixa:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contas-fixas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
     },
   })
   const deleteContaFixa = useMutation({
@@ -109,19 +115,18 @@ export function useContasFixas() {
         p_id: id
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao deletar conta fixa:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['contas-fixas'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
-      refreshDashboard()
     },
   })
-  const refreshDashboard = async () => {
-    await supabase.rpc('refresh_dashboard_views')
-  }
   const stats = {
     totalMensal: contas.reduce((sum, c) => sum + c.valor, 0),
     energia: contas.filter(c => (c as any).categoria === 'energia').reduce((sum, c) => sum + c.valor, 0),

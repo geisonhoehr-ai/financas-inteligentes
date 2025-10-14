@@ -113,6 +113,7 @@ export function useTags() {
 
       if (error) {
         console.error('Erro ao criar tag:', error)
+        console.error('Dados enviados:', tag)
         throw error
       }
 

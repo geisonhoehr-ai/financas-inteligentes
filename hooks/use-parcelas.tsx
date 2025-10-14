@@ -99,6 +99,7 @@ export function useParcelas() {
 
       if (error) {
         console.error('Erro ao criar parcela:', error)
+        console.error('Dados enviados:', parcela)
         throw error
       }
       return data

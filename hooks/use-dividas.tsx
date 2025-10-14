@@ -138,6 +138,8 @@ export function useDividas(familiaId?: string) {
 
       if (error) {
         console.error('Erro detalhado ao criar dívida:', error)
+        console.error('Dados enviados:', divida)
+        console.error('Parâmetros RPC:', params)
         throw new Error(error.message || 'Erro ao criar dívida')
       }
       return data

@@ -247,19 +247,23 @@ function CreateDesafioForm({ onClose }: { onClose: () => void }) {
     e.preventDefault()
     if (!familiaAtivaId) return
 
+    const desafioData = {
+      familia_id: familiaAtivaId,
+      nome: formData.nome,
+      descricao: formData.descricao,
+      tipo: 'economia',
+      meta_economia: parseFloat(formData.meta_economia),
+      data_inicio: formData.data_inicio,
+      data_fim: formData.data_fim,
+      premio: formData.premio,
+      ativo: true,
+      concluido: false
+    }
+
+    console.log('Dados a serem enviados (modo economia):', desafioData)
+
     try {
-      await createDesafio({
-        familia_id: familiaAtivaId,
-        nome: formData.nome,
-        descricao: formData.descricao,
-        tipo: 'economia',
-        meta_economia: parseFloat(formData.meta_economia),
-        data_inicio: formData.data_inicio,
-        data_fim: formData.data_fim,
-        premio: formData.premio,
-        ativo: true,
-        concluido: false
-      } as any)
+      await createDesafio(desafioData as any)
       onClose()
     } catch (error) {
       console.error('Erro ao criar desafio:', error)

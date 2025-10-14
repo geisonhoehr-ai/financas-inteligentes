@@ -88,6 +88,7 @@ export function useFerramentas() {
 
       if (error) {
         console.error('Erro ao criar ferramenta:', error)
+        console.error('Dados enviados:', ferramenta)
         throw error
       }
       return data

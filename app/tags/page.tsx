@@ -268,6 +268,8 @@ function TagForm({ tag, onClose }: { tag?: Tag | null; onClose: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    console.log('Dados a serem enviados (tags):', formData)
+
     try {
       if (tag) {
         await updateTag({ id: tag.id, ...formData })

@@ -215,6 +215,8 @@ function MetaForm({ familiaId, meta, onClose }: { familiaId?: string; meta?: Met
       familia_id: familiaId
     }
 
+    console.log('Dados a serem enviados (metas):', metaData)
+
     try {
       if (meta) {
         await updateMeta({ id: meta.id, ...metaData })

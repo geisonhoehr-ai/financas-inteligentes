@@ -87,6 +87,7 @@ export function useFamilias() {
 
       if (error) {
         console.error('Erro ao criar família:', error)
+        console.error('Dados enviados:', familia)
         throw error
       }
 

@@ -89,7 +89,11 @@ export function useConvites(familiaId?: string) {
         p_validade: novoConvite.validade || undefined
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar convite:', error)
+        console.error('Dados enviados:', novoConvite)
+        throw error
+      }
       return data
     },
     onSuccess: () => {

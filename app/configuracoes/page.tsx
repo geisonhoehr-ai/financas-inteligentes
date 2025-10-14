@@ -37,12 +37,15 @@ export default function ConfiguracoesPage() {
   })
 
   const handleCreateFamilia = () => {
-    // TODO: Get admin_id from auth context (useAuth hook)
-    createFamilia({
+    const familiaData = {
       nome: novaFamilia.nome,
       modo_calculo: novaFamilia.modo_calculo,
       // admin_id será definido automaticamente pelo backend via auth.uid()
-    })
+    }
+
+    console.log('Criando família:', familiaData)
+
+    createFamilia(familiaData)
     setNovaFamilia({ nome: '', modo_calculo: 'familiar' })
     setShowNewFamilia(false)
   }
@@ -57,11 +60,15 @@ export default function ConfiguracoesPage() {
       ? new Date(Date.now() + novoConvite.dias_validade * 24 * 60 * 60 * 1000).toISOString()
       : null
 
-    createConvite({
+    const conviteData = {
       familia_id: familiaAtualId,
       max_usos: novoConvite.max_usos,
       validade,
-    })
+    }
+
+    console.log('Criando convite:', conviteData)
+
+    createConvite(conviteData)
     setNovoConvite({ max_usos: null, dias_validade: 7 })
   }
 

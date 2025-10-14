@@ -82,6 +82,8 @@ export default function DividasPage() {
       familia_id: familiaAtiva?.id
     }
 
+    console.log('Dados a serem enviados (dívidas):', dividaData)
+
     try {
       await createDivida(dividaData)
       setShowAddDivida(false)

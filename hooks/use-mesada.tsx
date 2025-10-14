@@ -154,6 +154,7 @@ export function useMesada() {
 
       if (error) {
         console.error('Erro ao criar perfil:', error)
+        console.error('Dados enviados:', filho)
         throw new Error(error.message || 'Erro ao criar perfil de filho')
       }
       return data

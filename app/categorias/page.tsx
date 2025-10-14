@@ -322,6 +322,8 @@ function CategoriaForm({ categoria, onClose }: { categoria?: any; onClose: () =>
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    console.log('Dados a serem enviados (categorias):', formData)
+    
     if (categoria) {
       updateMutation.mutate(formData)
     } else {

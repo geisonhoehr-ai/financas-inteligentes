@@ -150,6 +150,7 @@ export function useOrcamento() {
 
       if (error) {
         console.error('Erro ao criar orçamento:', error)
+        console.error('Dados enviados:', orcamento)
         throw error
       }
 

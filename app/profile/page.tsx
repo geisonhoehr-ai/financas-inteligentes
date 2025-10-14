@@ -31,18 +31,22 @@ export default function ProfilePage() {
     e.preventDefault()
     setIsLoading(true)
     
+    console.log('Atualizando perfil:', profile)
+    
     try {
       const { error } = await supabase.auth.updateUser({
         data: profile
       })
 
       if (error) {
+        console.error('Erro ao atualizar perfil:', error)
         showToast.error('Erro ao atualizar perfil: ' + error.message)
         return
       }
 
       showToast.success('Perfil atualizado com sucesso!')
     } catch (error) {
+      console.error('Erro inesperado ao atualizar perfil:', error)
       showToast.error('Erro inesperado. Tente novamente.')
     } finally {
       setIsLoading(false)

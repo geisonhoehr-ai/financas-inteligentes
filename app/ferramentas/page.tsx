@@ -211,13 +211,15 @@ function FerramentaForm({ familiaId, ferramenta, onClose }: { familiaId?: string
     
     const ferramentaData = {
       ...formData,
-      categoria: formData.tipo, // Mapear tipo para categoria
+      categoria: formData.tipo || 'outros', // Mapear tipo para categoria com fallback
       valor: parseFloat(formData.valor.toString()),
       data_inicio: formData.data_inicio || new Date().toISOString().split('T')[0],
       data_fim: formData.data_fim || null,
       observacoes: formData.descricao,
       familia_id: familiaId
     }
+
+    console.log('Dados a serem enviados (ferramentas):', ferramentaData)
 
     try {
       if (ferramenta) {

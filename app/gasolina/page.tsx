@@ -218,6 +218,8 @@ function GasolinaForm({ familiaId, gasolina, onClose }: { familiaId?: string; ga
       familia_id: familiaId
     }
 
+    console.log('Dados a serem enviados (gasolina):', gasolinaData)
+
     try {
       if (gasolina) {
         await updateGasolina({ id: gasolina.id, ...gasolinaData })

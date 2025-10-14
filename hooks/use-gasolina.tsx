@@ -77,13 +77,16 @@ export function useGasolina() {
         p_privado: gasolina.privado || false
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar registro de gasolina:', error)
+        console.error('Dados enviados:', gasolina)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gasolina'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
     },
   })
   const updateGasolina = useMutation({
@@ -102,13 +105,15 @@ export function useGasolina() {
         p_privado: gasolina.privado || false
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao atualizar registro de gasolina:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gasolina'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
-      refreshDashboard()
     },
   })
   const deleteGasolina = useMutation({
@@ -117,19 +122,18 @@ export function useGasolina() {
         p_id: id
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao deletar registro de gasolina:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gasolina'] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
       queryClient.invalidateQueries({ queryKey: ['lixeira'] })
-      refreshDashboard()
     },
   })
-  const refreshDashboard = async () => {
-    await supabase.rpc('refresh_dashboard_views')
-  }
   const stats = {
     gastoTotal: abastecimentos.reduce((sum, a) => sum + (a.valor || 0), 0),
     litrosTotais: abastecimentos.reduce((sum, a) => sum + (a.litros || 0), 0),

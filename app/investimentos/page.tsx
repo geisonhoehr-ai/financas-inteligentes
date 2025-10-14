@@ -229,6 +229,8 @@ function InvestimentoForm({ familiaId, investimento, onClose }: { familiaId?: st
       familia_id: familiaId
     }
 
+    console.log('Dados a serem enviados (investimentos):', investimentoData)
+
     try {
       if (investimento) {
         await updateInvestimento({ id: investimento.id, ...investimentoData })

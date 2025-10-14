@@ -96,3 +96,8 @@ export function SelectItem({ value, children, onSelect, className }: SelectItemP
     </button>
   )
 }
+
+// Aliases para compatibilidade com shadcn/ui
+export const SelectTrigger = Select
+export const SelectValue = ({ children }: { children?: React.ReactNode }) => <>{children}</>
+export const SelectContent = ({ children }: { children: React.ReactNode }) => <>{children}</>

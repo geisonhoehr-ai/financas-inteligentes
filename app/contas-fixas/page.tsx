@@ -232,6 +232,8 @@ function ContaFixaForm({ familiaId, conta, onClose }: { familiaId?: string; cont
       familia_id: familiaId
     }
 
+    console.log('Dados a serem enviados:', contaData)
+
     try {
       if (conta) {
         await updateContaFixa({ id: conta.id, ...contaData })

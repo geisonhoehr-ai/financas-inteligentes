@@ -65,6 +65,7 @@ export function useModoEconomia() {
 
       if (error) {
         console.error('Erro ao criar desafio:', error)
+        console.error('Dados enviados:', desafio)
         throw new Error(error.message || 'Erro ao criar desafio')
       }
       return data

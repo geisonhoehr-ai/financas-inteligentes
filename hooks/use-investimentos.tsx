@@ -82,6 +82,7 @@ export function useInvestimentos() {
 
       if (error) {
         console.error('Erro ao criar investimento:', error)
+        console.error('Dados enviados:', investimento)
         throw error
       }
       return data

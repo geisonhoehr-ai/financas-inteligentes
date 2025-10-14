@@ -24,7 +24,8 @@ import {
   Tag,
   UserPlus,
   Wallet,
-  ChevronDown
+  ChevronDown,
+  Shield
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -102,6 +103,12 @@ const navigation = [
     name: 'Configurações',
     href: '/configuracoes',
     icon: Settings,
+  },
+  {
+    type: 'link' as const,
+    name: 'Admin',
+    href: '/admin',
+    icon: Shield,
   },
   {
     type: 'link' as const,

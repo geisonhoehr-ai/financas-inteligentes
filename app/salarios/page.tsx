@@ -228,6 +228,8 @@ function SalarioForm({ familiaId, salario, onClose }: { familiaId?: string; sala
       familia_id: familiaId
     }
 
+    console.log('Dados a serem enviados (salários):', salarioData)
+
     try {
       if (salario) {
         await updateSalario({ id: salario.id, ...salarioData })

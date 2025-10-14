@@ -91,6 +91,7 @@ export function useSalarios() {
           hint: error.hint,
           code: error.code
         })
+        console.error('Dados enviados:', salario)
         throw error
       }
 

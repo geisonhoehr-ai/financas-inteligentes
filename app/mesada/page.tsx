@@ -354,15 +354,19 @@ function AddFilhoForm({ onClose }: { onClose: () => void }) {
     e.preventDefault()
     if (!familiaAtivaId) return
 
+    const filhoData = {
+      nome: formData.nome,
+      data_nascimento: formData.data_nascimento || undefined,
+      idade: formData.idade ? parseInt(formData.idade) : undefined,
+      avatar: formData.avatar,
+      familia_id: familiaAtivaId,
+      ativo: true
+    }
+
+    console.log('Dados a serem enviados (criar filho):', filhoData)
+
     try {
-      await createFilho({
-        nome: formData.nome,
-        data_nascimento: formData.data_nascimento || undefined,
-        idade: formData.idade ? parseInt(formData.idade) : undefined,
-        avatar: formData.avatar,
-        familia_id: familiaAtivaId,
-        ativo: true
-      } as any)
+      await createFilho(filhoData as any)
       onClose()
     } catch (error) {
       console.error('Erro ao criar filho:', error)
@@ -451,13 +455,17 @@ function EditMesadaForm({ mesada, filhoId, onClose }: { mesada: any; filhoId: st
     e.preventDefault()
     if (!mesada?.id) return
 
+    const mesadaData = {
+      id: mesada.id,
+      valor_base: parseFloat(formData.valor_base),
+      dia_pagamento: parseInt(formData.dia_pagamento),
+      meta_economia: formData.meta_economia ? parseFloat(formData.meta_economia) : undefined,
+    }
+
+    console.log('Dados a serem enviados (atualizar mesada):', mesadaData)
+
     try {
-      await updateMesada({
-        id: mesada.id,
-        valor_base: parseFloat(formData.valor_base),
-        dia_pagamento: parseInt(formData.dia_pagamento),
-        meta_economia: formData.meta_economia ? parseFloat(formData.meta_economia) : undefined,
-      } as any)
+      await updateMesada(mesadaData as any)
       onClose()
     } catch (error) {
       console.error('Erro ao atualizar mesada:', error)

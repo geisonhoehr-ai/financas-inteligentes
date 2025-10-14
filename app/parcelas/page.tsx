@@ -234,6 +234,8 @@ function ParcelaForm({ familiaId, parcela, onClose }: { familiaId?: string; parc
       familia_id: familiaId
     } as any
 
+    console.log('Dados a serem enviados (parcelas):', parcelaData)
+
     try {
       if (parcela) {
         await updateParcela({ id: parcela.id, ...parcelaData })

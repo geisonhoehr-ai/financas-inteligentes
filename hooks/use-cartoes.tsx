@@ -78,7 +78,11 @@ export function useCartoes() {
         p_privado: cartao.privado || false
       })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar cartão:', error)
+        console.error('Dados enviados:', cartao)
+        throw error
+      }
       return data
     },
     onSuccess: () => {

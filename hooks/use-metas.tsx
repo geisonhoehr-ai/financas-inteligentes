@@ -64,9 +64,9 @@ export function useMetas() {
           nome: meta.nome,
           valor_objetivo: meta.valor_objetivo,
           valor_atual: meta.valor_atual || 0,
-          prazo: meta.prazo || "",
+          prazo: meta.prazo || null,
           observacoes: meta.observacoes || "",
-          familia_id: meta.familia_id || "",
+          familia_id: meta.familia_id || null,
           usuario_id: user.user.id,
           concluida: false,
           deletado: false
@@ -74,7 +74,11 @@ export function useMetas() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao criar meta:', error)
+        console.error('Dados enviados:', meta)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
@@ -97,7 +101,10 @@ export function useMetas() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao atualizar meta:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {
@@ -120,7 +127,10 @@ export function useMetas() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro ao deletar meta:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {

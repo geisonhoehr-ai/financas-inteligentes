@@ -371,15 +371,19 @@ function CreateOrcamentoForm({ onClose }: { onClose: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    const orcamentoData = {
+      nome: formData.nome,
+      descricao: formData.descricao,
+      valor_total: parseFloat(formData.valor_total),
+      mes_referencia: hoje.getMonth() + 1,
+      ano_referencia: hoje.getFullYear(),
+      ativo: true
+    }
+
+    console.log('Dados a serem enviados (orçamento):', orcamentoData)
+
     try {
-      await createOrcamento({
-        nome: formData.nome,
-        descricao: formData.descricao,
-        valor_total: parseFloat(formData.valor_total),
-        mes_referencia: hoje.getMonth() + 1,
-        ano_referencia: hoje.getFullYear(),
-        ativo: true
-      } as any)
+      await createOrcamento(orcamentoData as any)
       onClose()
     } catch (error) {
       console.error('Erro ao criar orçamento:', error)

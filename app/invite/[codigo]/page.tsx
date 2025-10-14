@@ -64,12 +64,15 @@ export default function InvitePage() {
         return
       }
 
+      console.log('Aceitando convite:', { codigo, usuario_id: user.id })
+
       const { error } = await supabase.rpc('aceitar_convite', {
         p_codigo: codigo,
         p_usuario_id: user.id
       })
 
       if (error) {
+        console.error('Erro ao aceitar convite:', error)
         showToast.error('Erro ao aceitar convite: ' + error.message)
         return
       }
