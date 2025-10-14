@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { formatCurrency, formatDateTime } from '@/lib/utils'
-import { Plus, Receipt, Trash2, Edit3, Lock, Tag as TagIcon } from 'lucide-react'
+import { Plus, Receipt, Trash2, Edit3, Lock, Tag } from 'lucide-react'
 import { TagSelector } from '@/components/tag-selector'
 import { useTags } from '@/hooks/use-tags'
 
@@ -159,10 +159,27 @@ export default function GastosPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="sm:ml-13">
+                      <div className="sm:ml-13 space-y-1">
                         <p className="text-sm text-zinc-600 dark:text-zinc-300">
                           Categoria: {gasto.categoria || 'Não especificada'}
                         </p>
+                        {gasto.tags && gasto.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {gasto.tags.map((tag: any) => (
+                              <span
+                                key={tag.id}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full"
+                                style={{
+                                  backgroundColor: tag.cor ? `${tag.cor}20` : '#e5e7eb',
+                                  color: tag.cor || '#6b7280'
+                                }}
+                              >
+                                <Tag className="h-3 w-3" />
+                                {tag.nome}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center justify-between sm:justify-end gap-3">

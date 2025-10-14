@@ -15,20 +15,54 @@ export function useGastos() {
       const { data: user } = await supabase.auth.getUser()
       if (!user.user) return { gastos: [], stats: { total_mes: 0, total_hoje: 0, total_gastos: 0 } }
 
-      // Usar função RPC que agora funciona com mv_gastos_stats
-      // Passar familiaAtivaId para filtrar por família
-      const { data: result, error: rpcError } = await supabase.rpc('buscar_gastos_com_stats', {
-        p_limit: 50,
-        p_offset: 0,
-        p_familia_id: familiaAtivaId || undefined
-      })
+      // Buscar gastos com join de categorias
+      let query = supabase
+        .from('gastos')
+        .select(`
+          *,
+          categorias(id, nome, icone, cor)
+        `)
+        .eq('deletado', false)
+        .order('data', { ascending: false })
+        .limit(50)
 
-      if (rpcError) {
-        console.error('Erro ao buscar gastos:', rpcError)
-        throw rpcError
+      if (familiaAtivaId) {
+        query = query.eq('familia_id', familiaAtivaId)
       }
 
-      return result || { gastos: [], stats: { total_mes: 0, total_hoje: 0, total_gastos: 0 } }
+      const { data: gastosData, error: gastosError } = await query
+
+      if (gastosError) {
+        console.error('Erro ao buscar gastos:', gastosError)
+        throw gastosError
+      }
+
+      // Buscar tags para cada gasto
+      const gastos = await Promise.all((gastosData || []).map(async (gasto: any) => {
+        const { data: tagsData } = await supabase
+          .from('gastos_tags')
+          .select('tags(id, nome, cor)')
+          .eq('gasto_id', gasto.id)
+
+        return {
+          ...gasto,
+          categoria: gasto.categorias?.nome || 'Não especificada',
+          categoria_obj: gasto.categorias,
+          tags: tagsData?.map((t: any) => t.tags) || []
+        }
+      }))
+
+      // Calcular estatísticas
+      const hoje = new Date().toISOString().split('T')[0]
+      const mesAtual = new Date().toISOString().slice(0, 7) // YYYY-MM
+
+      const stats = {
+        total_mes: gastos.filter((g: any) => g.data.startsWith(mesAtual)).reduce((sum: number, g: any) => sum + parseFloat(g.valor.toString()), 0),
+        total_hoje: gastos.filter((g: any) => g.data.startsWith(hoje)).reduce((sum: number, g: any) => sum + parseFloat(g.valor.toString()), 0),
+        total_gastos: gastos.length
+      }
+
+      return { gastos, stats }
     },
   })
   const createGasto = useMutation({
