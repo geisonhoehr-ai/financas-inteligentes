@@ -9,6 +9,7 @@ export interface UserRole {
   created_at: string
   updated_at: string
   email?: string
+  last_sign_in_at?: string | null
 }
 
 export interface AdminStats {
