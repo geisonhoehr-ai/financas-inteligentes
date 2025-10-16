@@ -10,6 +10,7 @@ import { useFamilias } from '@/hooks/use-familias'
 import { useFamiliaAtiva } from '@/hooks/use-familia-ativa'
 import { UploadComprovante } from '@/components/upload-comprovante'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { showToast } from '@/lib/toast'
 import {
   TrendingUp,
   TrendingDown,
@@ -63,11 +64,20 @@ export default function DividasPage() {
     
     // Se não tiver credor_id nem devedor_id, não permite salvar
     if (!formData.credor_id && !formData.credor_nome_livre) {
-      alert('Por favor, selecione ou digite o nome de quem vai receber')
+      showToast.error('Por favor, selecione ou digite o nome de quem vai receber')
       return
     }
     if (!formData.devedor_id && !formData.devedor_nome_livre) {
-      alert('Por favor, selecione ou digite o nome de quem vai pagar')
+      showToast.error('Por favor, selecione ou digite o nome de quem vai pagar')
+      return
+    }
+
+    // Validar se credor e devedor são diferentes
+    const credorId = formData.credor_id || formData.credor_nome_livre
+    const devedorId = formData.devedor_id || formData.devedor_nome_livre
+    
+    if (credorId === devedorId) {
+      showToast.error('Credor e devedor devem ser pessoas diferentes')
       return
     }
     

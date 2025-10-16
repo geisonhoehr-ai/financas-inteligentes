@@ -119,6 +119,11 @@ export function useDividas(familiaId?: string) {
   })
   const createDivida = useMutation({
     mutationFn: async (divida: Partial<DividaInterna>) => {
+      // Validar se credor e devedor são diferentes
+      if (divida.credor_id === divida.devedor_id) {
+        throw new Error('Credor e devedor devem ser pessoas diferentes')
+      }
+
       // Tentar primeiro com a função v2 (mais flexível)
       const params: any = {
         p_familia_id: divida.familia_id,
